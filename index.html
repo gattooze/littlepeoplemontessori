@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Little People Montessori -- a Montessori house in Mumbai for children 18 months to 6 years, with a casa daycare and an activity centre, under an old mango tree.">
+<meta name="color-scheme" content="light only">
+<meta name="description" content="Little People Montessori -- a Montessori house in Mumbai for children 18 months to 6 years, with a casa daycare and a canopy of after-hours classes, under an old mango tree.">
 <style>
-  html, body { margin: 0; padding: 0; }
+  html, body { margin: 0; padding: 0; background: #F6EFE9; }
 </style>
 </head>
 <body>
@@ -59,51 +60,18 @@
     --shadow: 0 1px 2px #2b2b2908, 0 12px 34px -18px #2b2b2938;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --ground:     #191816;
-      --ground-2:   #211F1C;
-      --ground-3:   #2A2724;
-      --ink:        #F2EAE2;
-      --ink-2:      #A99E93;
-      --ink-3:      #7D736980;
-      --line:       #F2EAE216;
-      --line-solid: #35312C;
-      --blush:      #F0BAC3;
-      --sage:       #93B183;
-      --denim:      #85A4D6;
-      --mango:      #E6BE62;
-      --rose:       #C98996;
-      --bark:       #4A4136;
-      --leafbed:    color-mix(in srgb, #93B183 18%, #191816);
-      --blush-wash: #F0BAC326;
-      --sage-wash:  #93B18320;
-      --denim-wash: #85A4D619;
-      --action:     #90ADDC;
-      --action-ink: #191816;
-      --shadow: 0 1px 2px #00000030, 0 14px 38px -18px #00000070;
-    }
-  }
-  :root[data-theme="light"] {
-    --ground: #F6EFE9; --ground-2: #FBF7F3; --ground-3: #EFE5DC;
-    --ink: #2B2B29; --ink-2: #6E655D; --ink-3: #9C918780;
-    --line: #2B2B2914; --line-solid: #E2D6CA;
-    --blush: #EEB3BD; --sage: #7B9B6E; --denim: #5C7FB8; --mango: #E8B84B;
-    --rose: #DB93A1; --bark: #D8C3A8; --leafbed: color-mix(in srgb, #7B9B6E 16%, #F6EFE9);
-    --blush-wash: #EEB3BD33; --sage-wash: #7B9B6E24; --denim-wash: #5C7FB81F;
-    --action: #4C6FA8; --action-ink: #FBF7F3;
-    --shadow: 0 1px 2px #2b2b2908, 0 12px 34px -18px #2b2b2938;
-  }
-  :root[data-theme="dark"] {
-    --ground: #191816; --ground-2: #211F1C; --ground-3: #2A2724;
-    --ink: #F2EAE2; --ink-2: #A99E93; --ink-3: #7D736980;
-    --line: #F2EAE216; --line-solid: #35312C;
-    --blush: #F0BAC3; --sage: #93B183; --denim: #85A4D6; --mango: #E6BE62;
-    --rose: #C98996; --bark: #4A4136; --leafbed: color-mix(in srgb, #93B183 18%, #191816);
-    --blush-wash: #F0BAC326; --sage-wash: #93B18320; --denim-wash: #85A4D619;
-    --action: #90ADDC; --action-ink: #191816;
-    --shadow: 0 1px 2px #00000030, 0 14px 38px -18px #00000070;
-  }
+  /* Tell the browser this page is light-only. Without this, a phone in
+     system dark mode can paint its native canvas (and the strip iOS
+     Safari reveals on overscroll bounce) black instead of white, even
+     though every element we style is explicitly cream -- because nothing
+     ever painted that native background layer. */
+  html { color-scheme: light only; }
+  html, body { background: #F6EFE9; }
+
+  /* This site commits to one light palette on purpose -- the bougainvillea
+     pinks and sage greens are tuned for the cream ground, and a dark
+     variant would fight the illustration's colours. No dark-mode block,
+     by design: not an oversight. */
 
   /* ---------- base ---------- */
   .lp {
@@ -370,10 +338,24 @@
   .prog dd { margin: 0; font-family: var(--display); font-weight: 600; font-variant-numeric: tabular-nums; }
   @media (max-width: 880px) { .progs { grid-template-columns: 1fr; } }
 
-  /* ---------- activity centre chips ---------- */
-  .acts-wrap { margin-top: clamp(2rem, 4vw, 3rem); border-top: 1px dashed var(--line-solid); padding-top: clamp(1.6rem, 3vw, 2.4rem); display: grid; gap: 1rem; }
-  .acts-wrap h3 { font-size: var(--t-h3); }
-  .acts-wrap > p { color: var(--ink-2); font-size: var(--t-small); max-width: var(--measure); }
+  /* the canopy: a fourth card that spans the full width of the row above
+     it -- the three stones sit in a line, the canopy sits over all of them */
+  .prog.canopy-card {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) auto;
+    gap: 1.1rem 2.4rem;
+    align-items: center;
+  }
+  .canopy-card .canopy-head { display: grid; gap: 0.45rem; }
+  .canopy-card .canopy-head p { font-size: var(--t-small); color: var(--ink-2); line-height: 1.62; max-width: 36rem; }
+  .canopy-card .acts { justify-content: flex-end; }
+  @media (max-width: 780px) {
+    .prog.canopy-card { grid-template-columns: 1fr; }
+    .canopy-card .acts { justify-content: flex-start; }
+  }
+
+  /* ---------- activity chips (used inside the canopy card) ---------- */
   .acts { display: flex; flex-wrap: wrap; gap: 0.6rem; }
   .act {
     display: inline-flex; align-items: center; gap: 0.55rem;
@@ -771,8 +753,8 @@
     <header class="hero wrap">
       <div class="hero-top">
         <div class="label rv">A Montessori house in Mumbai &middot; 18 months &ndash; 6 years</div>
-        <h1 class="rv" tabindex="-1">little people <em>build themselves.</em></h1>
-        <p class="hero-lead rv">Nobody can grow up for you. In three small rooms stacked one on the other &mdash; with an old mango tree leaning over the terrace &mdash; children practise doing it themselves: pouring, buttoning, reading, climbing. One careful stone at a time.</p>
+        <h1 class="rv" tabindex="-1">little people <em>grow themselves.</em></h1>
+        <p class="hero-lead rv">Nobody can grow up for you &mdash; so the room is built around the child, not the other way round. Real jugs, low shelves, a mango tree outside the window. Toddlers pour their own water; six-year-olds do their own sums. Growing up, one small job at a time.</p>
         <div class="hero-cta rv">
           <a class="btn btn-solid" href="#/admissions"><span class="pebble"></span>Book a tour</a>
           <a class="btn btn-ghost" href="#/programs">See the programs</a>
@@ -1059,7 +1041,7 @@
         <div class="sec-head rv">
           <span class="label">Programs</span>
           <h2>three rooms, stacked like our stones</h2>
-          <p>Each environment rests on what the child built in the one below it. And off to the side, like fruit on the branches, hangs the activity centre.</p>
+          <p>Each room rests on what the child built in the one below it. And over the top of all three, like a tree over a house, hangs the canopy.</p>
         </div>
         <div class="progs">
           <a class="prog rv" href="#/programs" style="--tone: var(--denim); --wash: var(--denim-wash);">
@@ -1069,7 +1051,7 @@
               </svg>
             </div>
             <span class="prog-age">18 months &ndash; 3 years</span>
-            <h3>toddler environment</h3>
+            <h3>toddler</h3>
             <p>The base stone. Walking, speaking, pouring, sweeping &mdash; and the first taste of doing something entirely alone.</p>
           </a>
           <a class="prog rv" href="#/programs" style="--tone: var(--sage); --wash: var(--sage-wash);">
@@ -1080,7 +1062,7 @@
               </svg>
             </div>
             <span class="prog-age">3 &ndash; 6 years</span>
-            <h3>primary environment</h3>
+            <h3>primary</h3>
             <p>The heart of the house. The three-hour work cycle begins: reading, the decimal system, geography, botany &mdash; chosen, not assigned.</p>
           </a>
           <a class="prog rv" href="#/programs" style="--tone: var(--blush); --wash: var(--blush-wash);">
@@ -1095,17 +1077,20 @@
             <h3>casa</h3>
             <p>The soft stone on top. Unhurried mornings and afternoons of naps, stories, snacks and free play &mdash; home, until home.</p>
           </a>
-        </div>
-        <div class="acts-wrap rv">
-          <h3>and on the branches: the activity centre</h3>
-          <p>Evenings and weekends, the house fills with classes open to every child in the neighbourhood &mdash; not just ours.</p>
-          <div class="acts">
-            <span class="act"><svg viewBox="0 0 24 28" aria-hidden="true"><use href="#act-dance"/></svg>dance</span>
-            <span class="act"><svg viewBox="0 0 28 24" aria-hidden="true"><use href="#act-capoeira"/></svg>capoeira</span>
-            <span class="act"><svg viewBox="0 0 20 26" aria-hidden="true"><use href="#act-music"/></svg>music</span>
-            <span class="act"><svg viewBox="0 0 24 28" aria-hidden="true"><use href="#act-art"/></svg>art</span>
-            <span class="act"><svg viewBox="0 0 26 24" aria-hidden="true"><use href="#act-read"/></svg>reading circle</span>
-            <a class="act" href="#/programs" style="text-decoration:none; color:inherit">&hellip;and more</a>
+          <div class="prog canopy-card rv" style="--tone: var(--sage); --wash: var(--sage-wash);">
+            <div class="canopy-head">
+              <span class="prog-age">Evenings &amp; weekends</span>
+              <h3>the canopy</h3>
+              <p>Where the stack opens up. After hours, the house fills with classes for every child in the neighbourhood, not just ours &mdash; the leaves and fruit on top of the three stones below.</p>
+            </div>
+            <div class="acts">
+              <span class="act"><svg viewBox="0 0 24 28" aria-hidden="true"><use href="#act-dance"/></svg>dance</span>
+              <span class="act"><svg viewBox="0 0 28 24" aria-hidden="true"><use href="#act-capoeira"/></svg>capoeira</span>
+              <span class="act"><svg viewBox="0 0 20 26" aria-hidden="true"><use href="#act-music"/></svg>music</span>
+              <span class="act"><svg viewBox="0 0 24 28" aria-hidden="true"><use href="#act-art"/></svg>art</span>
+              <span class="act"><svg viewBox="0 0 26 24" aria-hidden="true"><use href="#act-read"/></svg>reading circle</span>
+              <a class="act" href="#/programs" style="text-decoration:none; color:inherit">&hellip;and more</a>
+            </div>
           </div>
         </div>
       </div>
@@ -1275,7 +1260,7 @@
       <div>
         <span class="label rv">Programs</span>
         <h1 class="rv" tabindex="-1">the stack, and the branches</h1>
-        <p class="lead rv">Three environments stacked like our stones, each resting on what the child built in the one below &mdash; and an activity centre growing off the side, the way fruit hangs off a good tree.</p>
+        <p class="lead rv">Three rooms stacked like our stones, each resting on what the child grew into in the one below &mdash; and the canopy over the top of all three, where the school opens up to the whole street.</p>
       </div>
       <svg class="spot rv" viewBox="0 0 90 90" aria-hidden="true"><use href="#spot-stack"/></svg>
     </div>
@@ -1289,7 +1274,7 @@
             </svg>
           </div>
           <span class="prog-age">18 months &ndash; 3 years</span>
-          <h3>toddler environment</h3>
+          <h3>toddler</h3>
           <p>The base stone, on the ground floor. Walking, speaking, pouring, sweeping, and the first taste of doing something entirely alone. Most of what happens here is dignity: a coat hook at knee height, a jug a small hand can lift, an adult who does not rush.</p>
           <dl>
             <div><dt>Hours</dt><dd>8:30 &ndash; 12:00</dd></div>
@@ -1305,7 +1290,7 @@
             </svg>
           </div>
           <span class="prog-age">3 &ndash; 6 years</span>
-          <h3>primary environment</h3>
+          <h3>primary</h3>
           <p>The middle stone, and the heart of the house. The three-hour work cycle begins: reading, the decimal system, geography, botany &mdash; all of it chosen, none of it assigned. The final year is the one parents are most tempted to skip, and most regret skipping: it's when the five-year-old becomes the leader of the room.</p>
           <dl>
             <div><dt>Hours</dt><dd>8:30 &ndash; 15:00</dd></div>
@@ -1330,26 +1315,22 @@
             <div><dt>Places</dt><dd>limited</dd></div>
           </dl>
         </div>
-      </div>
-      <p class="rv" style="margin-top:1.2rem; font-size:var(--t-small); color:var(--ink-2)">Hours, ratios and places shown are indicative &mdash; to be confirmed by the school before launch.</p>
-    </section>
-
-    <section class="band">
-      <div class="sec wrap">
-        <div class="sec-head rv">
-          <span class="label">The activity centre</span>
-          <h2>what grows on the branches</h2>
-          <p>A school this small should still hum in the evenings. The activity centre runs classes after hours and on weekends, open to every child in the neighbourhood &mdash; yours doesn't need to be enrolled with us to belong here.</p>
+        <div class="prog canopy-card rv" style="--tone: var(--sage); --wash: var(--sage-wash);">
+          <div class="canopy-head">
+            <span class="prog-age">Evenings &amp; weekends</span>
+            <h3>the canopy</h3>
+            <p>A school this small should still hum after hours. The canopy runs classes for every child in the neighbourhood, not just ours &mdash; you don't need to be enrolled here to belong here.</p>
+          </div>
+          <div class="acts">
+            <span class="act"><svg viewBox="0 0 24 28" aria-hidden="true"><use href="#act-dance"/></svg>dance</span>
+            <span class="act"><svg viewBox="0 0 28 24" aria-hidden="true"><use href="#act-capoeira"/></svg>capoeira</span>
+            <span class="act"><svg viewBox="0 0 20 26" aria-hidden="true"><use href="#act-music"/></svg>music</span>
+            <span class="act"><svg viewBox="0 0 24 28" aria-hidden="true"><use href="#act-art"/></svg>art</span>
+            <span class="act"><svg viewBox="0 0 26 24" aria-hidden="true"><use href="#act-read"/></svg>reading circle</span>
+          </div>
         </div>
-        <div class="acts rv">
-          <span class="act"><svg viewBox="0 0 24 28" aria-hidden="true"><use href="#act-dance"/></svg>dance</span>
-          <span class="act"><svg viewBox="0 0 28 24" aria-hidden="true"><use href="#act-capoeira"/></svg>capoeira</span>
-          <span class="act"><svg viewBox="0 0 20 26" aria-hidden="true"><use href="#act-music"/></svg>music</span>
-          <span class="act"><svg viewBox="0 0 24 28" aria-hidden="true"><use href="#act-art"/></svg>art</span>
-          <span class="act"><svg viewBox="0 0 26 24" aria-hidden="true"><use href="#act-read"/></svg>reading circle</span>
-        </div>
-        <p class="rv" style="margin-top:1.2rem; font-size:var(--t-small); color:var(--ink-2)">The full class list and timetable are being put together &mdash; ask when you visit, or watch this space.</p>
       </div>
+      <p class="rv" style="margin-top:1.2rem; font-size:var(--t-small); color:var(--ink-2)">Hours, ratios and places shown are indicative &mdash; to be confirmed by the school before launch. The canopy's full class list and timetable are still being put together &mdash; ask when you visit.</p>
     </section>
 
     <section class="sec wrap">
@@ -1361,7 +1342,7 @@
       <div class="tour-steps rv" style="max-width: 40rem;">
         <div class="tour-step" style="border-color: var(--line-solid)"><i style="background:var(--denim)"></i><span><b style="color:var(--ink)">toddler &rarr; primary</b><span style="color:var(--ink-2)">Around the third birthday, once independence in dressing, toileting and snack is steady.</span></span></div>
         <div class="tour-step" style="border-color: var(--line-solid)"><i style="background:var(--sage)"></i><span><b style="color:var(--ink)">primary &rarr; the world</b><span style="color:var(--ink-2)">At six &mdash; reading, writing, calculating, and carrying the settled belief that they can teach themselves anything.</span></span></div>
-        <div class="tour-step" style="border-color: var(--line-solid)"><i style="background:var(--blush)"></i><span><b style="color:var(--ink)">casa, alongside</b><span style="color:var(--ink-2)">Daycare wraps around both environments, so the day has one rhythm instead of three commutes.</span></span></div>
+        <div class="tour-step" style="border-color: var(--line-solid)"><i style="background:var(--blush)"></i><span><b style="color:var(--ink)">casa, alongside</b><span style="color:var(--ink-2)">Daycare wraps around both rooms, so the day has one rhythm instead of three commutes.</span></span></div>
       </div>
     </section>
   </main>
@@ -1520,7 +1501,7 @@
           </svg>
           <span><span class="mark-name">little people</span><br><span class="mark-sub">Montessori</span></span>
         </a>
-        <span>An AMI-informed Montessori house in Mumbai for children 18 months to 6 years &mdash; with a casa daycare and an activity centre, under an old mango tree.</span>
+        <span>An AMI-informed Montessori house in Mumbai for children 18 months to 6 years &mdash; with a casa daycare and a canopy of after-hours classes, under an old mango tree.</span>
       </div>
       <div class="foot-col">
         <h4>Visit</h4>
@@ -1915,10 +1896,6 @@
   cv.addEventListener('pointerleave', releaseStone);
 
   window.addEventListener('resize', () => { layout(); kick(); });
-
-  const repaint = () => { pal = palette(); render(); };
-  new MutationObserver(repaint).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', repaint);
 
   /* go */
   route();
