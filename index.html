@@ -1,0 +1,1929 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Little People Montessori -- a Montessori house in Mumbai for children 18 months to 6 years, with a casa daycare and an activity centre, under an old mango tree.">
+<style>
+  html, body { margin: 0; padding: 0; }
+</style>
+</head>
+<body>
+<title>little people montessori &mdash; a montessori house in mumbai</title>
+
+<style>
+  /* ============================================================
+     LITTLE PEOPLE MONTESSORI -- design tokens
+     Palette sampled from the logo; the building wears the same
+     three bands (blush / sage / denim) top to bottom.
+     ============================================================ */
+  :root {
+    --ground:      #F6EFE9;
+    --ground-2:    #FBF7F3;
+    --ground-3:    #EFE5DC;
+    --ink:         #2B2B29;
+    --ink-2:       #6E655D;
+    --ink-3:       #9C918780;
+    --line:        #2B2B2914;
+    --line-solid:  #E2D6CA;
+
+    --blush:       #EEB3BD;
+    --sage:        #7B9B6E;
+    --denim:       #5C7FB8;
+    --mango:       #E8B84B;
+    --rose:        #DB93A1;
+    --bark:        #D8C3A8;
+    --leafbed:     color-mix(in srgb, #7B9B6E 16%, #F6EFE9);
+
+    --blush-wash:  #EEB3BD33;
+    --sage-wash:   #7B9B6E24;
+    --denim-wash:  #5C7FB81F;
+
+    --action:      #4C6FA8;
+    --action-ink:  #FBF7F3;
+
+    --display: "Avenir Next", Avenir, Futura, "Century Gothic", "Trebuchet MS", system-ui, sans-serif;
+    --body: Charter, "Bitstream Charter", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+
+    --t-hero:  clamp(2.6rem, 5.8vw, 5rem);
+    --t-h2:    clamp(2rem, 4.2vw, 3.2rem);
+    --t-h3:    clamp(1.25rem, 1.9vw, 1.55rem);
+    --t-lead:  clamp(1.1rem, 1.6vw, 1.3rem);
+    --t-body:  1.0625rem;
+    --t-small: 0.9375rem;
+    --t-label: 0.7rem;
+
+    --pad: clamp(1.4rem, 5vw, 4rem);
+    --gap-section: clamp(4.5rem, 9vw, 8rem);
+    --measure: 34rem;
+    --shadow: 0 1px 2px #2b2b2908, 0 12px 34px -18px #2b2b2938;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground:     #191816;
+      --ground-2:   #211F1C;
+      --ground-3:   #2A2724;
+      --ink:        #F2EAE2;
+      --ink-2:      #A99E93;
+      --ink-3:      #7D736980;
+      --line:       #F2EAE216;
+      --line-solid: #35312C;
+      --blush:      #F0BAC3;
+      --sage:       #93B183;
+      --denim:      #85A4D6;
+      --mango:      #E6BE62;
+      --rose:       #C98996;
+      --bark:       #4A4136;
+      --leafbed:    color-mix(in srgb, #93B183 18%, #191816);
+      --blush-wash: #F0BAC326;
+      --sage-wash:  #93B18320;
+      --denim-wash: #85A4D619;
+      --action:     #90ADDC;
+      --action-ink: #191816;
+      --shadow: 0 1px 2px #00000030, 0 14px 38px -18px #00000070;
+    }
+  }
+  :root[data-theme="light"] {
+    --ground: #F6EFE9; --ground-2: #FBF7F3; --ground-3: #EFE5DC;
+    --ink: #2B2B29; --ink-2: #6E655D; --ink-3: #9C918780;
+    --line: #2B2B2914; --line-solid: #E2D6CA;
+    --blush: #EEB3BD; --sage: #7B9B6E; --denim: #5C7FB8; --mango: #E8B84B;
+    --rose: #DB93A1; --bark: #D8C3A8; --leafbed: color-mix(in srgb, #7B9B6E 16%, #F6EFE9);
+    --blush-wash: #EEB3BD33; --sage-wash: #7B9B6E24; --denim-wash: #5C7FB81F;
+    --action: #4C6FA8; --action-ink: #FBF7F3;
+    --shadow: 0 1px 2px #2b2b2908, 0 12px 34px -18px #2b2b2938;
+  }
+  :root[data-theme="dark"] {
+    --ground: #191816; --ground-2: #211F1C; --ground-3: #2A2724;
+    --ink: #F2EAE2; --ink-2: #A99E93; --ink-3: #7D736980;
+    --line: #F2EAE216; --line-solid: #35312C;
+    --blush: #F0BAC3; --sage: #93B183; --denim: #85A4D6; --mango: #E6BE62;
+    --rose: #C98996; --bark: #4A4136; --leafbed: color-mix(in srgb, #93B183 18%, #191816);
+    --blush-wash: #F0BAC326; --sage-wash: #93B18320; --denim-wash: #85A4D619;
+    --action: #90ADDC; --action-ink: #191816;
+    --shadow: 0 1px 2px #00000030, 0 14px 38px -18px #00000070;
+  }
+
+  /* ---------- base ---------- */
+  .lp {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: var(--t-body);
+    line-height: 1.72;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  .lp *, .lp *::before, .lp *::after { box-sizing: border-box; }
+  .lp p { margin: 0; }
+  .lp h1, .lp h2, .lp h3, .lp h4 {
+    font-family: var(--display);
+    font-weight: 600;
+    text-transform: lowercase;   /* the logo speaks in lowercase; so do we */
+    letter-spacing: -0.035em;
+    line-height: 1.04;
+    text-wrap: balance;
+    margin: 0;
+  }
+  .lp a { color: inherit; }
+  .lp :focus-visible { outline: 2px solid var(--action); outline-offset: 3px; border-radius: 3px; }
+  .lp h1:focus { outline: none; }
+
+  .wrap { width: 100%; max-width: 76rem; margin-inline: auto; padding-inline: var(--pad); }
+
+  .label {
+    font-family: var(--display);
+    font-size: var(--t-label);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 600;
+    color: var(--ink-2);
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .label::before {
+    content: ""; width: 7px; height: 8px;
+    border-radius: 46% 54% 58% 42% / 52% 46% 54% 48%;
+    background: currentColor; opacity: 0.55; flex: none;
+  }
+
+  /* ---------- buttons ---------- */
+  .btn {
+    font-family: var(--display);
+    font-size: 0.9rem; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 0.65rem;
+    padding: 0.85rem 1.5rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform .32s cubic-bezier(.2,.9,.3,1.3), background-color .25s, border-color .25s, color .25s;
+  }
+  .btn-solid { background: var(--action); color: var(--action-ink); }
+  .btn-solid:hover { transform: translateY(-2px) rotate(-0.5deg); }
+  .btn-ghost { border-color: var(--line-solid); color: var(--ink); }
+  .btn-ghost:hover { border-color: var(--action); color: var(--action); transform: translateY(-2px) rotate(0.5deg); }
+  .btn .pebble {
+    width: 9px; height: 10px; flex: none;
+    border-radius: 46% 54% 58% 42% / 52% 46% 54% 48%;
+    background: currentColor;
+    transition: transform .4s cubic-bezier(.2,.9,.3,1.3);
+  }
+  .btn:hover .pebble { transform: translateY(-3px) rotate(-14deg); }
+
+  /* ---------- nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 40;
+    background: color-mix(in srgb, var(--ground) 88%, transparent);
+    backdrop-filter: blur(14px) saturate(1.3);
+    border-bottom: 1px solid transparent;
+    transition: border-color .3s;
+  }
+  .nav.is-stuck { border-bottom-color: var(--line); }
+  .nav-in {
+    max-width: 76rem; margin-inline: auto; padding: 0.85rem var(--pad);
+    display: flex; align-items: center; gap: 1.4rem; position: relative;
+  }
+  .mark { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; margin-right: auto; }
+  .mark-name {
+    font-family: var(--display); font-weight: 600; font-size: 1.12rem;
+    letter-spacing: -0.045em; line-height: 0.92; text-transform: lowercase;
+  }
+  .mark-sub {
+    font-family: var(--display); font-size: 0.53rem; font-weight: 600;
+    letter-spacing: 0.28em; text-transform: uppercase; color: var(--ink-2);
+  }
+  .mark svg .s { transition: transform .5s cubic-bezier(.2,.9,.3,1.4); transform-origin: center; }
+  .mark:hover svg .s1 { transform: translateY(-2.5px) rotate(-8deg); }
+  .mark:hover svg .s2 { transform: translateY(-1.2px) rotate(4deg); }
+
+  .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+  .nav-links a {
+    font-family: var(--display); font-size: 0.875rem; font-weight: 500;
+    text-decoration: none; color: var(--ink-2);
+    position: relative; padding-block: 0.3rem;
+    transition: color .22s;
+  }
+  .nav-links a::after {
+    content: ""; position: absolute; left: 50%; margin-left: -3px; bottom: -2px;
+    width: 6px; height: 7px;
+    border-radius: 46% 54% 58% 42% / 52% 46% 54% 48%;
+    background: var(--blush);
+    opacity: 0; transform: translateY(4px);
+    transition: opacity .25s, transform .35s cubic-bezier(.2,.9,.3,1.4);
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-links a:hover::after,
+  .nav-links a.active::after { opacity: 1; transform: translateY(0); }
+  .nav-links a.active { color: var(--ink); }
+
+  .menu-btn {
+    display: none; background: none; border: 1px solid var(--line-solid);
+    border-radius: 10px; padding: 0.45rem 0.6rem; cursor: pointer; color: var(--ink);
+  }
+  .menu-btn svg { display: block; }
+  @media (max-width: 900px) {
+    .menu-btn { display: block; }
+    .nav-links {
+      display: none;
+      position: absolute; top: calc(100% + 8px); right: var(--pad);
+      flex-direction: column; align-items: flex-start; gap: 0.4rem;
+      background: var(--ground-2); border: 1px solid var(--line-solid);
+      border-radius: 16px; padding: 1rem 1.3rem; box-shadow: var(--shadow);
+      min-width: 180px; z-index: 50;
+    }
+    .nav-links.open { display: flex; }
+    .nav-links a { padding-block: 0.45rem; font-size: 1rem; }
+    .nav .btn { display: none; }
+  }
+
+  /* ---------- pages / router ---------- */
+  .page { display: none; flex: 1; }
+  .page.active { display: block; animation: pagein .55s cubic-bezier(.2,.7,.3,1); }
+  @keyframes pagein { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  .sec { padding-block: var(--gap-section); }
+  .sec-tight { padding-block: clamp(3rem, 6vw, 5rem); }
+  .sec-head { display: grid; gap: 1.1rem; margin-bottom: clamp(2.2rem, 4.5vw, 3.6rem); }
+  .sec-head h2 { font-size: var(--t-h2); max-width: 20ch; }
+  .sec-head p { color: var(--ink-2); max-width: var(--measure); font-size: var(--t-lead); line-height: 1.62; }
+  .band { background: var(--ground-2); border-block: 1px solid var(--line); }
+
+  /* page headers with a spot illustration */
+  .page-head {
+    padding-top: clamp(2.2rem, 5vw, 4rem);
+    display: grid; grid-template-columns: minmax(0,1fr) auto;
+    gap: 1.5rem; align-items: end;
+  }
+  .page-head h1 { font-size: clamp(2.4rem, 5vw, 4.2rem); max-width: 16ch; margin-top: 0.9rem; }
+  .page-head .lead { color: var(--ink-2); font-size: var(--t-lead); max-width: var(--measure); margin-top: 1.1rem; line-height: 1.62; }
+  .page-head .spot { width: clamp(120px, 16vw, 190px); height: auto; flex: none; }
+  @media (max-width: 720px) {
+    .page-head { grid-template-columns: 1fr; }
+    .page-head .spot { order: -1; width: 130px; }
+  }
+
+  /* ---------- illustration plumbing ---------- */
+  .spot { overflow: visible; }
+  svg .ink { fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  svg .ink-thin { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  svg .paper { fill: var(--ground-2); }
+
+  /* doodle divider between sections */
+  .divider {
+    display: flex; justify-content: center; align-items: center; gap: 1.6rem;
+    padding-block: 0.4rem;
+  }
+  .divider svg { width: 54px; height: 34px; overflow: visible; opacity: 0.9; }
+
+  /* gentle idle motion for hanging things */
+  .hang { transform-box: fill-box; transform-origin: top center; animation: sway 5.5s ease-in-out infinite; }
+  .hang.h2 { animation-delay: -1.8s; animation-duration: 6.4s; }
+  .hang.h3 { animation-delay: -3.2s; animation-duration: 4.9s; }
+  @keyframes sway { 0%,100% { transform: rotate(-3.4deg); } 50% { transform: rotate(3.4deg); } }
+
+  .bob { transform-box: fill-box; transform-origin: center; animation: bob 6s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+  .peck { transform-box: fill-box; transform-origin: bottom center; animation: peck 7s ease-in-out infinite; }
+  @keyframes peck { 0%,86%,100% { transform: rotate(0); } 90% { transform: rotate(-9deg); } 94% { transform: rotate(3deg); } }
+
+  /* bougainvillea sways very slightly; the sun's rays wheel slowly */
+  .flora { transform-box: fill-box; transform-origin: top center; animation: floraSway 6.5s ease-in-out infinite; }
+  .flora.f2 { animation-delay: -2.2s; animation-duration: 7.6s; }
+  .flora.f3 { animation-delay: -4.1s; animation-duration: 5.8s; }
+  @keyframes floraSway { 0%,100% { transform: rotate(-1.3deg); } 50% { transform: rotate(1.5deg); } }
+  .sunrays { transform-box: fill-box; transform-origin: center; animation: orbit 52s linear infinite; }
+
+  .flutter { animation: flutter 22s linear infinite; }
+  @keyframes flutter {
+    0%   { transform: translate(0,0) rotate(6deg); }
+    20%  { transform: translate(150px,-60px) rotate(-8deg); }
+    40%  { transform: translate(330px,-20px) rotate(10deg); }
+    60%  { transform: translate(520px,-90px) rotate(-6deg); }
+    80%  { transform: translate(700px,-30px) rotate(8deg); }
+    100% { transform: translate(860px,-110px) rotate(0deg); opacity: 0; }
+  }
+  .wing { transform-box: fill-box; transform-origin: center bottom; animation: wing .5s ease-in-out infinite alternate; }
+  @keyframes wing { from { transform: scaleY(1); } to { transform: scaleY(0.35); } }
+
+  /* ---------- hero (home) ---------- */
+  .hero { padding-top: clamp(1.6rem, 4vw, 3rem); }
+  .hero-top { display: grid; gap: 1rem; text-align: center; justify-items: center; }
+  .hero h1 { font-size: var(--t-hero); max-width: 17ch; }
+  .hero h1 em { font-style: normal; color: var(--denim); }
+  .hero-lead { font-size: var(--t-lead); color: var(--ink-2); max-width: 36rem; line-height: 1.62; }
+  .hero-cta { display: flex; flex-wrap: wrap; gap: 0.7rem; justify-content: center; margin-top: 0.7rem; }
+
+  .scene-wrap { position: relative; margin-top: clamp(1rem, 3vw, 2rem); }
+  .scene-wrap svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .scene-hint {
+    position: absolute; right: 2%; bottom: 2%;
+    font-family: var(--display); font-size: 0.66rem; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2);
+    opacity: 0.7; pointer-events: none;
+  }
+  #canopy { cursor: pointer; }
+  @media (max-width: 640px) {
+    .scene-hint { position: static; display: block; text-align: center; margin-top: 0.5rem; }
+  }
+
+  /* ---------- cards / programs ---------- */
+  .progs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .prog {
+    background: var(--ground-2);
+    border: 1px solid var(--line-solid);
+    border-radius: 20px;
+    padding: 1.6rem 1.5rem 1.5rem;
+    display: flex; flex-direction: column; gap: 0.85rem;
+    position: relative; overflow: hidden;
+    transition: transform .45s cubic-bezier(.2,.9,.3,1.2), border-color .35s;
+    text-decoration: none;
+  }
+  .prog::after {
+    content: ""; position: absolute; inset: auto -30% -55% -30%; height: 70%;
+    background: var(--wash); border-radius: 50%;
+    opacity: 0; transition: opacity .5s;
+  }
+  .prog:hover { transform: translateY(-6px) rotate(-0.4deg); border-color: var(--tone); }
+  .prog:hover::after { opacity: 1; }
+  .prog > * { position: relative; z-index: 1; }
+  .prog-art { height: 104px; display: flex; align-items: flex-end; }
+  .prog-art svg { overflow: visible; width: 130px; height: 104px; }
+  .prog-art .top { transition: transform .55s cubic-bezier(.2,.9,.3,1.5); transform-box: fill-box; transform-origin: center; }
+  .prog:hover .prog-art .top { transform: translateY(-7px) rotate(-7deg); }
+  .prog-age {
+    font-family: var(--display); font-size: var(--t-label); font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--tone);
+  }
+  .prog h3 { font-size: var(--t-h3); }
+  .prog p { font-size: var(--t-small); color: var(--ink-2); line-height: 1.65; }
+  .prog dl {
+    margin: 0.4rem 0 0; margin-top: auto; padding-top: 0.9rem;
+    border-top: 1px solid var(--line-solid);
+    display: grid; gap: 0.4rem; font-size: 0.85rem;
+  }
+  .prog dl div { display: flex; justify-content: space-between; gap: 1rem; }
+  .prog dt { color: var(--ink-2); }
+  .prog dd { margin: 0; font-family: var(--display); font-weight: 600; font-variant-numeric: tabular-nums; }
+  @media (max-width: 880px) { .progs { grid-template-columns: 1fr; } }
+
+  /* ---------- activity centre chips ---------- */
+  .acts-wrap { margin-top: clamp(2rem, 4vw, 3rem); border-top: 1px dashed var(--line-solid); padding-top: clamp(1.6rem, 3vw, 2.4rem); display: grid; gap: 1rem; }
+  .acts-wrap h3 { font-size: var(--t-h3); }
+  .acts-wrap > p { color: var(--ink-2); font-size: var(--t-small); max-width: var(--measure); }
+  .acts { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .act {
+    display: inline-flex; align-items: center; gap: 0.55rem;
+    font-family: var(--display); font-weight: 600; font-size: 0.85rem; text-transform: lowercase;
+    border: 1px solid var(--line-solid); border-radius: 999px;
+    padding: 0.45rem 1rem 0.45rem 0.7rem; background: var(--ground-2);
+    transition: transform .4s cubic-bezier(.2,.9,.3,1.4), border-color .3s;
+  }
+  .act:hover { transform: translateY(-3px) rotate(-1.2deg); border-color: var(--sage); }
+  .act svg { width: 22px; height: 22px; overflow: visible; }
+
+  /* ---------- principles ---------- */
+  .prins { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.6rem, 3vw, 2.6rem); }
+  .prin { display: grid; gap: 0.75rem; align-content: start; }
+  .prin-art { height: 86px; display: flex; align-items: center; }
+  .prin-art svg { overflow: visible; width: 100px; height: 86px; }
+  .prin h3 { font-size: 1.15rem; }
+  .prin p { font-size: var(--t-small); color: var(--ink-2); line-height: 1.65; }
+  @media (max-width: 880px) { .prins { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .prins { grid-template-columns: 1fr; } }
+
+  .m-orbit { transform-box: fill-box; transform-origin: center; animation: orbit 14s linear infinite; }
+  @keyframes orbit { to { transform: rotate(360deg); } }
+  .m-breathe { transform-box: fill-box; transform-origin: center; animation: breathe 5.5s ease-in-out infinite; }
+  @keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+  .m-tip { transform-box: fill-box; transform-origin: center; animation: tip 6s ease-in-out infinite; }
+  @keyframes tip { 0%,100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+  .m-rise { animation: rise 4.5s ease-in-out infinite; }
+  @keyframes rise { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .m-trail { stroke-dasharray: 3 6; animation: trail 3.5s linear infinite; }
+  @keyframes trail { to { stroke-dashoffset: -18; } }
+  .m-settle { transform-box: fill-box; transform-origin: center bottom; animation: settle 7s ease-in-out infinite; }
+  @keyframes settle { 0%,100% { transform: rotate(0deg); } 30% { transform: rotate(3deg); } 65% { transform: rotate(-2deg); } }
+
+  /* ---------- thesis + stones canvas ---------- */
+  .thesis { display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,0.9fr); gap: clamp(2rem,5vw,4.5rem); align-items: center; }
+  .thesis-quote {
+    font-family: var(--display); font-weight: 600; text-transform: lowercase;
+    font-size: clamp(1.5rem, 2.6vw, 2.15rem); line-height: 1.16; letter-spacing: -0.035em;
+  }
+  .thesis-quote span { color: var(--ink-2); }
+  .thesis-cite { margin-top: 1.2rem; font-size: var(--t-small); color: var(--ink-2); font-style: italic; }
+  .thesis-body { display: grid; gap: 1.1rem; max-width: var(--measure); margin-top: 1.6rem; }
+  .stage { position: relative; aspect-ratio: 1 / 1; max-width: 400px; width: 100%; justify-self: center; }
+  .stage canvas { width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
+  .stage canvas:active { cursor: grabbing; }
+  .stage-hint {
+    position: absolute; bottom: -0.4rem; left: 50%; transform: translateX(-50%);
+    font-family: var(--display); font-size: 0.66rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-2); opacity: 0.65; white-space: nowrap;
+  }
+  @media (max-width: 860px) { .thesis { grid-template-columns: 1fr; } .stage { max-width: 320px; } }
+
+  /* ---------- day timeline ---------- */
+  .cycle { display: grid; grid-template-columns: minmax(0,0.8fr) minmax(0,1.2fr); gap: clamp(2rem,5vw,5rem); }
+  .cycle-aside {
+    background: var(--ground-3); border-radius: 20px; padding: clamp(1.5rem, 3vw, 2.2rem);
+    align-self: start; display: grid; gap: 1rem;
+  }
+  .cycle-aside .big-num {
+    font-family: var(--display); font-weight: 600; font-size: clamp(3rem,7vw,4.6rem);
+    line-height: 0.9; letter-spacing: -0.05em; color: var(--sage);
+  }
+  .cycle-aside p { font-size: var(--t-small); color: var(--ink-2); line-height: 1.65; }
+  .cycle-aside svg { width: 120px; height: auto; overflow: visible; justify-self: start; }
+  .cyc {
+    display: grid; grid-template-columns: 4.4rem 2.2rem 1fr;
+    gap: 0 1rem; align-items: start;
+    padding-block: 1.15rem;
+    border-top: 1px solid var(--line-solid);
+  }
+  .cyc:last-child { border-bottom: 1px solid var(--line-solid); }
+  .cyc-time {
+    font-family: var(--display); font-weight: 600; font-size: 0.85rem;
+    font-variant-numeric: tabular-nums; color: var(--ink-2); padding-top: 0.15rem;
+  }
+  .cyc-dot { display: flex; justify-content: center; padding-top: 0.2rem; }
+  .cyc-dot i {
+    display: block; border-radius: 46% 54% 58% 42% / 52% 46% 54% 48%;
+    transition: transform .5s cubic-bezier(.2,.9,.3,1.5);
+  }
+  .cyc:hover .cyc-dot i { transform: rotate(-16deg) scale(1.15); }
+  .cyc h4 { font-size: 1.05rem; margin-bottom: 0.25rem; }
+  .cyc p { font-size: var(--t-small); color: var(--ink-2); line-height: 1.6; }
+  @media (max-width: 880px) {
+    .cycle { grid-template-columns: 1fr; }
+    .cyc { grid-template-columns: 3.6rem 1.8rem 1fr; }
+  }
+
+  /* ---------- voices ---------- */
+  .voices { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .voice {
+    background: var(--ground-2); border: 1px solid var(--line-solid);
+    border-radius: 20px; padding: clamp(1.5rem, 3vw, 2.1rem);
+    display: grid; gap: 1.1rem; align-content: start;
+  }
+  .voice blockquote { margin: 0; font-size: clamp(1.05rem, 1.6vw, 1.2rem); line-height: 1.6; }
+  .voice figcaption { display: flex; align-items: center; gap: 0.7rem; font-size: var(--t-small); color: var(--ink-2); }
+  .voice figcaption i {
+    width: 26px; height: 28px; flex: none;
+    border-radius: 46% 54% 58% 42% / 52% 46% 54% 48%;
+  }
+  .voice figcaption b { font-family: var(--display); font-weight: 600; color: var(--ink); display: block; text-transform: lowercase; }
+  @media (max-width: 780px) { .voices { grid-template-columns: 1fr; } }
+
+  /* ---------- tour CTA panel ---------- */
+  .tour {
+    background: var(--ink); color: var(--ground);
+    border-radius: 28px; padding: clamp(2.2rem, 6vw, 4rem);
+    position: relative; overflow: hidden;
+    display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,0.85fr);
+    gap: clamp(2rem, 5vw, 4rem); align-items: center;
+  }
+  .tour h2 { font-size: var(--t-h2); }
+  .tour p { color: color-mix(in srgb, var(--ground) 68%, transparent); margin-top: 1rem; max-width: 30rem; }
+  .tour .btn-solid { background: var(--blush); color: #2B2B29; margin-top: 2rem; }
+  .tour-steps { display: grid; gap: 0.9rem; }
+  .tour-step {
+    display: grid; grid-template-columns: 2.1rem 1fr; gap: 0 0.9rem; align-items: start;
+    padding-bottom: 0.9rem; border-bottom: 1px solid color-mix(in srgb, var(--ground) 16%, transparent);
+  }
+  .tour-step:last-child { border-bottom: 0; padding-bottom: 0; }
+  .tour-step i {
+    width: 15px; height: 17px; margin-top: 0.35rem;
+    border-radius: 46% 54% 58% 42% / 52% 46% 54% 48%;
+  }
+  .tour-step b { font-family: var(--display); font-weight: 600; text-transform: lowercase; font-size: 1rem; display: block; }
+  .tour-step span { font-size: var(--t-small); color: color-mix(in srgb, var(--ground) 62%, transparent); }
+  @media (max-width: 880px) { .tour { grid-template-columns: 1fr; } }
+
+  /* ---------- admissions extras ---------- */
+  .contact-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+  .ccard {
+    background: var(--ground-2); border: 1px solid var(--line-solid); border-radius: 20px;
+    padding: 1.5rem; display: grid; gap: 0.4rem; align-content: start;
+  }
+  .ccard .label { margin-bottom: 0.4rem; }
+  .ccard b { font-family: var(--display); font-weight: 600; font-size: 1.15rem; letter-spacing: -0.02em; }
+  .ccard span, .ccard a { font-size: var(--t-small); color: var(--ink-2); text-decoration: none; justify-self: start; }
+  .ccard a:hover { color: var(--action); }
+  @media (max-width: 780px) { .contact-cards { grid-template-columns: 1fr; } }
+
+  .faq { display: grid; gap: 0; max-width: 44rem; }
+  .faq details { border-top: 1px solid var(--line-solid); }
+  .faq details:last-child { border-bottom: 1px solid var(--line-solid); }
+  .faq summary {
+    cursor: pointer; list-style: none;
+    font-family: var(--display); font-weight: 600; font-size: 1.05rem; text-transform: lowercase;
+    letter-spacing: -0.02em;
+    padding: 1.1rem 0; display: flex; align-items: center; gap: 0.8rem;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::before {
+    content: ""; width: 9px; height: 10px; flex: none;
+    border-radius: 46% 54% 58% 42% / 52% 46% 54% 48%;
+    background: var(--denim);
+    transition: transform .4s cubic-bezier(.2,.9,.3,1.4);
+  }
+  .faq details[open] summary::before { transform: translateY(-3px) rotate(-18deg); background: var(--blush); }
+  .faq details p { padding: 0 0 1.2rem 1.55rem; color: var(--ink-2); font-size: var(--t-small); max-width: 40rem; }
+
+  /* ---------- footer ---------- */
+  .foot { padding-block: clamp(3rem, 7vw, 5rem) 2.5rem; border-top: 1px solid var(--line-solid); margin-top: var(--gap-section); position: relative; }
+  .foot-grid { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 2rem; }
+  .foot-col { display: grid; gap: 0.55rem; align-content: start; }
+  .foot-col h4 { font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 0.35rem; font-weight: 600; }
+  .foot-col a, .foot-col span { font-size: var(--t-small); color: var(--ink-2); text-decoration: none; transition: color .2s; }
+  .foot-col a:hover { color: var(--action); }
+  .foot-note {
+    margin-top: 3rem; padding-top: 1.4rem; border-top: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between;
+    font-size: 0.82rem; color: var(--ink-2);
+  }
+  .tbd { color: var(--action); border-bottom: 1px dashed currentColor; }
+  .foot-doodle { position: absolute; top: -34px; right: var(--pad); width: 90px; height: auto; overflow: visible; }
+  @media (max-width: 800px) { .foot-grid { grid-template-columns: 1fr 1fr; } }
+
+  /* ---------- reveal ---------- */
+  .rv { opacity: 0; transform: translateY(22px); transition: opacity .8s cubic-bezier(.2,.7,.3,1), transform .8s cubic-bezier(.2,.7,.3,1); }
+  .rv.in { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lp *, .lp *::before, .lp *::after {
+      animation-duration: .001ms !important; animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+    .rv { opacity: 1; transform: none; }
+    .flutter { display: none; }
+  }
+</style>
+
+<div class="lp">
+
+<!-- ============================================================
+     SHARED SVG DEFS: the ink-wobble filters + spot illustrations.
+     Every drawing runs its geometry through feTurbulence noise so
+     clean paths come out looking hand-inked.
+     ============================================================ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="squig" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3.5"/>
+    </filter>
+    <filter id="squig2" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="6"/>
+    </filter>
+
+    <!-- NOTE: everything in these defs is styled with presentation
+         ATTRIBUTES, not classes -- CSS class selectors do not reach
+         into the shadow content cloned by <use>. -->
+
+    <!-- a sprig of mango leaves: long droopy lanceolate leaves -->
+    <g id="leaf-sprig" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M0 0 C6 -8 14 -12 24 -13 C16 -6 8 -2 0 0 Z"/>
+      <path d="M0 0 C8 -2 18 0 26 6 C16 6 6 4 0 0 Z"/>
+      <path d="M0 0 C4 8 10 14 20 18 C10 16 2 10 0 0 Z"/>
+    </g>
+
+    <!-- one mango with stem + leaf -->
+    <g id="mango" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M0 -12 C0 -8 1 -5 1 -2" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+      <path d="M0 -2 C7 -4 12 2 10 9 C8 16 0 19 -5 15 C-10 11 -9 2 -4 -1 C-2.5 -2 -1 -2.4 0 -2 Z"
+            fill="var(--m, var(--sage))" stroke="var(--ink)" stroke-width="1.6"/>
+      <path d="M1 -7 C7 -11 14 -11 19 -8 C13 -5 6 -5 1 -7 Z" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+    </g>
+
+    <!-- three balanced stones, small -->
+    <g id="cairn-s">
+      <path d="M0 22 c9 0 15 3.4 15 8.4 S9 39 0 39 -15 35.8 -15 30.4 -9 22 0 22Z" fill="var(--denim)"/>
+      <path d="M0 8 c7 0 11.5 2.8 11.5 7 S7 22 0 22 -11.5 19.2 -11.5 15 -7 8 0 8Z" fill="var(--sage)"/>
+      <path d="M0 -3 c5 0 8 2 8 5.2 S5 8 0 8 -8 6.2 -8 2.2 -5 -3 0 -3Z" fill="var(--blush)"/>
+    </g>
+
+    <!-- SPOT: child reading, back against the big denim stone -->
+    <g id="spot-read" stroke-linecap="round" stroke-linejoin="round">
+      <g filter="url(#squig)">
+        <path d="M58 62 c14 0 22 6 22 14 s-8 13 -20 13 -22 -5 -22 -13 8 -14 20 -14Z" fill="var(--denim-wash)" stroke="var(--ink)" stroke-width="2.2"/>
+        <circle cx="34" cy="46" r="9.5" fill="var(--ground-2)" stroke="var(--ink)" stroke-width="2.2"/>
+        <path d="M25.5 43 a9.5 9.5 0 0 1 14 -4" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+        <path d="M26 55 c-2 8 -2 14 0 21 l16 0 c3 -8 3 -15 0 -21 -5 -2.5 -11 -2.5 -16 0Z" fill="var(--sage)" stroke="var(--ink)" stroke-width="2.2"/>
+        <path d="M20 78 l14 -1 M34 77 l13 2" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+        <path d="M18 64 c6 -3 12 -3 15 1 3 -4 9 -5 15 -2 l-2 10 c-5 -2 -9 -1 -13 1 -4 -3 -8 -3 -13 -1 Z" fill="var(--ground-2)" stroke="var(--ink)" stroke-width="2"/>
+        <path d="M33 65 l0 9" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+        <use href="#leaf-sprig" transform="translate(76 46) scale(0.8)"/>
+      </g>
+    </g>
+
+    <!-- SPOT: child kneeling, placing the top stone on a cairn -->
+    <g id="spot-stack" stroke-linecap="round" stroke-linejoin="round">
+      <g filter="url(#squig)">
+        <circle cx="30" cy="34" r="9.5" fill="var(--ground-2)" stroke="var(--ink)" stroke-width="2.2"/>
+        <path d="M21.5 31 a9.5 9.5 0 0 1 13 -5" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+        <path d="M22 44 c-3 8 -3 16 1 24 l14 -2 c2 -8 1 -15 -2 -22 -4 -2 -9 -2 -13 0Z" fill="var(--blush)" stroke="var(--ink)" stroke-width="2.2"/>
+        <path d="M23 68 c-2 3 -2 6 0 8 l8 0" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+        <path d="M35 48 c6 -3 12 -5 19 -6 M35 56 c5 0 10 0 15 -1" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+        <path d="M62 34 c4.5 0 7.5 2 7.5 5 s-3 5 -7.5 5 -7.5 -2 -7.5 -5 3 -5 7.5 -5Z" fill="var(--blush)" stroke="var(--ink)" stroke-width="2"/>
+        <path d="M64 48 c6.5 0 10.5 2.6 10.5 6.2 S70.5 60 64 60 53.5 57.6 53.5 54.2 57.5 48 64 48Z" fill="var(--sage)" stroke="var(--ink)" stroke-width="2"/>
+        <path d="M64 60 c8.5 0 14 3.4 14 8.2 S72.5 76 64 76 50 72.6 50 67.8 55.5 60 64 60Z" fill="var(--denim)" stroke="var(--ink)" stroke-width="2"/>
+        <path d="M14 76 l62 2" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+      </g>
+    </g>
+
+    <!-- SPOT: hands pouring from a jug into a glass (practical life) -->
+    <g id="spot-pour" stroke-linecap="round" stroke-linejoin="round">
+      <g filter="url(#squig)">
+        <path d="M26 26 c-6 1 -10 6 -10 13 0 8 5 13 13 13 l12 0 2 -25 c-6 -2 -12 -2 -17 -1Z" fill="var(--sage)" stroke="var(--ink)" stroke-width="2.2"/>
+        <path d="M43 28 c5 -1 8 1 8 4 0 4 -3 6 -7 6" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+        <path d="M22 54 c0 6 1 10 3 15 M27 54 c0 5 1 9 2 13" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-dasharray="1 5"/>
+        <path d="M18 72 l16 0 -2 14 -12 0 Z" fill="var(--ground-2)" stroke="var(--ink)" stroke-width="2.2"/>
+        <path d="M8 86 l74 1" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+        <use href="#cairn-s" transform="translate(66 44) scale(0.9)"/>
+      </g>
+    </g>
+
+    <!-- SPOT: watering can + sprout growing from a stone-shaped pot -->
+    <g id="spot-grow" stroke-linecap="round" stroke-linejoin="round">
+      <g filter="url(#squig)">
+        <path d="M16 38 l24 0 2 22 -28 0 Z" fill="var(--blush)" stroke="var(--ink)" stroke-width="2.2"/>
+        <path d="M40 42 c7 -1 10 3 9 8 -1 4 -5 6 -9 5 M16 42 c-6 -8 -2 -14 6 -13" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+        <path d="M12 46 c-2 6 -3 10 -3 16 M16 48 c-1 5 -2 9 -2 13" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-dasharray="1 4.5"/>
+        <path d="M62 60 c8 0 13 3 13 8 s-5 8 -13 8 -13 -3 -13 -8 5 -8 13 -8Z" fill="var(--denim)" stroke="var(--ink)" stroke-width="2.2"/>
+        <path d="M62 60 c0 -8 0 -12 0 -16" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+        <path d="M62 50 c-6 -1 -10 -5 -11 -11 6 1 10 5 11 11Z M62 44 c1 -6 5 -10 11 -11 -1 6 -5 10 -11 11Z" fill="var(--sage-wash)" stroke="var(--ink)" stroke-width="2.4"/>
+        <path d="M8 78 l74 1" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+      </g>
+    </g>
+
+    <!-- SPOT: parakeet perched on a mango branch -->
+    <g id="spot-parakeet" stroke-linecap="round" stroke-linejoin="round">
+      <g filter="url(#squig)">
+        <path d="M6 62 c22 -4 46 -4 70 0" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+        <use href="#leaf-sprig" transform="translate(66 60) scale(0.9)"/>
+        <use href="#mango" transform="translate(22 74) scale(0.85)" style="--m: var(--blush)"/>
+        <g>
+          <path d="M44 32 c8 -1 13 4 13 11 0 9 -6 16 -13 19 -2 -4 -3 -8 -3 -13 0 -8 1 -14 3 -17Z" fill="var(--sage)" stroke="var(--ink)" stroke-width="2.2"/>
+          <path d="M44 62 c-2 6 -3 10 -3 14" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+          <circle cx="49" cy="38" r="1.4" fill="var(--ink)"/>
+          <path d="M56 38 c3 0 5 1.5 5 3.5 -2 1.5 -4 1.5 -6 0.5" fill="var(--blush)" stroke="var(--ink)" stroke-width="1.6"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- SPOT: mango sprig for admissions / dividers -->
+    <g id="spot-sprig" stroke-linecap="round" stroke-linejoin="round">
+      <g filter="url(#squig)">
+        <path d="M10 12 c18 6 40 8 62 6" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+        <use href="#leaf-sprig" transform="translate(30 16)"/>
+        <use href="#leaf-sprig" transform="translate(58 18) scale(-1 1)"/>
+        <use href="#mango" transform="translate(44 34)"/>
+        <use href="#mango" transform="translate(64 30) scale(0.8)" style="--m: var(--blush)"/>
+      </g>
+    </g>
+
+    <!-- a bougainvillea cluster: papery two-tone blooms + a leaf twig -->
+    <g id="bloom" stroke-linejoin="round">
+      <path d="M-11 1 c-4 -3 -6 -7 -6 -11 4 1 7 4 8 8Z" fill="none" stroke="var(--sage)" stroke-width="1.4"/>
+      <circle cx="0" cy="0" r="5.2" fill="var(--blush)" stroke="var(--ink)" stroke-width="1.1"/>
+      <circle cx="7" cy="3" r="4.4" fill="var(--rose)" stroke="var(--ink)" stroke-width="1.1"/>
+      <circle cx="-6" cy="4" r="4.2" fill="var(--rose)" stroke="var(--ink)" stroke-width="1.1"/>
+      <circle cx="2" cy="7" r="4.6" fill="var(--blush)" stroke="var(--ink)" stroke-width="1.1"/>
+      <circle cx="0" cy="0" r="1" fill="var(--ground-2)"/>
+      <circle cx="2" cy="7" r="1" fill="var(--ground-2)"/>
+    </g>
+
+    <!-- a trailing vine with two stray blooms -->
+    <g id="vine">
+      <path d="M0 0 c-2 10 -1 20 2 31" fill="none" stroke="var(--sage)" stroke-width="1.4" stroke-linecap="round"/>
+      <circle cx="-1" cy="13" r="2.8" fill="var(--rose)" stroke="var(--ink)" stroke-width="0.9"/>
+      <circle cx="2" cy="25" r="2.8" fill="var(--blush)" stroke="var(--ink)" stroke-width="0.9"/>
+    </g>
+
+    <!-- activity centre mini icons -->
+    <g id="act-dance" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round">
+      <circle cx="12" cy="4.5" r="3.2" fill="var(--ground-2)"/>
+      <path d="M12 8 c-1.5 4 -1.5 8 0 12"/>
+      <path d="M4 11 c4 -3 11 -3 15 1"/>
+      <path d="M12 20 c-3 1 -5 3 -6 6 M12 20 c2 2 3 4 3 7"/>
+    </g>
+    <g id="act-capoeira" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round">
+      <circle cx="5" cy="14" r="3.2" fill="var(--ground-2)"/>
+      <path d="M8 12 c5 -4 10 -4 14 0"/>
+      <path d="M14 10 c1 -3 3 -6 6 -8 M18 12 c3 -1 5 -1 8 1"/>
+    </g>
+    <g id="act-music" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round">
+      <ellipse cx="7" cy="21" rx="3.6" ry="2.8" fill="var(--blush)"/>
+      <path d="M10.5 21 V5 c3 1 6 3 7 7"/>
+    </g>
+    <g id="act-art" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round">
+      <path d="M20 4 C14 9 9 15 6 21"/>
+      <path d="M6 21 c-2 2 -2 4 -1 5 1.5 0.5 3.5 -0.5 4 -3Z" fill="var(--sage)" stroke-width="1.4"/>
+    </g>
+    <g id="act-read" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round">
+      <path d="M3 8 c4 -2.5 8 -2.5 10 0 2 -2.5 6 -2.5 10 0 l0 13 c-4 -2 -8 -2 -10 0 -2 -2 -6 -2 -10 0Z" fill="var(--ground-2)"/>
+      <path d="M13 8 l0 13"/>
+    </g>
+  </defs>
+</svg>
+
+  <!-- ============ NAV ============ -->
+  <nav class="nav" id="nav">
+    <div class="nav-in">
+      <a class="mark" href="#/" aria-label="little people montessori, home">
+        <svg width="26" height="34" viewBox="0 0 26 34" aria-hidden="true">
+          <path class="s s1" d="M13 1.6c4.3 0 6.6 2.4 6.5 5.2-.1 2.9-2.6 4.7-6.4 4.7S6.5 9.9 6.5 6.9C6.5 4 8.7 1.6 13 1.6Z" fill="var(--blush)"/>
+          <path class="s s2" d="M13 12.2c5.1-.1 8 2.7 8 6.2 0 3.6-3 6.1-8 6.1s-8-2.4-8-6.1c0-3.6 2.9-6.2 8-6.2Z" fill="var(--sage)"/>
+          <path class="s s3" d="M13 24.6c6.6-.1 10.4 3 10.4 7.3 0 4.4-4 7.4-10.4 7.4S2.6 36.3 2.6 31.9c0-4.3 3.8-7.4 10.4-7.3Z" fill="var(--denim)"/>
+        </svg>
+        <span>
+          <span class="mark-name">little people</span><br>
+          <span class="mark-sub">Montessori</span>
+        </span>
+      </a>
+      <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false">
+        <svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true">
+          <path d="M2 2 C8 1 14 1 18 2 M2 8 C8 7 14 7 18 8 M2 14 C8 13 14 13 18 14"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <a href="#/method" data-r="method">the method</a>
+        <a href="#/programs" data-r="programs">programs</a>
+        <a href="#/day" data-r="day">a day here</a>
+        <a href="#/admissions" data-r="admissions">admissions</a>
+      </div>
+      <a class="btn btn-solid" href="#/admissions"><span class="pebble"></span>Book a tour</a>
+    </div>
+  </nav>
+
+  <!-- ================================================================
+       PAGE: HOME
+       ================================================================ -->
+  <main class="page" data-page="home" id="page-home">
+    <header class="hero wrap">
+      <div class="hero-top">
+        <div class="label rv">A Montessori house in Mumbai &middot; 18 months &ndash; 6 years</div>
+        <h1 class="rv" tabindex="-1">little people <em>build themselves.</em></h1>
+        <p class="hero-lead rv">Nobody can grow up for you. In three small rooms stacked one on the other &mdash; with an old mango tree leaning over the terrace &mdash; children practise doing it themselves: pouring, buttoning, reading, climbing. One careful stone at a time.</p>
+        <div class="hero-cta rv">
+          <a class="btn btn-solid" href="#/admissions"><span class="pebble"></span>Book a tour</a>
+          <a class="btn btn-ghost" href="#/programs">See the programs</a>
+        </div>
+      </div>
+
+      <!-- ============ THE HERO SCENE ============
+           The real building: a narrow white tower wearing the logo's
+           three bands (blush / sage / denim, top to bottom), bougainvillea
+           spilling off every ledge, and the mango tree overshadowing
+           the whole terrace. Click the canopy: mangoes fall.        -->
+      <div class="scene-wrap rv">
+        <svg id="heroScene" viewBox="0 0 920 640" role="img"
+             aria-label="Hand-drawn scene: a narrow white school building with pink, green and blue bands and bougainvillea window boxes, a child waving from the terrace, another on a tyre swing, a third stacking stones by the gate, all beneath a large mango tree that leans over the terrace.">
+
+          <!-- sun (rays wheel slowly) + birds -->
+          <g filter="url(#squig)">
+            <g class="m-breathe" style="animation-duration:9s">
+              <circle cx="92" cy="74" r="24" fill="var(--blush-wash)" stroke="var(--blush)" stroke-width="2.4"/>
+            </g>
+            <g class="sunrays" stroke="var(--blush)" stroke-width="2" stroke-linecap="round" fill="none">
+              <path d="M92 38 l0 -10 M92 110 l0 10 M56 74 l-10 0 M128 74 l10 0 M67 49 l-7 -7 M117 99 l7 7 M117 49 l7 -7 M67 99 l-7 7"/>
+            </g>
+            <path class="ink-thin" d="M150 150 q7 -8 14 0 q7 -8 14 0 M195 122 q6 -7 12 0"/>
+          </g>
+
+          <!-- ============ BUILDING ============ -->
+          <g transform="rotate(-0.4 360 600)">
+            <g filter="url(#squig)">
+              <!-- body -->
+              <rect x="262" y="88" width="196" height="508" class="paper" stroke="var(--ink)" stroke-width="3"/>
+              <!-- terrace railing (green, like the real one) -->
+              <g stroke="var(--sage)" stroke-width="2.2" fill="none">
+                <path d="M258 48 L462 48"/>
+                <path d="M262 48 V88 M287 48 V88 M312 48 V88 M337 48 V88 M362 48 V88 M387 48 V88 M412 48 V88 M437 48 V88 M458 48 V88"/>
+              </g>
+
+              <!-- kid waving from the terrace -->
+              <g>
+                <circle cx="430" cy="66" r="9" class="paper" stroke="var(--ink)" stroke-width="2.2"/>
+                <path class="ink" d="M422 62 a9 9 0 0 1 12 -4"/>
+                <path class="ink" d="M438 60 c4 -4 6 -8 7 -13"/>
+                <path d="M423 75 c4 -2 10 -2 14 0 l0 13 -14 0 Z" fill="var(--denim)" stroke="var(--ink)" stroke-width="2"/>
+              </g>
+
+              <!-- terrace parapet wears the top stone's blush -->
+              <rect x="250" y="88" width="220" height="16" fill="var(--blush)" stroke="var(--ink)" stroke-width="2.2"/>
+
+              <!-- floor 1: window + sage band ledge -->
+              <rect x="300" y="124" width="120" height="76" fill="var(--ground)" stroke="var(--ink)" stroke-width="2.6"/>
+              <path class="ink-thin" d="M360 124 V200 M300 162 H420"/>
+              <rect x="250" y="206" width="220" height="14" fill="var(--sage)" stroke="var(--ink)" stroke-width="2.2"/>
+
+              <!-- floor 2: window + denim band ledge -->
+              <rect x="300" y="240" width="120" height="76" fill="var(--ground)" stroke="var(--ink)" stroke-width="2.6"/>
+              <path class="ink-thin" d="M360 240 V316 M300 278 H420"/>
+              <rect x="250" y="322" width="220" height="14" fill="var(--denim)" stroke="var(--ink)" stroke-width="2.2"/>
+
+              <!-- ground floor: a proper storey, with the signboard and a tall doorway -->
+              <rect x="282" y="346" width="156" height="50" rx="5" class="paper" stroke="var(--ink)" stroke-width="2.4"/>
+              <g transform="translate(302 371)">
+                <path d="M0 9 c5.5 0 9 2 9 5 s-3.5 5 -9 5 -9 -2 -9 -5 3.5 -5 9 -5Z" fill="var(--denim)"/>
+                <path d="M0 1 c4.5 0 7 1.6 7 4 s-2.5 4 -7 4 -7 -1.6 -7 -4 2.5 -4 7 -4Z" fill="var(--sage)"/>
+                <path d="M0 -7 c3.2 0 5 1.4 5 3.4 S3.2 0 0 0 -5 -1.2 -5 -3.6 -3.2 -7 0 -7Z" fill="var(--blush)"/>
+              </g>
+              <text x="320" y="372" font-family="var(--display)" font-weight="600" font-size="16" letter-spacing="-0.5" fill="var(--ink)">little people</text>
+              <text x="321" y="387" font-family="var(--display)" font-weight="600" font-size="7" letter-spacing="3.4" fill="var(--ink-2)">MONTESSORI</text>
+
+              <!-- tall glazed doorway, lit warm -->
+              <rect x="330" y="440" width="70" height="156" fill="var(--blush-wash)" stroke="var(--ink)" stroke-width="2.4"/>
+              <path class="ink-thin" d="M365 440 V596 M330 470 H400"/>
+              <circle cx="357" cy="522" r="1.8" fill="var(--ink)"/>
+              <!-- potted plants flanking the door -->
+              <path d="M294 574 l22 0 -3 22 -16 0 Z" fill="var(--ground-3)" stroke="var(--ink)" stroke-width="2"/>
+              <path class="ink-thin" d="M305 574 c-4 -8 -10 -12 -17 -13 M305 574 c1 -8 4 -14 9 -18 M305 574 c-1 -6 -1 -11 1 -16"/>
+              <path d="M404 574 l22 0 -3 22 -16 0 Z" fill="var(--ground-3)" stroke="var(--ink)" stroke-width="2"/>
+              <path class="ink-thin" d="M415 574 c-4 -8 -10 -12 -16 -13 M415 574 c2 -8 5 -14 10 -18"/>
+            </g>
+
+            <!-- bougainvillea: papery blooms + trailing vines on every ledge,
+                 each row swaying almost imperceptibly -->
+            <g filter="url(#squig)">
+              <!-- terrace cascade over the blush parapet -->
+              <g class="flora">
+                <use href="#bloom" transform="translate(270 90)"/>
+                <use href="#bloom" transform="translate(297 84) rotate(14) scale(0.9)"/>
+                <use href="#bloom" transform="translate(325 92) rotate(-10)"/>
+                <use href="#bloom" transform="translate(355 85) rotate(8) scale(1.05)"/>
+                <use href="#bloom" transform="translate(385 92) rotate(-6) scale(0.9)"/>
+                <use href="#bloom" transform="translate(450 90) scale(0.85)"/>
+                <use href="#vine" transform="translate(274 98)"/>
+                <use href="#vine" transform="translate(330 100) scale(1.15)"/>
+                <use href="#vine" transform="translate(382 99) scale(0.9)"/>
+              </g>
+              <!-- floor 1 ledge (sage band) -->
+              <g class="flora f2">
+                <use href="#bloom" transform="translate(288 202)"/>
+                <use href="#bloom" transform="translate(338 199) rotate(12) scale(1.05)"/>
+                <use href="#bloom" transform="translate(390 203) rotate(-8) scale(0.95)"/>
+                <use href="#bloom" transform="translate(438 200) rotate(6) scale(0.85)"/>
+                <use href="#vine" transform="translate(298 212)"/>
+                <use href="#vine" transform="translate(378 214) scale(1.1)"/>
+                <use href="#vine" transform="translate(444 212) scale(0.85)"/>
+              </g>
+              <!-- floor 2 ledge (denim band) -->
+              <g class="flora f3">
+                <use href="#bloom" transform="translate(292 318) rotate(-8)"/>
+                <use href="#bloom" transform="translate(344 315) rotate(10) scale(1.05)"/>
+                <use href="#bloom" transform="translate(396 319) scale(0.95)"/>
+                <use href="#bloom" transform="translate(442 316) rotate(-12) scale(0.85)"/>
+                <use href="#vine" transform="translate(306 328)"/>
+                <use href="#vine" transform="translate(420 330) scale(0.95)"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- ============ FENCE + GATE ============ -->
+          <g filter="url(#squig)">
+            <g class="ink-thin">
+              <path d="M96 566 H250 M96 582 H250"/>
+              <path d="M110 560 V596 M138 560 V596 M166 560 V596 M194 560 V596 M222 560 V596"/>
+              <path d="M470 566 H636 M470 582 H636"/>
+              <path d="M484 560 V596 M512 552 V596 M576 552 V596 M604 560 V596 M628 562 V596"/>
+            </g>
+            <!-- gate posts with finials -->
+            <path class="ink" d="M512 552 c-2 -6 2 -10 6 -8 M576 552 c2 -6 -2 -10 -6 -8"/>
+            <!-- admissions board hanging on the gate -->
+            <g class="hang h2">
+              <path class="ink-thin" d="M521 556 l8 10 M567 556 l-8 10"/>
+              <rect x="516" y="566" width="76" height="20" rx="4" class="paper" stroke="var(--ink)" stroke-width="2"/>
+              <text x="554" y="579.5" text-anchor="middle" font-family="var(--display)" font-weight="600" font-size="9.5" fill="var(--ink)">admissions open</text>
+            </g>
+          </g>
+
+          <!-- ============ MANGO TREE (right, canopy over the terrace) ============ -->
+          <g id="treeGroup">
+            <g filter="url(#squig)">
+              <!-- trunk -->
+              <path d="M640 596 C638 500 622 430 606 370 C592 316 586 268 596 216 L622 224 C616 270 622 312 636 366 C652 428 668 500 672 596 Z"
+                    fill="var(--bark)" stroke="var(--ink)" stroke-width="2.6"/>
+              <path class="ink-thin" d="M628 480 c-3 10 -3 20 -1 30 M614 380 c-3 8 -4 16 -3 24 M604 300 c-2 8 -2 14 -1 20"/>
+              <!-- branches: the long one reaches LEFT toward the terrace,
+                   ending under the canopy so it never crosses the windows -->
+              <path class="ink" stroke-width="5" d="M600 222 C566 194 536 178 505 168"/>
+              <path class="ink" stroke-width="4" d="M604 218 C632 178 664 150 704 138"/>
+              <path class="ink" stroke-width="3.4" d="M612 258 C662 248 706 256 748 276"/>
+              <path class="ink-thin" d="M500 163 c-6 8 -8 14 -8 22 M560 180 c-4 8 -5 14 -4 22"/>
+            </g>
+
+            <!-- tyre swing: drawn BEFORE the canopy so the ropes emerge
+                 from inside the foliage -->
+            <g filter="url(#squig)" class="hang h3">
+              <path class="ink-thin" d="M494 166 L494 428 M508 164 L508 428"/>
+              <circle cx="501" cy="452" r="25" fill="none" stroke="var(--denim)" stroke-width="10"/>
+              <circle cx="501" cy="452" r="25" fill="none" stroke="var(--ink)" stroke-width="2" opacity="0.5"/>
+              <circle cx="501" cy="408" r="10" class="paper" stroke="var(--ink)" stroke-width="2.2"/>
+              <path class="ink" d="M492 405 a10 10 0 0 1 13 -5"/>
+              <path d="M493 418 c5 -2 11 -2 15 0 l-1 12 -13 0 Z" fill="var(--blush)" stroke="var(--ink)" stroke-width="2"/>
+              <path class="ink" d="M493 421 c-3 -6 -2 -14 1 -22 M509 421 c3 -6 2 -14 -1 -22"/>
+              <path class="ink" d="M496 452 c-1 10 -1 18 1 26 M506 452 c1 10 1 18 -1 26"/>
+            </g>
+
+            <!-- canopy: ONE hand-drawn silhouette, opaque so it truly
+                 overshadows the terrace -- a thin leafy fringe skimming the
+                 railing, deepening into the big mass on the right -->
+            <g id="canopy">
+              <title>give the tree a shake</title>
+              <g filter="url(#squig2)">
+                <path fill="var(--leafbed)" stroke="var(--ink)" stroke-width="2.6" stroke-linejoin="round"
+                  d="M252 66
+                     C 262 34, 296 22, 330 26
+                     C 356 4, 408 0, 446 12
+                     C 488 -12, 548 -14, 588 10
+                     C 632 -14, 696 -6, 722 26
+                     C 772 14, 818 38, 830 72
+                     C 880 84, 898 124, 882 156
+                     C 912 192, 898 238, 858 248
+                     C 852 288, 808 304, 772 286
+                     C 740 314, 690 312, 662 288
+                     C 624 310, 576 304, 556 280
+                     C 526 292, 498 282, 488 258
+                     C 478 200, 472 140, 464 92
+                     C 452 60, 430 48, 404 46
+                     C 370 44, 336 50, 306 56
+                     C 286 60, 266 62, 252 66 Z"/>
+                <!-- inner texture: a few scribble arcs suggesting leaf masses -->
+                <g fill="none" stroke="var(--ink)" stroke-width="1.6" opacity="0.5">
+                  <path d="M320 34 c22 -10 48 -12 72 -6"/>
+                  <path d="M540 60 c30 -16 68 -14 92 4"/>
+                  <path d="M700 76 c28 -8 56 0 74 20"/>
+                  <path d="M760 190 c24 -16 54 -16 76 -2"/>
+                  <path d="M560 200 c22 -18 52 -22 78 -12"/>
+                  <path d="M620 130 c24 -14 52 -14 74 0"/>
+                </g>
+                <!-- darker leaf patches for depth -->
+                <ellipse cx="640" cy="170" rx="60" ry="28" fill="var(--sage-wash)"/>
+                <ellipse cx="690" cy="60" rx="66" ry="26" fill="var(--sage-wash)"/>
+                <ellipse cx="810" cy="210" rx="56" ry="26" fill="var(--sage-wash)"/>
+                <ellipse cx="560" cy="238" rx="56" ry="22" fill="var(--sage-wash)"/>
+              </g>
+              <!-- leaf sprigs at the canopy edges -->
+              <g filter="url(#squig)">
+                <use href="#leaf-sprig" transform="translate(268 116) scale(-1.1 1.1)"/>
+                <use href="#leaf-sprig" transform="translate(372 42) rotate(-20)"/>
+                <use href="#leaf-sprig" transform="translate(508 22) rotate(-6) scale(1.15)"/>
+                <use href="#leaf-sprig" transform="translate(664 8) rotate(-14)"/>
+                <use href="#leaf-sprig" transform="translate(842 72) rotate(16) scale(1.1)"/>
+                <use href="#leaf-sprig" transform="translate(898 158) rotate(30)"/>
+                <use href="#leaf-sprig" transform="translate(846 262) rotate(60) scale(1.05)"/>
+                <use href="#leaf-sprig" transform="translate(600 292) rotate(150) scale(-1 1)"/>
+                <use href="#leaf-sprig" transform="translate(474 210) rotate(130)"/>
+              </g>
+              <!-- hanging mangoes: outer g carries position (a CSS transform
+                   animation on the use itself would override the attribute) -->
+              <g filter="url(#squig)">
+                <g transform="translate(352 64)"><use href="#mango" class="hang"/></g>
+                <g transform="translate(400 62) scale(0.85)"><use href="#mango" class="hang h2" style="--m: var(--blush)"/></g>
+                <g transform="translate(498 272) scale(0.9)"><use href="#mango" class="hang h2"/></g>
+                <g transform="translate(566 288)"><use href="#mango" class="hang h3" style="--m: var(--blush)"/></g>
+                <g transform="translate(706 306) scale(1.1)"><use href="#mango" class="hang h2"/></g>
+                <g transform="translate(788 296) scale(0.9)"><use href="#mango" class="hang"/></g>
+                <g transform="translate(862 252) scale(0.85)"><use href="#mango" class="hang h3" style="--m: var(--blush)"/></g>
+              </g>
+            </g>
+
+            <!-- parakeet on the right branch -->
+            <g filter="url(#squig)" class="peck">
+              <path d="M694 262 c7 -1 11 3 11 9 0 8 -5 14 -11 16 -2 -3 -3 -7 -3 -11 0 -7 1 -12 3 -14Z" fill="var(--sage)" stroke="var(--ink)" stroke-width="2"/>
+              <path class="ink" d="M694 287 c-2 5 -2 9 -2 12"/>
+              <circle cx="698" cy="267" r="1.3" fill="var(--ink)"/>
+              <path d="M704 267 c2.6 0 4.4 1.3 4.4 3 -1.8 1.3 -3.5 1.3 -5.2 0.4" fill="var(--blush)" stroke="var(--ink)" stroke-width="1.4"/>
+            </g>
+
+          </g>
+
+          <!-- kid stacking stones, left of the building: kneeling, mid-placement -->
+          <g filter="url(#squig)">
+            <circle cx="176" cy="531" r="10" class="paper" stroke="var(--ink)" stroke-width="2.2"/>
+            <path class="ink" d="M167 528 a10 10 0 0 1 14 -5"/>
+            <path d="M170 541 c-6 11 -8 27 -3 45 l20 0 c3 -13 1 -27 -3 -37 -5 -5 -10 -7 -14 -8Z" fill="var(--sage)" stroke="var(--ink)" stroke-width="2.2"/>
+            <path class="ink" d="M165 590 l26 0"/>
+            <path class="ink" d="M186 549 c7 -3 14 -6 21 -8 M186 557 c6 -1 12 -2 18 -3"/>
+            <path d="M212 534 c4.5 0 7.5 2 7.5 5 s-3 5 -7.5 5 -7.5 -2 -7.5 -5 3 -5 7.5 -5Z" fill="var(--blush)" stroke="var(--ink)" stroke-width="2"/>
+            <path d="M216 558 c7 0 11 3 11 8 s-4 8 -11 8 -11 -3 -11 -8 4 -8 11 -8Z" fill="var(--sage)" stroke="var(--ink)" stroke-width="2"/>
+            <path d="M216 574 c9 0 14.5 4 14.5 11 S225 596 216 596 201.5 592 201.5 585 207 574 216 574Z" fill="var(--denim)" stroke="var(--ink)" stroke-width="2"/>
+            <!-- spare pebbles + snail -->
+            <path d="M240 590 c3.5 0 6 1.6 6 4 s-2.5 4 -6 4 -6 -1.6 -6 -4 2.5 -4 6 -4Z" fill="var(--ground-3)" stroke="var(--ink)" stroke-width="1.8"/>
+            <g class="ink-thin">
+              <path d="M62 588 c1 -6 6 -9 11 -7 5 2 6 9 1 12 -4 2 -8 1 -10 -2"/>
+              <path d="M58 594 c6 2 12 2 18 0"/>
+            </g>
+          </g>
+
+          <!-- ground line, grass, fallen mango -->
+          <g filter="url(#squig)">
+            <path class="ink" d="M30 596 C300 592 620 592 890 596"/>
+            <g class="ink-thin">
+              <path d="M120 596 c1 -6 2 -9 5 -12 M126 596 c0 -5 1 -8 3 -11 M131 596 c1 -4 2 -7 4 -9"/>
+              <path d="M470 596 c1 -5 2 -8 4 -11 M476 596 c1 -4 2 -7 4 -9"/>
+              <path d="M700 596 c1 -6 2 -9 5 -12 M707 596 c0 -5 1 -8 3 -11"/>
+              <path d="M860 596 c1 -5 3 -8 5 -10 M866 596 c1 -4 2 -6 4 -8"/>
+            </g>
+            <use href="#mango" transform="translate(766 588) rotate(70)" style="--m: var(--blush)"/>
+            <use href="#leaf-sprig" transform="translate(806 590) rotate(14) scale(0.8)"/>
+          </g>
+
+          <!-- butterfly drifting across the scene -->
+          <g class="flutter" transform="translate(40 340)" aria-hidden="true">
+            <g class="wing"><ellipse cx="-5" cy="-6" rx="6" ry="9" fill="var(--blush)" stroke="var(--ink)" stroke-width="1.2"/></g>
+            <g class="wing" style="animation-delay:.25s"><ellipse cx="5" cy="-6" rx="6" ry="9" fill="var(--blush)" stroke="var(--ink)" stroke-width="1.2"/></g>
+            <path d="M0 -14 L0 2" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round"/>
+          </g>
+
+          <!-- falling mangoes get appended here by JS -->
+          <g id="drops"></g>
+        </svg>
+        <span class="scene-hint">click the tree for some fruits</span>
+      </div>
+    </header>
+
+    <!-- three programs, three stones -->
+    <section class="band" style="margin-top: var(--gap-section)">
+      <div class="sec wrap">
+        <div class="sec-head rv">
+          <span class="label">Programs</span>
+          <h2>three rooms, stacked like our stones</h2>
+          <p>Each environment rests on what the child built in the one below it. And off to the side, like fruit on the branches, hangs the activity centre.</p>
+        </div>
+        <div class="progs">
+          <a class="prog rv" href="#/programs" style="--tone: var(--denim); --wash: var(--denim-wash);">
+            <div class="prog-art">
+              <svg viewBox="0 0 120 96" aria-hidden="true">
+                <path class="top" d="M46 62c15 0 26 6 26 15s-11 15-26 15-26-6-26-15 11-15 26-15Z" fill="var(--denim)"/>
+              </svg>
+            </div>
+            <span class="prog-age">18 months &ndash; 3 years</span>
+            <h3>toddler environment</h3>
+            <p>The base stone. Walking, speaking, pouring, sweeping &mdash; and the first taste of doing something entirely alone.</p>
+          </a>
+          <a class="prog rv" href="#/programs" style="--tone: var(--sage); --wash: var(--sage-wash);">
+            <div class="prog-art">
+              <svg viewBox="0 0 120 96" aria-hidden="true">
+                <path d="M46 62c15 0 26 6 26 15s-11 15-26 15-26-6-26-15 11-15 26-15Z" fill="var(--denim)" opacity=".28"/>
+                <path class="top" d="M46 40c11 0 20 5 20 12s-9 12-20 12-20-5-20-12 9-12 20-12Z" fill="var(--sage)"/>
+              </svg>
+            </div>
+            <span class="prog-age">3 &ndash; 6 years</span>
+            <h3>primary environment</h3>
+            <p>The heart of the house. The three-hour work cycle begins: reading, the decimal system, geography, botany &mdash; chosen, not assigned.</p>
+          </a>
+          <a class="prog rv" href="#/programs" style="--tone: var(--blush); --wash: var(--blush-wash);">
+            <div class="prog-art">
+              <svg viewBox="0 0 120 96" aria-hidden="true">
+                <path d="M46 62c15 0 26 6 26 15s-11 15-26 15-26-6-26-15 11-15 26-15Z" fill="var(--denim)" opacity=".28"/>
+                <path d="M46 40c11 0 20 5 20 12s-9 12-20 12-20-5-20-12 9-12 20-12Z" fill="var(--sage)" opacity=".28"/>
+                <path class="top" d="M46 23c8 0 14 4 14 9.5S54 42 46 42s-14-4-14-9.5S38 23 46 23Z" fill="var(--blush)"/>
+              </svg>
+            </div>
+            <span class="prog-age">Daycare &middot; before &amp; after school</span>
+            <h3>casa</h3>
+            <p>The soft stone on top. Unhurried mornings and afternoons of naps, stories, snacks and free play &mdash; home, until home.</p>
+          </a>
+        </div>
+        <div class="acts-wrap rv">
+          <h3>and on the branches: the activity centre</h3>
+          <p>Evenings and weekends, the house fills with classes open to every child in the neighbourhood &mdash; not just ours.</p>
+          <div class="acts">
+            <span class="act"><svg viewBox="0 0 24 28" aria-hidden="true"><use href="#act-dance"/></svg>dance</span>
+            <span class="act"><svg viewBox="0 0 28 24" aria-hidden="true"><use href="#act-capoeira"/></svg>capoeira</span>
+            <span class="act"><svg viewBox="0 0 20 26" aria-hidden="true"><use href="#act-music"/></svg>music</span>
+            <span class="act"><svg viewBox="0 0 24 28" aria-hidden="true"><use href="#act-art"/></svg>art</span>
+            <span class="act"><svg viewBox="0 0 26 24" aria-hidden="true"><use href="#act-read"/></svg>reading circle</span>
+            <a class="act" href="#/programs" style="text-decoration:none; color:inherit">&hellip;and more</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- thesis + the playable stones -->
+    <section class="sec wrap">
+      <div class="thesis">
+        <div class="rv">
+          <p class="thesis-quote">&ldquo;never help a child with a task at which they feel they can succeed.&rdquo; <span>the hardest thing we do here is nothing.</span></p>
+          <p class="thesis-cite">&mdash; Dr. Maria Montessori</p>
+          <div class="thesis-body">
+            <p>A three-year-old buttoning her own coat is doing something enormous. It takes her four minutes. An adult could do it in six seconds &mdash; and in doing so, would quietly teach her that she is someone things get done <em>for</em>.</p>
+            <p>Our mark is three stones balanced on each other. Nothing holds them together but their own weight, found carefully, one on top of the next. That is a childhood. Go on &mdash; build ours. Nobody will help you, and that's the point.</p>
+          </div>
+        </div>
+        <div class="stage rv">
+          <canvas id="stones" aria-label="Three scattered stones. Drag them on top of each other to build the balanced stack from the logo."></canvas>
+          <span class="stage-hint" id="stackHint">stack the stones &mdash; biggest at the bottom</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- voices -->
+    <section class="band">
+      <div class="sec wrap">
+        <div class="sec-head rv">
+          <span class="label">Parents</span>
+          <h2>what actually changed at home</h2>
+          <p style="font-size:var(--t-small)">Placeholder quotes &mdash; to be replaced with real parent testimonials before launch.</p>
+        </div>
+        <div class="voices">
+          <figure class="voice rv">
+            <blockquote>&ldquo;I came for the academics, honestly. What I got was a four-year-old who makes her own breakfast and puts her plate in the sink without being asked. I still don't fully understand how that happened.&rdquo;</blockquote>
+            <figcaption><i style="background:var(--sage)"></i><span><b>Parent of a primary child</b>Enrolled since 2023</span></figcaption>
+          </figure>
+          <figure class="voice rv">
+            <blockquote>&ldquo;We nearly pulled him out at five to start 'big school'. Staying for the final primary year was the best decision we made &mdash; that's when everything he'd been quietly collecting suddenly assembled.&rdquo;</blockquote>
+            <figcaption><i style="background:var(--denim)"></i><span><b>Parent of a primary graduate</b>Enrolled since 2021</span></figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- tour CTA -->
+    <section class="sec wrap">
+      <div class="tour rv">
+        <div>
+          <h2>come stand under the tree.</h2>
+          <p>You cannot understand this from a website &mdash; not even a good one. Twenty minutes at the edge of a working classroom will tell you more than everything above.</p>
+          <a class="btn btn-solid" href="#/admissions"><span class="pebble"></span>Book a tour</a>
+        </div>
+        <div class="tour-steps">
+          <div class="tour-step"><i style="background:var(--blush)"></i><span><b>you tell us about your child</b><span>Age, temperament, what you're hoping for. Two minutes.</span></span></div>
+          <div class="tour-step"><i style="background:var(--sage)"></i><span><b>we reply within one working day</b><span>With two or three morning slots that suit the age group.</span></span></div>
+          <div class="tour-step"><i style="background:var(--denim)"></i><span><b>you visit during the work cycle</b><span>So you see the rooms as they actually are.</span></span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================================================================
+       PAGE: THE METHOD
+       ================================================================ -->
+  <main class="page" data-page="method" id="page-method">
+    <div class="wrap page-head">
+      <div>
+        <span class="label rv">The method</span>
+        <h1 class="rv" tabindex="-1">six things we believe, and can show you</h1>
+        <p class="lead rv">Montessori is not a philosophy you take on faith. Every one of these is visible in ten minutes on the floor of a classroom &mdash; which is exactly why we'd rather you came and looked.</p>
+      </div>
+      <svg class="spot rv" viewBox="0 0 90 90" aria-hidden="true"><use href="#spot-read"/></svg>
+    </div>
+
+    <section class="sec wrap">
+      <div class="prins">
+        <div class="prin rv">
+          <div class="prin-art">
+            <svg viewBox="0 0 86 74" aria-hidden="true">
+              <circle cx="37" cy="37" r="30" fill="none" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="2 5"/>
+              <g class="m-breathe"><path d="M37 20c9 0 14 5.5 14 12.5S45.5 46 37 46s-14-6-14-13.5S28 20 37 20Z" fill="var(--sage)"/></g>
+            </svg>
+          </div>
+          <h3>freedom within a form</h3>
+          <p>Children choose their own work, for as long as it holds them. The choice is real; the boundary around it is invisible and absolutely firm.</p>
+        </div>
+        <div class="prin rv">
+          <div class="prin-art">
+            <svg viewBox="0 0 86 74" aria-hidden="true">
+              <line x1="10" y1="58" x2="66" y2="58" stroke="var(--ink-3)" stroke-width="1.5"/>
+              <g class="m-settle"><path d="M37 30c8.5 0 13.5 5.5 13.5 12S45 58 37 58s-13.5-6-13.5-13S28.5 30 37 30Z" fill="var(--denim)"/></g>
+              <path d="M17 50c4 0 6 2.5 6 5.5S20.5 58 17 58s-6-1-6-3.5S13 50 17 50Z" fill="var(--blush)" opacity=".7"/>
+              <path d="M60 51c3.5 0 5.5 2 5.5 4.5S63 58 60 58s-5-.8-5-3 1.8-4 5-4Z" fill="var(--sage)" opacity=".7"/>
+            </svg>
+          </div>
+          <h3>a room that teaches</h3>
+          <p>Low shelves. One of each material. Real glass, real knives, real weight. The environment does the instructing so the adult doesn't have to.</p>
+        </div>
+        <div class="prin rv">
+          <div class="prin-art">
+            <svg viewBox="0 0 86 74" aria-hidden="true">
+              <g class="m-rise" style="animation-delay:0s"><path d="M14 44c5 0 8 3 8 6.5S18.5 57 14 57s-8-3-8-6.5S9 44 14 44Z" fill="var(--blush)"/></g>
+              <g class="m-rise" style="animation-delay:-1.5s"><path d="M37 34c7 0 11 4.5 11 10s-4.5 13-11 13-11-6-11-12.5S30 34 37 34Z" fill="var(--sage)"/></g>
+              <g class="m-rise" style="animation-delay:-3s"><path d="M63 40c6 0 9.5 4 9.5 8.5S67.5 57 63 57s-9-3.5-9-8 3-9 9-9Z" fill="var(--denim)"/></g>
+            </svg>
+          </div>
+          <h3>three years, one room</h3>
+          <p>The five-year-old teaching the three-year-old learns twice. Children stay with the same guide for a full three-year cycle &mdash; long enough to be truly known.</p>
+        </div>
+        <div class="prin rv">
+          <div class="prin-art">
+            <svg viewBox="0 0 86 74" aria-hidden="true">
+              <g class="m-orbit" style="transform-origin:37px 37px"><circle cx="37" cy="9" r="4" fill="var(--blush)"/></g>
+              <path d="M37 24c8.5 0 13.5 5.5 13.5 12.5S45 50 37 50s-13.5-6-13.5-13.5S28.5 24 37 24Z" fill="var(--sage)"/>
+            </svg>
+          </div>
+          <h3>the three-hour cycle</h3>
+          <p>An uninterrupted morning. No bells, no rotations, no being pulled off a task that finally clicked. Deep concentration is the rarest thing we protect.</p>
+        </div>
+        <div class="prin rv">
+          <div class="prin-art">
+            <svg viewBox="0 0 86 74" aria-hidden="true">
+              <path class="m-trail" d="M8 56C20 56 22 30 37 30s18 20 30 20" fill="none" stroke="var(--ink-3)" stroke-width="1.6" stroke-linecap="round"/>
+              <g class="m-tip"><path d="M37 20c7.5 0 12 4.5 12 10.5S44 41 37 41s-12-4.5-12-10.5S29.5 20 37 20Z" fill="var(--denim)"/></g>
+            </svg>
+          </div>
+          <h3>follow the child</h3>
+          <p>We don't run a curriculum on a calendar. We watch what a particular child is reaching for this week, and put the next thing quietly within reach.</p>
+        </div>
+        <div class="prin rv">
+          <div class="prin-art">
+            <svg viewBox="0 0 86 74" aria-hidden="true">
+              <path d="M37 24c10 0 15.5 6.5 15.5 14.5S46 55 37 55s-15.5-7-15.5-16S27 24 37 24Z" fill="var(--blush)"/>
+              <g class="m-breathe" style="animation-delay:-2s" fill="none" stroke="var(--ground-2)" stroke-width="1.9" stroke-linecap="round">
+                <path d="M28 47a9 9 0 0 1 18 0"/><path d="M32 47a5 5 0 0 1 10 0"/><path d="M35.6 47a1.4 1.4 0 0 1 2.8 0"/>
+              </g>
+            </svg>
+          </div>
+          <h3>the hand teaches the mind</h3>
+          <p>Abstraction comes last, not first. A child understands &ldquo;a thousand&rdquo; by carrying the weight of a thousand beads across a room in both arms.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider rv" aria-hidden="true">
+      <svg viewBox="0 0 90 50"><use href="#spot-sprig" transform="scale(0.9)"/></svg>
+    </div>
+
+    <section class="sec-tight wrap">
+      <div class="thesis" style="grid-template-columns: 1fr; max-width: 46rem;">
+        <div class="rv">
+          <p class="thesis-quote">&ldquo;the greatest sign of success for a teacher is to be able to say: the children are now working as if i did not exist.&rdquo;</p>
+          <p class="thesis-cite">&mdash; Dr. Maria Montessori</p>
+          <div class="thesis-body">
+            <p>So we wait. We watch. We keep the room in order and the materials within reach, and we let the four minutes happen. That patience is the whole method, and it is why children who leave us tend to arrive at their next school already believing they are capable.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================================================================
+       PAGE: PROGRAMS
+       ================================================================ -->
+  <main class="page" data-page="programs" id="page-programs">
+    <div class="wrap page-head">
+      <div>
+        <span class="label rv">Programs</span>
+        <h1 class="rv" tabindex="-1">the stack, and the branches</h1>
+        <p class="lead rv">Three environments stacked like our stones, each resting on what the child built in the one below &mdash; and an activity centre growing off the side, the way fruit hangs off a good tree.</p>
+      </div>
+      <svg class="spot rv" viewBox="0 0 90 90" aria-hidden="true"><use href="#spot-stack"/></svg>
+    </div>
+
+    <section class="sec wrap">
+      <div class="progs">
+        <div class="prog rv" style="--tone: var(--denim); --wash: var(--denim-wash);">
+          <div class="prog-art">
+            <svg viewBox="0 0 120 96" aria-hidden="true">
+              <path class="top" d="M46 62c15 0 26 6 26 15s-11 15-26 15-26-6-26-15 11-15 26-15Z" fill="var(--denim)"/>
+            </svg>
+          </div>
+          <span class="prog-age">18 months &ndash; 3 years</span>
+          <h3>toddler environment</h3>
+          <p>The base stone, on the ground floor. Walking, speaking, pouring, sweeping, and the first taste of doing something entirely alone. Most of what happens here is dignity: a coat hook at knee height, a jug a small hand can lift, an adult who does not rush.</p>
+          <dl>
+            <div><dt>Hours</dt><dd>8:30 &ndash; 12:00</dd></div>
+            <div><dt>Ratio</dt><dd>1 : 6</dd></div>
+            <div><dt>Places</dt><dd>12</dd></div>
+          </dl>
+        </div>
+        <div class="prog rv" style="--tone: var(--sage); --wash: var(--sage-wash);">
+          <div class="prog-art">
+            <svg viewBox="0 0 120 96" aria-hidden="true">
+              <path d="M46 62c15 0 26 6 26 15s-11 15-26 15-26-6-26-15 11-15 26-15Z" fill="var(--denim)" opacity=".28"/>
+              <path class="top" d="M46 40c11 0 20 5 20 12s-9 12-20 12-20-5-20-12 9-12 20-12Z" fill="var(--sage)"/>
+            </svg>
+          </div>
+          <span class="prog-age">3 &ndash; 6 years</span>
+          <h3>primary environment</h3>
+          <p>The middle stone, and the heart of the house. The three-hour work cycle begins: reading, the decimal system, geography, botany &mdash; all of it chosen, none of it assigned. The final year is the one parents are most tempted to skip, and most regret skipping: it's when the five-year-old becomes the leader of the room.</p>
+          <dl>
+            <div><dt>Hours</dt><dd>8:30 &ndash; 15:00</dd></div>
+            <div><dt>Ratio</dt><dd>1 : 9</dd></div>
+            <div><dt>Places</dt><dd>24</dd></div>
+          </dl>
+        </div>
+        <div class="prog rv" style="--tone: var(--blush); --wash: var(--blush-wash);">
+          <div class="prog-art">
+            <svg viewBox="0 0 120 96" aria-hidden="true">
+              <path d="M46 62c15 0 26 6 26 15s-11 15-26 15-26-6-26-15 11-15 26-15Z" fill="var(--denim)" opacity=".28"/>
+              <path d="M46 40c11 0 20 5 20 12s-9 12-20 12-20-5-20-12 9-12 20-12Z" fill="var(--sage)" opacity=".28"/>
+              <path class="top" d="M46 23c8 0 14 4 14 9.5S54 42 46 42s-14-4-14-9.5S38 23 46 23Z" fill="var(--blush)"/>
+            </svg>
+          </div>
+          <span class="prog-age">Daycare &middot; all ages we serve</span>
+          <h3>casa</h3>
+          <p>The soft stone on top. Before school opens and after it closes, casa keeps the day unhurried: naps in quiet corners, stories under the fan, snacks the children lay out themselves, free play in the yard. Home, until home. For working parents it's the stone that holds everything else steady.</p>
+          <dl>
+            <div><dt>Hours</dt><dd>8:00 &ndash; 18:00</dd></div>
+            <div><dt>Days</dt><dd>Mon &ndash; Fri</dd></div>
+            <div><dt>Places</dt><dd>limited</dd></div>
+          </dl>
+        </div>
+      </div>
+      <p class="rv" style="margin-top:1.2rem; font-size:var(--t-small); color:var(--ink-2)">Hours, ratios and places shown are indicative &mdash; to be confirmed by the school before launch.</p>
+    </section>
+
+    <section class="band">
+      <div class="sec wrap">
+        <div class="sec-head rv">
+          <span class="label">The activity centre</span>
+          <h2>what grows on the branches</h2>
+          <p>A school this small should still hum in the evenings. The activity centre runs classes after hours and on weekends, open to every child in the neighbourhood &mdash; yours doesn't need to be enrolled with us to belong here.</p>
+        </div>
+        <div class="acts rv">
+          <span class="act"><svg viewBox="0 0 24 28" aria-hidden="true"><use href="#act-dance"/></svg>dance</span>
+          <span class="act"><svg viewBox="0 0 28 24" aria-hidden="true"><use href="#act-capoeira"/></svg>capoeira</span>
+          <span class="act"><svg viewBox="0 0 20 26" aria-hidden="true"><use href="#act-music"/></svg>music</span>
+          <span class="act"><svg viewBox="0 0 24 28" aria-hidden="true"><use href="#act-art"/></svg>art</span>
+          <span class="act"><svg viewBox="0 0 26 24" aria-hidden="true"><use href="#act-read"/></svg>reading circle</span>
+        </div>
+        <p class="rv" style="margin-top:1.2rem; font-size:var(--t-small); color:var(--ink-2)">The full class list and timetable are being put together &mdash; ask when you visit, or watch this space.</p>
+      </div>
+    </section>
+
+    <section class="sec wrap">
+      <div class="sec-head rv">
+        <span class="label">Moving up</span>
+        <h2>how a child climbs the stack</h2>
+        <p>No entrance tests, no report cards. A child moves up when their guide and the receiving guide agree they're ready &mdash; usually in the months around their birthday, always as a visit first.</p>
+      </div>
+      <div class="tour-steps rv" style="max-width: 40rem;">
+        <div class="tour-step" style="border-color: var(--line-solid)"><i style="background:var(--denim)"></i><span><b style="color:var(--ink)">toddler &rarr; primary</b><span style="color:var(--ink-2)">Around the third birthday, once independence in dressing, toileting and snack is steady.</span></span></div>
+        <div class="tour-step" style="border-color: var(--line-solid)"><i style="background:var(--sage)"></i><span><b style="color:var(--ink)">primary &rarr; the world</b><span style="color:var(--ink-2)">At six &mdash; reading, writing, calculating, and carrying the settled belief that they can teach themselves anything.</span></span></div>
+        <div class="tour-step" style="border-color: var(--line-solid)"><i style="background:var(--blush)"></i><span><b style="color:var(--ink)">casa, alongside</b><span style="color:var(--ink-2)">Daycare wraps around both environments, so the day has one rhythm instead of three commutes.</span></span></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================================================================
+       PAGE: A DAY HERE
+       ================================================================ -->
+  <main class="page" data-page="day" id="page-day">
+    <div class="wrap page-head">
+      <div>
+        <span class="label rv">A day here</span>
+        <h1 class="rv" tabindex="-1">what an uninterrupted morning looks like</h1>
+        <p class="lead rv">The timetable is deliberately boring: one long block, protected fiercely. Everything interesting happens inside it.</p>
+      </div>
+      <svg class="spot rv" viewBox="0 0 90 90" aria-hidden="true"><use href="#spot-pour"/></svg>
+    </div>
+
+    <section class="sec wrap">
+      <div class="cycle">
+        <div class="cycle-aside rv">
+          <span class="big-num">3h</span>
+          <p><b>One unbroken block.</b> Between 8:45 and 11:45 nothing is scheduled. No circle time called mid-task, no transition bell, no adult deciding it's time to move on.</p>
+          <p>It looks, to a visitor, like very little is being organised. What's actually happening is the slow arrival of concentration &mdash; and once a child finds it, we will not be the ones to break it.</p>
+          <svg viewBox="0 0 90 90" aria-hidden="true"><use href="#spot-grow"/></svg>
+        </div>
+        <div>
+          <div class="cyc rv">
+            <span class="cyc-time">8:30</span>
+            <span class="cyc-dot"><i style="width:9px;height:10px;background:var(--blush)"></i></span>
+            <div><h4>arrival, at the gate</h4><p>Each child is greeted by name under the tree, shakes a hand, hangs their own bag and changes their own shoes. Parents say goodbye at the gate &mdash; the rooms belong to the children.</p></div>
+          </div>
+          <div class="cyc rv">
+            <span class="cyc-time">8:45</span>
+            <span class="cyc-dot"><i style="width:12px;height:13px;background:var(--sage)"></i></span>
+            <div><h4>the work cycle opens</h4><p>Children choose. Some go straight to something hard; some watch from a rug for twenty minutes first. Both are fine. Guides give individual lessons, one child at a time.</p></div>
+          </div>
+          <div class="cyc rv">
+            <span class="cyc-time">10:15</span>
+            <span class="cyc-dot"><i style="width:17px;height:18px;background:var(--denim)"></i></span>
+            <div><h4>false fatigue, then depth</h4><p>Mid-morning the room gets noisy and restless. Most schools would call a break here. We hold &mdash; and on the other side of it is the deepest, quietest hour of the day.</p></div>
+          </div>
+          <div class="cyc rv">
+            <span class="cyc-time">11:45</span>
+            <span class="cyc-dot"><i style="width:12px;height:13px;background:var(--sage)"></i></span>
+            <div><h4>coming together</h4><p>Work is returned to the shelf by the child who took it. Then a short gathering &mdash; a song, a story, a problem someone wants the group's help with.</p></div>
+          </div>
+          <div class="cyc rv">
+            <span class="cyc-time">12:15</span>
+            <span class="cyc-dot"><i style="width:9px;height:10px;background:var(--blush)"></i></span>
+            <div><h4>lunch, laid by the children</h4><p>Tables set, water poured from glass jugs, spills wiped by whoever spilled. Practical life isn't a subject here; it's just how the day runs.</p></div>
+          </div>
+          <div class="cyc rv">
+            <span class="cyc-time">13:00</span>
+            <span class="cyc-dot"><i style="width:14px;height:15px;background:var(--denim)"></i></span>
+            <div><h4>under the tree, in any weather</h4><p>The shaded yard, the planters the children water, the mangoes they count every April and eat every May. Toddlers go home; primary carries on into the afternoon, and casa children stay for the slow, napping hours.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================================================================
+       PAGE: ADMISSIONS
+       ================================================================ -->
+  <main class="page" data-page="admissions" id="page-admissions">
+    <div class="wrap page-head">
+      <div>
+        <span class="label rv">Admissions</span>
+        <h1 class="rv" tabindex="-1">come stand under the tree.</h1>
+        <p class="lead rv">Tours run on weekday mornings during the work cycle, so you see the rooms as they actually are. Come without your child the first time &mdash; so you can watch properly.</p>
+      </div>
+      <svg class="spot rv" viewBox="0 0 90 90" aria-hidden="true"><use href="#spot-parakeet"/></svg>
+    </div>
+
+    <section class="sec-tight wrap">
+      <div class="contact-cards">
+        <div class="ccard rv">
+          <span class="label">Call or write</span>
+          <b>+91 90040 12345</b>
+          <a href="tel:+919004012345">Ring us on a weekday between 9 and 4</a>
+          <a class="tbd" href="#/admissions">hello@littlepeoplemontessori.in &mdash; to confirm</a>
+        </div>
+        <div class="ccard rv">
+          <span class="label">Visit</span>
+          <b>sk plaza</b>
+          <span class="tbd">Street address &mdash; to add</span>
+          <span>Mumbai</span>
+        </div>
+        <div class="ccard rv">
+          <span class="label">Tour days</span>
+          <b>weekday mornings</b>
+          <span>During the work cycle, 9:00 &ndash; 11:30</span>
+          <span>Children join a second visit</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec-tight wrap">
+      <div class="tour rv">
+        <div>
+          <h2>what happens when you enquire</h2>
+          <p>Every enquiry gets a reply from a person, not an autoresponder, within one working day.</p>
+          <a class="btn btn-solid" href="tel:+919004012345"><span class="pebble"></span>Request a tour date</a>
+        </div>
+        <div class="tour-steps">
+          <div class="tour-step"><i style="background:var(--blush)"></i><span><b>you tell us about your child</b><span>Age, temperament, what you're hoping for. Two minutes.</span></span></div>
+          <div class="tour-step"><i style="background:var(--sage)"></i><span><b>we reply within one working day</b><span>With two or three morning slots that suit the age group.</span></span></div>
+          <div class="tour-step"><i style="background:var(--denim)"></i><span><b>you visit, then your child visits</b><span>A quiet morning for you; a settling-in visit for them.</span></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec wrap">
+      <div class="sec-head rv">
+        <span class="label">Questions we hear a lot</span>
+        <h2>the honest answers</h2>
+      </div>
+      <div class="faq rv">
+        <details>
+          <summary>why don't you publish the fees?</summary>
+          <p>Because a number without context does the conversation a disservice in both directions. Enquire and we'll send you the full fee schedule the same day, along with what it covers &mdash; no meeting required, no hard sell.</p>
+        </details>
+        <details>
+          <summary>my child has never been away from us. how do you settle them?</summary>
+          <p>Gradually, and at the child's pace, not a fixed schedule. Short first visits with a parent nearby, stretching as the child's comfort stretches. Most toddlers are settled inside two weeks; some take four; both are normal.</p>
+        </details>
+        <details>
+          <summary>will my child be ready for a conventional school afterwards?</summary>
+          <p>This is the most common worry and the least borne out. Children leave here reading, writing and calculating &mdash; but the thing their next teachers actually remark on is that they can start work without being told to.</p>
+        </details>
+        <details>
+          <summary>do you follow a board or curriculum?</summary>
+          <p>We follow the AMI Montessori scope, which comfortably covers &mdash; and mostly outruns &mdash; state board expectations for these ages. Details of curriculum mapping are shared during the admissions conversation.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER (shared) ============ -->
+  <footer class="wrap foot">
+    <svg class="foot-doodle" viewBox="0 0 90 60" aria-hidden="true">
+      <g filter="url(#squig)">
+        <path class="ink" d="M6 20 c20 -8 48 -8 78 0"/>
+        <use href="#leaf-sprig" transform="translate(30 22)"/>
+        <g transform="translate(52 38) scale(0.9)"><use href="#mango" class="hang"/></g>
+        <use href="#cairn-s" transform="translate(76 18) scale(0.7)"/>
+      </g>
+    </svg>
+    <div class="foot-grid">
+      <div class="foot-col">
+        <a class="mark" href="#/" style="margin-bottom:0.8rem">
+          <svg width="26" height="34" viewBox="0 0 26 34" aria-hidden="true">
+            <path d="M13 1.6c4.3 0 6.6 2.4 6.5 5.2-.1 2.9-2.6 4.7-6.4 4.7S6.5 9.9 6.5 6.9C6.5 4 8.7 1.6 13 1.6Z" fill="var(--blush)"/>
+            <path d="M13 12.2c5.1-.1 8 2.7 8 6.2 0 3.6-3 6.1-8 6.1s-8-2.4-8-6.1c0-3.6 2.9-6.2 8-6.2Z" fill="var(--sage)"/>
+            <path d="M13 24.6c6.6-.1 10.4 3 10.4 7.3 0 4.4-4 7.4-10.4 7.4S2.6 36.3 2.6 31.9c0-4.3 3.8-7.4 10.4-7.3Z" fill="var(--denim)"/>
+          </svg>
+          <span><span class="mark-name">little people</span><br><span class="mark-sub">Montessori</span></span>
+        </a>
+        <span>An AMI-informed Montessori house in Mumbai for children 18 months to 6 years &mdash; with a casa daycare and an activity centre, under an old mango tree.</span>
+      </div>
+      <div class="foot-col">
+        <h4>Visit</h4>
+        <span>SK Plaza</span>
+        <span class="tbd">Street address &mdash; to add</span>
+        <span>Mumbai</span>
+      </div>
+      <div class="foot-col">
+        <h4>Contact</h4>
+        <a href="tel:+919004012345">+91 90040 12345</a>
+        <span class="tbd">Email &mdash; to confirm</span>
+        <span>littlepeoplemontessori.in</span>
+      </div>
+      <div class="foot-col">
+        <h4>School</h4>
+        <a href="#/programs">Programs</a>
+        <a href="#/method">The method</a>
+        <a href="#/day">A day here</a>
+        <a href="#/admissions">Admissions</a>
+      </div>
+    </div>
+    <div class="foot-note">
+      <span>&copy; 2026 Little People Montessori</span>
+      <span>Design prototype &mdash; content and details to be confirmed with the school.</span>
+    </div>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------------------------------------------------
+     1 - ROUTER: hash-based pages that behave like real pages.
+     --------------------------------------------------------- */
+  const PAGES = ['home', 'method', 'programs', 'day', 'admissions'];
+  const TITLES = {
+    home: 'little people montessori -- a montessori house in mumbai',
+    method: 'the method -- little people montessori',
+    programs: 'programs -- little people montessori',
+    day: 'a day here -- little people montessori',
+    admissions: 'admissions -- little people montessori'
+  };
+  const navLinks = document.getElementById('navLinks');
+
+  function currentRoute() {
+    const h = location.hash.replace(/^#\/?/, '').split('?')[0];
+    return PAGES.includes(h) ? h : 'home';
+  }
+
+  function route() {
+    const r = currentRoute();
+    document.querySelectorAll('.page').forEach(p => {
+      p.classList.toggle('active', p.dataset.page === r);
+    });
+    navLinks.querySelectorAll('a').forEach(a => {
+      a.classList.toggle('active', a.dataset.r === r);
+    });
+    document.title = TITLES[r];
+    window.scrollTo(0, 0);
+    navLinks.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+    const h1 = document.querySelector('.page.active h1');
+    if (h1) h1.focus({ preventScroll: true });
+    if (r === 'home') initStones();
+  }
+
+  window.addEventListener('hashchange', route);
+
+  /* mobile menu */
+  const menuBtn = document.getElementById('menuBtn');
+  menuBtn.addEventListener('click', () => {
+    const open = navLinks.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', String(open));
+  });
+  navLinks.addEventListener('click', (e) => {
+    if (e.target.tagName === 'A') navLinks.classList.remove('open');
+  });
+
+  /* ---------------------------------------------------------
+     2 - SCROLL REVEALS (works across page switches: hidden
+     elements simply fire when their page becomes visible)
+     --------------------------------------------------------- */
+  const revealed = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (en.isIntersecting) { en.target.classList.add('in'); revealed.unobserve(en.target); }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -6% 0px' });
+  document.querySelectorAll('.rv').forEach((el, i) => {
+    el.style.transitionDelay = (Math.min(i % 5, 4) * 60) + 'ms';
+    revealed.observe(el);
+  });
+
+  /* ---------------------------------------------------------
+     3 - NAV HAIRLINE
+     --------------------------------------------------------- */
+  const nav = document.getElementById('nav');
+  const onScroll = () => nav.classList.toggle('is-stuck', window.scrollY > 12);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ---------------------------------------------------------
+     4 - SHAKE THE MANGO TREE: click the canopy, a mango falls,
+     bounces on the ground line, rests, then fades away.
+     --------------------------------------------------------- */
+  const scene = document.getElementById('heroScene');
+  const canopy = document.getElementById('canopy');
+  const drops = document.getElementById('drops');
+  const GROUND_Y = 584;
+  const NS = 'http://www.w3.org/2000/svg';
+  let live = 0;
+
+  function svgPoint(evt) {
+    const pt = scene.createSVGPoint();
+    pt.x = evt.clientX; pt.y = evt.clientY;
+    return pt.matrixTransform(scene.getScreenCTM().inverse());
+  }
+
+  canopy.addEventListener('click', (evt) => {
+    if (live >= 6) return;
+    const p = svgPoint(evt);
+    const ripe = Math.random() < 0.4;
+    const g = document.createElementNS(NS, 'g');
+    const use = document.createElementNS(NS, 'use');
+    use.setAttribute('href', '#mango');
+    if (ripe) use.setAttribute('style', '--m: var(--blush)');
+    g.appendChild(use);
+    drops.appendChild(g);
+    live++;
+
+    let x = Math.min(Math.max(p.x, 280), 880);
+    let y = Math.max(Math.min(p.y, 300), 40);
+    let vy = 0, vx = (Math.random() - 0.5) * 1.6, rot = Math.random() * 40 - 20, vr = (Math.random() - 0.5) * 6;
+    let bounces = 0, restAt = 0;
+
+    function finish() {
+      g.style.transition = 'opacity 1s';
+      g.style.opacity = '0';
+      setTimeout(() => { g.remove(); live--; }, 1050);
+    }
+
+    if (reduce) {
+      g.setAttribute('transform', `translate(${x} ${GROUND_Y}) rotate(70)`);
+      setTimeout(finish, 1500);
+      return;
+    }
+
+    function fall(t) {
+      vy += 0.55; y += vy; x += vx; rot += vr;
+      if (y >= GROUND_Y) {
+        y = GROUND_Y;
+        if (bounces < 2 && Math.abs(vy) > 2.2) {
+          vy *= -0.38; vx *= 0.7; vr *= 0.6; bounces++;
+        } else if (!restAt) {
+          restAt = t; vy = 0; vx = 0; vr = 0; rot = 70;
+        }
+      }
+      g.setAttribute('transform', `translate(${x} ${y}) rotate(${rot})`);
+      if (restAt && t - restAt > 2200) { finish(); return; }
+      requestAnimationFrame(fall);
+    }
+    requestAnimationFrame(fall);
+  });
+
+  /* ---------------------------------------------------------
+     5 - BUILD THE STACK (home page): the stones start scattered
+     on the ground. Drag them on top of each other to build the
+     logo. Bigger stones won't sit on smaller ones -- they slide
+     off. First paint is always a correct scattered scene, even
+     if rAF never runs (hidden tab).
+     --------------------------------------------------------- */
+  const cv = document.getElementById('stones');
+  const ctx = cv.getContext('2d');
+  const hint = document.getElementById('stackHint');
+  const rng = (s) => () => (s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+
+  function makeOutline(seed, points, irregularity) {
+    const r = rng(seed), out = [];
+    for (let i = 0; i < points; i++) out.push(1 + (r() - 0.5) * irregularity);
+    for (let pass = 0; pass < 2; pass++) {
+      for (let i = 0; i < points; i++) {
+        const a = out[(i - 1 + points) % points], b = out[i], c = out[(i + 1) % points];
+        out[i] = (a + b * 2 + c) / 4;
+      }
+    }
+    return out;
+  }
+
+  /* index 0 = blush (top), 1 = sage (mid), 2 = denim (base) */
+  const stones = [
+    { key: 'blush', rx: 0.115, squash: 0.80, gxf: 0.18, outline: makeOutline(7391, 26, 0.22) },
+    { key: 'sage',  rx: 0.160, squash: 0.86, gxf: 0.82, outline: makeOutline(2213, 26, 0.20) },
+    { key: 'denim', rx: 0.215, squash: 0.90, gxf: 0.50, outline: makeOutline(5507, 26, 0.18) }
+  ];
+  stones.forEach((s) => {
+    s.x = 0; s.y = 0; s.vx = 0; s.vy = 0; s.rot = 0; s.vrot = 0;
+    s.on = null; s.gx = 0; s.dragging = false;
+  });
+  const [blush, sage, denim] = stones;
+
+  let W = 0, H = 0, floorY = 0;
+  let running = false, inited = false, celebrated = false;
+
+  const clampX = (s, x) => Math.min(Math.max(x, s.r * 1.15), W - s.r * 1.15);
+
+  function resolveRest(s) {
+    if (s.on) {
+      const t = resolveRest(s.on);
+      s.restX = t.x;
+      s.restY = t.y - s.on.h * 0.9 - s.h;
+    } else {
+      s.restX = s.gx;
+      s.restY = floorY - s.h;
+    }
+    return { x: s.restX, y: s.restY };
+  }
+
+  function layout() {
+    const rect = cv.getBoundingClientRect();
+    if (!rect.width) return false;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = rect.width; H = rect.height;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    floorY = H * 0.93;
+    const unit = Math.min(W, H);
+    stones.forEach(s => {
+      s.r = unit * s.rx; s.h = s.r * s.squash;
+      if (!inited) s.gx = W * s.gxf;
+      s.gx = clampX(s, s.gx);
+    });
+    stones.forEach(s => resolveRest(s));
+    stones.forEach(s => {
+      if (!s.dragging) { s.x = s.restX; s.y = s.restY; s.rot = 0; s.vx = s.vy = s.vrot = 0; }
+    });
+    render();
+    return true;
+  }
+
+  function palette() {
+    const cs = getComputedStyle(document.documentElement);
+    return {
+      blush: cs.getPropertyValue('--blush').trim(),
+      sage: cs.getPropertyValue('--sage').trim(),
+      denim: cs.getPropertyValue('--denim').trim(),
+      ink: cs.getPropertyValue('--ink').trim()
+    };
+  }
+  let pal = palette();
+
+  function drawStone(s, x, y, rot, fill) {
+    const pts = s.outline, n = pts.length;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(1, s.squash);
+    ctx.beginPath();
+    const P = (i) => {
+      const a = (i / n) * Math.PI * 2, rad = s.r * pts[((i % n) + n) % n];
+      return [Math.cos(a) * rad, Math.sin(a) * rad];
+    };
+    let [px, py] = P(0);
+    ctx.moveTo((px + P(1)[0]) / 2, (py + P(1)[1]) / 2);
+    for (let i = 1; i <= n; i++) {
+      const [ax, ay] = P(i); const [bx, by] = P(i + 1);
+      ctx.quadraticCurveTo(ax, ay, (ax + bx) / 2, (ay + by) / 2);
+    }
+    ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); ctx.restore();
+  }
+
+  const depth = (s) => s.on ? depth(s.on) + 1 : 0;
+
+  function render() {
+    if (!W || !H) return;
+    ctx.clearRect(0, 0, W, H);
+    /* one soft shadow per grounded pile */
+    stones.filter(s => !s.on && !s.dragging).forEach(s => {
+      ctx.save();
+      ctx.globalAlpha = 0.10; ctx.fillStyle = pal.ink;
+      ctx.beginPath();
+      ctx.ellipse(s.x, floorY + s.r * 0.06, s.r * 1.05, s.r * 0.10, 0, 0, Math.PI * 2);
+      ctx.fill(); ctx.restore();
+    });
+    /* draw bottom-up so upper stones sit in front; held stone last */
+    [...stones].sort((a, b) =>
+      (a.dragging ? 99 : depth(a)) - (b.dragging ? 99 : depth(b))
+    ).forEach(s => drawStone(s, s.x, s.y, s.rot, pal[s.key]));
+  }
+
+  function step() {
+    let moving = false;
+    stones.forEach(s => resolveRest(s));
+    stones.forEach((s) => {
+      if (s.dragging) { moving = true; return; }
+      s.vx += (s.restX - s.x) * 0.07; s.vx *= 0.84; s.x += s.vx;
+      s.vy += (s.restY - s.y) * 0.06; s.vy *= 0.82; s.y += s.vy;
+      s.vrot += -s.rot * 0.08; s.vrot *= 0.86; s.rot += s.vrot;
+      if (Math.abs(s.restX - s.x) > 0.15 || Math.abs(s.restY - s.y) > 0.15 ||
+          Math.abs(s.vx) > 0.05 || Math.abs(s.vy) > 0.05 || Math.abs(s.vrot) > 0.002) moving = true;
+    });
+    return moving;
+  }
+
+  function loop() {
+    const moving = step();
+    render();
+    if (moving) requestAnimationFrame(loop);
+    else running = false;
+  }
+  function kick() {
+    if (running) return;
+    running = true;
+    requestAnimationFrame(loop);
+  }
+
+  function initStones() {
+    /* route() flips display synchronously, so the canvas is measurable
+       right away -- never defer to rAF (it stalls in hidden tabs) */
+    if (!layout()) { requestAnimationFrame(initStones); return; }
+    inited = true;
+  }
+
+  function pick(px, py) {
+    /* prefer the visually front-most (deepest-stacked) stone under the pointer */
+    const hit = stones.filter(s => {
+      const dx = (px - s.x) / s.r, dy = (py - s.y) / (s.r * s.squash);
+      return dx * dx + dy * dy < 1.3;
+    });
+    return hit.sort((a, b) => depth(b) - depth(a))[0] || null;
+  }
+
+  function landStone(s) {
+    const px = s.x, py = s.y;
+    const occupied = (t) => stones.some(o => o !== s && o.on === t);
+    const candidates = stones.filter(t =>
+      t !== s && t.on !== s && !occupied(t) &&
+      Math.abs(px - t.x) < t.r * 0.62 && py < t.y + t.h
+    ).sort((a, b) => a.y - b.y);
+    const t = candidates[0];
+
+    if (t && s.r > t.r * 1.06) {
+      /* too big for what's beneath: slide off sideways with a wobble */
+      const dir = px >= t.x ? 1 : -1;
+      s.on = null;
+      s.gx = clampX(s, t.x + dir * (t.r + s.r) * 0.95);
+      s.vrot += dir * 0.14;
+    } else if (t) {
+      s.on = t;
+      s.vrot += (Math.random() - 0.5) * 0.05;
+    } else {
+      s.on = null;
+      s.gx = clampX(s, px);
+    }
+
+    /* the whole point, quietly celebrated */
+    if (!celebrated && blush.on === sage && sage.on === denim && !denim.on) {
+      celebrated = true;
+      stones.forEach((st, i) => { st.vrot += (i % 2 ? -1 : 1) * 0.09; });
+      if (hint) hint.textContent = 'balanced \u2014 nobody helped you. that\u2019s the whole idea.';
+    }
+  }
+
+  let held = null;
+  cv.addEventListener('pointerdown', (e) => {
+    const r = cv.getBoundingClientRect();
+    held = pick(e.clientX - r.left, e.clientY - r.top);
+    if (held) {
+      /* anything resting on the held stone tumbles back to the ground */
+      stones.forEach(o => {
+        let chain = o.on;
+        while (chain) { if (chain === held) { o.on = null; o.gx = clampX(o, o.x); break; } chain = chain.on; }
+      });
+      held.dragging = true;
+      cv.setPointerCapture(e.pointerId);
+      kick();
+    }
+  });
+  cv.addEventListener('pointermove', (e) => {
+    if (!held) return;
+    const r = cv.getBoundingClientRect();
+    held.x = e.clientX - r.left;
+    held.y = e.clientY - r.top;
+    held.rot = Math.max(-0.4, Math.min(0.4, (held.x - W / 2) * 0.0018));
+    kick();
+  });
+  const releaseStone = () => {
+    if (!held) return;
+    held.dragging = false;
+    landStone(held);
+    held = null;
+    kick();
+  };
+  cv.addEventListener('pointerup', releaseStone);
+  cv.addEventListener('pointercancel', releaseStone);
+  cv.addEventListener('pointerleave', releaseStone);
+
+  window.addEventListener('resize', () => { layout(); kick(); });
+
+  const repaint = () => { pal = palette(); render(); };
+  new MutationObserver(repaint).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', repaint);
+
+  /* go */
+  route();
+})();
+</script>
+
+</body>
+</html>
