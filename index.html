@@ -58,6 +58,7 @@
     --gap-section: clamp(4.5rem, 9vw, 8rem);
     --measure: 34rem;
     --shadow: 0 1px 2px #2b2b2908, 0 12px 34px -18px #2b2b2938;
+    --nav-h: 84px; /* measured rendered height of .nav, used to fit the hero in one screen on desktop */
   }
 
   /* Tell the browser this page is light-only. Without this, a phone in
@@ -66,7 +67,7 @@
      though every element we style is explicitly cream -- because nothing
      ever painted that native background layer. */
   html { color-scheme: light only; }
-  html, body { background: #F6EFE9; }
+  html, body { background: #F6EFE9; margin: 0; padding: 0; }
 
   /* This site commits to one light palette on purpose -- the bougainvillea
      pinks and sage greens are tuned for the cream ground, and a dark
@@ -277,12 +278,16 @@
   .wing { transform-box: fill-box; transform-origin: center bottom; animation: wing .5s ease-in-out infinite alternate; }
   @keyframes wing { from { transform: scaleY(1); } to { transform: scaleY(0.35); } }
 
-  /* ---------- hero (home) ---------- */
-  .hero { padding-top: clamp(1.6rem, 4vw, 3rem); }
-  .hero-top { display: grid; gap: 1rem; text-align: center; justify-items: center; }
+  /* ---------- hero (home) ----------
+     Mobile/tablet: the original stacked layout -- copy centred above
+     a full-width illustration. Desktop (>=1080px): a true two-column
+     hero so both halves share one screen -- copy padded on the left,
+     the scene bleeding to the true right edge of the viewport. */
+  .hero { padding-top: clamp(1.6rem, 4vw, 3rem); padding-inline: var(--pad); }
+  .hero-copy { display: grid; gap: 1rem; text-align: center; justify-items: center; }
   .hero h1 { font-size: var(--t-hero); max-width: 17ch; }
   .hero h1 em { font-style: normal; color: var(--denim); }
-  .hero-lead { font-size: var(--t-lead); color: var(--ink-2); max-width: 36rem; line-height: 1.62; }
+  .hero-lead { font-size: var(--t-lead); color: var(--ink-2); max-width: 30rem; line-height: 1.55; }
   .hero-cta { display: flex; flex-wrap: wrap; gap: 0.7rem; justify-content: center; margin-top: 0.7rem; }
 
   .scene-wrap { position: relative; margin-top: clamp(1rem, 3vw, 2rem); }
@@ -293,9 +298,51 @@
     letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2);
     opacity: 0.7; pointer-events: none;
   }
-  #canopy { cursor: pointer; }
+  .scene-hint--mobile { display: none; }
+  #canopy {
+    cursor: pointer;
+    /* stop mobile browsers drawing their tap/selection highlight box
+       over the canopy when it's tapped -- it's a click target, not text */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
   @media (max-width: 640px) {
-    .scene-hint { position: static; display: block; text-align: center; margin-top: 0.5rem; }
+    .scene-hint--desktop { display: none; }
+    .scene-hint--mobile { position: static; display: block; text-align: center; margin-top: 0.5rem; }
+  }
+
+  /* true side-by-side hero, illustration flush to the viewport edge */
+  @media (min-width: 1080px) {
+    .hero {
+      padding-inline: 0;
+      padding-top: 0; /* the min-height below already accounts for the nav;
+                          extra top padding would push the hero past one screen */
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+      align-items: center;
+      gap: 2rem;
+      min-height: calc(100svh - var(--nav-h));
+    }
+    .hero-copy {
+      text-align: left; justify-items: start;
+      padding-left: var(--pad);
+      max-width: 34rem;
+    }
+    .hero-lead { max-width: 28rem; }
+    .hero-cta { justify-content: flex-start; }
+    .scene-wrap {
+      margin-top: 0;
+      height: calc(100svh - var(--nav-h));
+      max-height: 44rem;
+      overflow: hidden;
+    }
+    /* preserveAspectRatio="xMaxYMid meet" (set on the svg tag) keeps the
+       artwork whole and un-cropped, anchored to this box's right edge --
+       any slack lands as breathing room on the left, toward the copy */
+    .scene-wrap svg { width: 100%; height: 100%; }
+    .scene-hint { right: 3%; bottom: 3%; }
   }
 
   /* ---------- cards / programs ---------- */
@@ -750,11 +797,11 @@
        PAGE: HOME
        ================================================================ -->
   <main class="page" data-page="home" id="page-home">
-    <header class="hero wrap">
-      <div class="hero-top">
-        <div class="label rv">A Montessori house in Mumbai &middot; 18 months &ndash; 6 years</div>
+    <header class="hero">
+      <div class="hero-copy">
+        <div class="label rv">A Montessori house in Mumbai</div>
         <h1 class="rv" tabindex="-1">little people <em>grow themselves.</em></h1>
-        <p class="hero-lead rv">Nobody can grow up for you &mdash; so the room is built around the child, not the other way round. Real jugs, low shelves, a mango tree outside the window. Toddlers pour their own water; six-year-olds do their own sums. Growing up, one small job at a time.</p>
+        <p class="hero-lead rv">Children don't need to be taught how to grow. They need room, real work, and the time to do it themselves.</p>
         <div class="hero-cta rv">
           <a class="btn btn-solid" href="#/admissions"><span class="pebble"></span>Book a tour</a>
           <a class="btn btn-ghost" href="#/programs">See the programs</a>
@@ -767,7 +814,7 @@
            spilling off every ledge, and the mango tree overshadowing
            the whole terrace. Click the canopy: mangoes fall.        -->
       <div class="scene-wrap rv">
-        <svg id="heroScene" viewBox="0 0 920 640" role="img"
+        <svg id="heroScene" viewBox="0 0 920 640" role="img" preserveAspectRatio="xMaxYMid meet"
              aria-label="Hand-drawn scene: a narrow white school building with pink, green and blue bands and bougainvillea window boxes, a child waving from the terrace, another on a tyre swing, a third stacking stones by the gate, all beneath a large mango tree that leans over the terrace.">
 
           <!-- sun (rays wheel slowly) + birds -->
@@ -835,37 +882,71 @@
             </g>
 
             <!-- bougainvillea: papery blooms + trailing vines on every ledge,
-                 each row swaying almost imperceptibly -->
+                 in two overlapping layers for a fuller cascade -- each row
+                 swaying almost imperceptibly -->
             <g filter="url(#squig)">
               <!-- terrace cascade over the blush parapet -->
               <g class="flora">
+                <use href="#bloom" transform="translate(258 92) rotate(-6) scale(0.85)"/>
                 <use href="#bloom" transform="translate(270 90)"/>
                 <use href="#bloom" transform="translate(297 84) rotate(14) scale(0.9)"/>
+                <use href="#bloom" transform="translate(311 96) rotate(-16) scale(0.8)"/>
                 <use href="#bloom" transform="translate(325 92) rotate(-10)"/>
+                <use href="#bloom" transform="translate(340 86) rotate(4) scale(0.9)"/>
                 <use href="#bloom" transform="translate(355 85) rotate(8) scale(1.05)"/>
+                <use href="#bloom" transform="translate(370 94) rotate(-14) scale(0.85)"/>
                 <use href="#bloom" transform="translate(385 92) rotate(-6) scale(0.9)"/>
+                <use href="#bloom" transform="translate(405 87) rotate(10) scale(0.8)"/>
+                <use href="#bloom" transform="translate(420 93) rotate(-8) scale(0.9)"/>
+                <use href="#bloom" transform="translate(437 86) rotate(6) scale(0.8)"/>
                 <use href="#bloom" transform="translate(450 90) scale(0.85)"/>
+                <use href="#bloom" transform="translate(462 96) rotate(-10) scale(0.75)"/>
+                <use href="#vine" transform="translate(262 100) scale(0.85)"/>
                 <use href="#vine" transform="translate(274 98)"/>
+                <use href="#vine" transform="translate(304 102) scale(0.9)"/>
                 <use href="#vine" transform="translate(330 100) scale(1.15)"/>
+                <use href="#vine" transform="translate(362 103) scale(0.8)"/>
                 <use href="#vine" transform="translate(382 99) scale(0.9)"/>
+                <use href="#vine" transform="translate(412 101) scale(0.85)"/>
+                <use href="#vine" transform="translate(445 100) scale(0.9)"/>
               </g>
               <!-- floor 1 ledge (sage band) -->
               <g class="flora f2">
+                <use href="#bloom" transform="translate(258 205) rotate(-10) scale(0.8)"/>
+                <use href="#bloom" transform="translate(273 200) rotate(6) scale(0.9)"/>
                 <use href="#bloom" transform="translate(288 202)"/>
+                <use href="#bloom" transform="translate(312 198) rotate(-12) scale(0.85)"/>
                 <use href="#bloom" transform="translate(338 199) rotate(12) scale(1.05)"/>
+                <use href="#bloom" transform="translate(362 204) rotate(-6) scale(0.85)"/>
                 <use href="#bloom" transform="translate(390 203) rotate(-8) scale(0.95)"/>
+                <use href="#bloom" transform="translate(414 198) rotate(9) scale(0.8)"/>
                 <use href="#bloom" transform="translate(438 200) rotate(6) scale(0.85)"/>
+                <use href="#bloom" transform="translate(456 205) rotate(-12) scale(0.75)"/>
+                <use href="#vine" transform="translate(266 212) scale(0.85)"/>
                 <use href="#vine" transform="translate(298 212)"/>
+                <use href="#vine" transform="translate(324 214) scale(0.8)"/>
+                <use href="#vine" transform="translate(352 216) scale(0.9)"/>
                 <use href="#vine" transform="translate(378 214) scale(1.1)"/>
+                <use href="#vine" transform="translate(404 213) scale(0.8)"/>
                 <use href="#vine" transform="translate(444 212) scale(0.85)"/>
               </g>
               <!-- floor 2 ledge (denim band) -->
               <g class="flora f3">
+                <use href="#bloom" transform="translate(260 322) rotate(8) scale(0.8)"/>
+                <use href="#bloom" transform="translate(276 316) rotate(-10) scale(0.9)"/>
                 <use href="#bloom" transform="translate(292 318) rotate(-8)"/>
+                <use href="#bloom" transform="translate(316 313) rotate(12) scale(0.85)"/>
                 <use href="#bloom" transform="translate(344 315) rotate(10) scale(1.05)"/>
+                <use href="#bloom" transform="translate(368 320) rotate(-6) scale(0.85)"/>
                 <use href="#bloom" transform="translate(396 319) scale(0.95)"/>
+                <use href="#bloom" transform="translate(420 314) rotate(-10) scale(0.8)"/>
                 <use href="#bloom" transform="translate(442 316) rotate(-12) scale(0.85)"/>
+                <use href="#bloom" transform="translate(458 321) rotate(8) scale(0.75)"/>
+                <use href="#vine" transform="translate(268 328) scale(0.85)"/>
                 <use href="#vine" transform="translate(306 328)"/>
+                <use href="#vine" transform="translate(334 330) scale(0.8)"/>
+                <use href="#vine" transform="translate(358 332) scale(0.9)"/>
+                <use href="#vine" transform="translate(386 329) scale(0.85)"/>
                 <use href="#vine" transform="translate(420 330) scale(0.95)"/>
               </g>
             </g>
@@ -1031,7 +1112,8 @@
           <!-- falling mangoes get appended here by JS -->
           <g id="drops"></g>
         </svg>
-        <span class="scene-hint">click the tree for some fruits</span>
+        <span class="scene-hint scene-hint--desktop">click the tree for some fruits</span>
+        <span class="scene-hint scene-hint--mobile">shake the tree for some fruits</span>
       </div>
     </header>
 
