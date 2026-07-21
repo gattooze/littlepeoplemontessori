@@ -346,7 +346,14 @@
       display: grid;
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: minmax(0, 1fr);
-      min-height: calc(100svh - var(--nav-h));
+      /* A DEFINITE height, not merely a minimum. The scene's <svg> carries
+         an intrinsic aspect ratio, so with an auto-sized row the artwork
+         dictated the hero's height and pushed it past the fold on shorter
+         windows -- taking the "click the tree" hint below the screen edge.
+         Pinning the height makes the row definite, so height:100% on the
+         svg resolves against it instead. */
+      height: calc(100svh - var(--nav-h));
+      min-height: 26rem; /* guard against a degenerate hero on tiny windows */
     }
     .hero-copy, .scene-wrap { grid-area: 1 / 1; }
     .hero-copy {
@@ -1145,9 +1152,21 @@
                below the text, plus birds up in the far corner. -->
           <g class="hero-extras" aria-hidden="true">
             <g filter="url(#squig)">
-              <!-- ground line carried out to the left edge, meeting the
-                   existing line at x=30 -->
-              <path class="ink" d="M-440 601 C-300 597 -140 594 34 596"/>
+              <!-- Ground line carried out past BOTH edges of the viewBox,
+                   meeting the existing line at x=30. It deliberately runs
+                   beyond the frame: on shorter windows the artwork is
+                   height-constrained and sits letterboxed, and these
+                   overhangs keep the line reaching the real screen edges
+                   (the svg draws outside its viewBox; .scene-wrap clips it
+                   at the viewport). -->
+              <path class="ink" d="M-880 604 C-600 599 -300 596 34 596"/>
+              <path class="ink" d="M880 596 C1020 597 1160 599 1360 603"/>
+              <g class="ink-thin">
+                <path d="M-660 599 c1 -6 2 -9 5 -12 M-653 599 c0 -5 1 -8 3 -11"/>
+                <path d="M-520 598 c1 -5 2 -8 4 -11 M-514 598 c1 -4 2 -7 4 -9"/>
+                <path d="M1020 597 c1 -6 2 -9 5 -12 M1027 597 c0 -5 1 -8 3 -11"/>
+                <path d="M1180 600 c1 -5 3 -8 5 -10 M1186 600 c1 -4 2 -6 4 -8"/>
+              </g>
               <g class="ink-thin">
                 <path d="M-392 596 c1 -6 2 -9 5 -12 M-386 596 c0 -5 1 -8 3 -11 M-381 596 c1 -4 2 -7 4 -9"/>
                 <path d="M-236 596 c1 -5 2 -8 4 -11 M-230 596 c1 -4 2 -7 4 -9"/>
