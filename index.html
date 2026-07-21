@@ -842,7 +842,7 @@
            spilling off every ledge, and the mango tree overshadowing
            the whole terrace. Click the canopy: mangoes fall.        -->
       <div class="scene-wrap rv">
-        <svg id="heroScene" viewBox="0 0 920 640" role="img" preserveAspectRatio="xMidYMid meet"
+        <svg id="heroScene" viewBox="0 -20 920 660" role="img" preserveAspectRatio="xMidYMid meet"
              aria-label="Hand-drawn scene: a narrow white school building with pink, green and blue bands and bougainvillea window boxes, a child waving from the terrace, another on a tyre swing, a third stacking stones by the gate, all beneath a large mango tree that leans over the terrace.">
 
           <!-- sun (rays wheel slowly) + birds -->
@@ -1777,8 +1777,12 @@
      narrow screens, and widened to the left on desktop so the drawing
      spans the full viewport with the copy layered over its empty half.
      Kept in sync with the 1080px breakpoint in the stylesheet. */
-  const VB_NARROW = '0 0 920 640';
-  const VB_WIDE = '-440 0 1360 640';
+  /* minY is -20, not 0: the mango canopy is drawn up to y=-11, and with
+     the scene clipped to its box on desktop that overhang was being
+     shaved off against the nav. The viewBox now contains the whole
+     drawing, so "meet" can never crop it. */
+  const VB_NARROW = '0 -20 920 660';
+  const VB_WIDE = '-440 -20 1360 660';
   const wideMQ = window.matchMedia('(min-width: 1080px)');
   const applyViewBox = () => scene.setAttribute('viewBox', wideMQ.matches ? VB_WIDE : VB_NARROW);
   applyViewBox();
