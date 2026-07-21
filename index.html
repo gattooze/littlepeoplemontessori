@@ -266,6 +266,10 @@
   @keyframes floraSway { 0%,100% { transform: rotate(-1.3deg); } 50% { transform: rotate(1.5deg); } }
   .sunrays { transform-box: fill-box; transform-origin: center; animation: orbit 52s linear infinite; }
 
+  /* Two butterfly paths. The mobile one deliberately wanders up out of the
+     artwork and drifts over the buttons. The desktop one crosses the whole
+     widened canvas but stays inside its bounds, so .scene-wrap's overflow
+     clip can never lop a wing off mid-flight. */
   .flutter { animation: flutter 22s linear infinite; }
   @keyframes flutter {
     0%   { transform: translate(0,0) rotate(6deg); }
@@ -275,8 +279,23 @@
     80%  { transform: translate(700px,-30px) rotate(8deg); }
     100% { transform: translate(860px,-110px) rotate(0deg); opacity: 0; }
   }
+  .flutter-wide { animation: flutterWide 30s linear infinite; }
+  @keyframes flutterWide {
+    0%   { transform: translate(0,0) rotate(6deg); opacity: 0; }
+    5%   { opacity: 1; }
+    20%  { transform: translate(250px,-72px) rotate(-8deg); }
+    40%  { transform: translate(530px,-16px) rotate(10deg); }
+    60%  { transform: translate(800px,-98px) rotate(-6deg); }
+    80%  { transform: translate(1060px,-26px) rotate(8deg); }
+    93%  { opacity: 1; }
+    100% { transform: translate(1250px,-92px) rotate(0deg); opacity: 0; }
+  }
   .wing { transform-box: fill-box; transform-origin: center bottom; animation: wing .5s ease-in-out infinite alternate; }
   @keyframes wing { from { transform: scaleY(1); } to { transform: scaleY(0.35); } }
+
+  /* left-hand scene elements: hidden until the canvas goes full-bleed,
+     otherwise they'd sit outside the narrow mobile viewBox */
+  .hero-extras { display: none; }
 
   /* ---------- hero (home) ----------
      Mobile/tablet: the original stacked layout -- copy centred above
@@ -315,34 +334,43 @@
 
   /* true side-by-side hero, illustration flush to the viewport edge */
   @media (min-width: 1080px) {
+    /* One full-bleed canvas: the scene spans the entire hero and the copy
+       is layered on top of it (both occupy the same single grid cell), so
+       the whole screen reads as one drawing rather than a picture parked
+       in a right-hand column. JS widens the artwork's viewBox to match --
+       see the hero-extras group for the elements that fill the left. */
     .hero {
       padding-inline: 0;
       padding-top: 0; /* the min-height below already accounts for the nav;
                           extra top padding would push the hero past one screen */
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
-      align-items: center;
-      gap: 2rem;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr);
       min-height: calc(100svh - var(--nav-h));
     }
+    .hero-copy, .scene-wrap { grid-area: 1 / 1; }
     .hero-copy {
+      z-index: 1;
+      align-self: center; justify-self: start;
       text-align: left; justify-items: start;
       padding-left: var(--pad);
       max-width: 34rem;
     }
-    .hero-lead { max-width: 28rem; }
+    .hero-lead { max-width: 27rem; }
     .hero-cta { justify-content: flex-start; }
     .scene-wrap {
+      z-index: 0;
       margin-top: 0;
-      height: calc(100svh - var(--nav-h));
-      max-height: 44rem;
+      align-self: stretch;
       overflow: hidden;
     }
-    /* preserveAspectRatio="xMaxYMid meet" (set on the svg tag) keeps the
-       artwork whole and un-cropped, anchored to this box's right edge --
-       any slack lands as breathing room on the left, toward the copy */
     .scene-wrap svg { width: 100%; height: 100%; }
     .scene-hint { right: 3%; bottom: 3%; }
+
+    /* left-hand scene elements, and the butterfly path that crosses the
+       full width -- both only make sense once the canvas is full-bleed */
+    .hero-extras { display: block; }
+    .bf-narrow { display: none; }
   }
 
   /* ---------- cards / programs ---------- */
@@ -590,7 +618,7 @@
       transition-duration: .001ms !important;
     }
     .rv { opacity: 1; transform: none; }
-    .flutter { display: none; }
+    .flutter, .flutter-wide { display: none; }
   }
 </style>
 
@@ -814,7 +842,7 @@
            spilling off every ledge, and the mango tree overshadowing
            the whole terrace. Click the canopy: mangoes fall.        -->
       <div class="scene-wrap rv">
-        <svg id="heroScene" viewBox="0 0 920 640" role="img" preserveAspectRatio="xMaxYMid meet"
+        <svg id="heroScene" viewBox="0 0 920 640" role="img" preserveAspectRatio="xMidYMid meet"
              aria-label="Hand-drawn scene: a narrow white school building with pink, green and blue bands and bougainvillea window boxes, a child waving from the terrace, another on a tyre swing, a third stacking stones by the gate, all beneath a large mango tree that leans over the terrace.">
 
           <!-- sun (rays wheel slowly) + birds -->
@@ -1102,11 +1130,54 @@
             <use href="#leaf-sprig" transform="translate(806 590) rotate(14) scale(0.8)"/>
           </g>
 
-          <!-- butterfly drifting across the scene -->
-          <g class="flutter" transform="translate(40 340)" aria-hidden="true">
+          <!-- butterfly drifting across the scene (mobile path: allowed to
+               wander up out of the artwork and over the buttons) -->
+          <g class="flutter bf-narrow" transform="translate(40 340)" aria-hidden="true">
             <g class="wing"><ellipse cx="-5" cy="-6" rx="6" ry="9" fill="var(--blush)" stroke="var(--ink)" stroke-width="1.2"/></g>
             <g class="wing" style="animation-delay:.25s"><ellipse cx="5" cy="-6" rx="6" ry="9" fill="var(--blush)" stroke="var(--ink)" stroke-width="1.2"/></g>
             <path d="M0 -14 L0 2" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round"/>
+          </g>
+
+          <!-- ============ LEFT-HAND SCENE (desktop full-bleed only) ============
+               Carries the drawing across the half of the screen the copy sits
+               on, so the whole viewport reads as one canvas: the ground line
+               runs the full width, with grass, pebbles and a small cairn well
+               below the text, plus birds up in the far corner. -->
+          <g class="hero-extras" aria-hidden="true">
+            <g filter="url(#squig)">
+              <!-- ground line carried out to the left edge, meeting the
+                   existing line at x=30 -->
+              <path class="ink" d="M-440 601 C-300 597 -140 594 34 596"/>
+              <g class="ink-thin">
+                <path d="M-392 596 c1 -6 2 -9 5 -12 M-386 596 c0 -5 1 -8 3 -11 M-381 596 c1 -4 2 -7 4 -9"/>
+                <path d="M-236 596 c1 -5 2 -8 4 -11 M-230 596 c1 -4 2 -7 4 -9"/>
+                <path d="M-96 596 c1 -6 2 -9 5 -12 M-89 596 c0 -5 1 -8 3 -11 M-84 596 c1 -4 2 -6 4 -8"/>
+                <path d="M-320 596 c1 -5 3 -8 5 -10"/>
+              </g>
+              <!-- a couple of loose pebbles resting on the line -->
+              <path d="M-352 588 c4.5 0 7.5 2 7.5 4.6 s-3 4.4 -7.5 4.4 -7.5 -1.8 -7.5 -4.4 3 -4.6 7.5 -4.6Z"
+                    fill="var(--ground-3)" stroke="var(--ink)" stroke-width="1.8"/>
+              <path d="M-150 590 c3.5 0 6 1.6 6 3.6 s-2.5 3.4 -6 3.4 -6 -1.4 -6 -3.4 2.5 -3.6 6 -3.6Z"
+                    fill="var(--ground-3)" stroke="var(--ink)" stroke-width="1.8"/>
+              <!-- a small two-stone cairn, someone started and left -->
+              <path d="M-268 586 c7 0 11.5 2.6 11.5 6 s-4.5 5.6 -11.5 5.6 -11.5 -2.2 -11.5 -5.6 4.5 -6 11.5 -6Z"
+                    fill="var(--denim)" stroke="var(--ink)" stroke-width="1.9"/>
+              <path d="M-268 574 c4.6 0 7.6 2 7.6 4.6 s-3 4.4 -7.6 4.4 -7.6 -1.8 -7.6 -4.4 3 -4.6 7.6 -4.6Z"
+                    fill="var(--sage)" stroke="var(--ink)" stroke-width="1.9"/>
+              <!-- a fallen leaf and a stray bloom drifted over from the ledges -->
+              <use href="#leaf-sprig" transform="translate(-186 588) rotate(-12) scale(0.75)"/>
+              <use href="#bloom" transform="translate(-410 578) rotate(8) scale(0.7)"/>
+              <!-- birds high in the far corner, clear of the headline -->
+              <path class="ink-thin" d="M-398 62 q7 -8 14 0 q7 -8 14 0 M-350 40 q6 -7 12 0"/>
+            </g>
+            <!-- butterfly crossing the full width, staying inside the canvas -->
+            <g transform="translate(-402 322)">
+              <g class="flutter-wide">
+                <g class="wing"><ellipse cx="-5" cy="-6" rx="6" ry="9" fill="var(--blush)" stroke="var(--ink)" stroke-width="1.2"/></g>
+                <g class="wing" style="animation-delay:.25s"><ellipse cx="5" cy="-6" rx="6" ry="9" fill="var(--blush)" stroke="var(--ink)" stroke-width="1.2"/></g>
+                <path d="M0 -14 L0 2" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round"/>
+              </g>
+            </g>
           </g>
 
           <!-- falling mangoes get appended here by JS -->
@@ -1691,6 +1762,17 @@
      --------------------------------------------------------- */
   const scene = document.getElementById('heroScene');
   const canopy = document.getElementById('canopy');
+
+  /* The hero canvas is framed two ways: tight around the building on
+     narrow screens, and widened to the left on desktop so the drawing
+     spans the full viewport with the copy layered over its empty half.
+     Kept in sync with the 1080px breakpoint in the stylesheet. */
+  const VB_NARROW = '0 0 920 640';
+  const VB_WIDE = '-440 0 1360 640';
+  const wideMQ = window.matchMedia('(min-width: 1080px)');
+  const applyViewBox = () => scene.setAttribute('viewBox', wideMQ.matches ? VB_WIDE : VB_NARROW);
+  applyViewBox();
+  wideMQ.addEventListener('change', applyViewBox);
   const drops = document.getElementById('drops');
   const GROUND_Y = 584;
   const NS = 'http://www.w3.org/2000/svg';
