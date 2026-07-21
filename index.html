@@ -1756,6 +1756,16 @@
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
 
+  /* The desktop hero sizes itself to "one screen minus the nav", so the
+     nav's real height has to be measured rather than hardcoded -- it
+     shifts a few px with font loading and between browsers, and a stale
+     guess makes the hero overshoot the fold. */
+  const setNavH = () =>
+    document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px');
+  setNavH();
+  window.addEventListener('resize', setNavH);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(setNavH);
+
   /* ---------------------------------------------------------
      4 - SHAKE THE MANGO TREE: click the canopy, a mango falls,
      bounces on the ground line, rests, then fades away.
