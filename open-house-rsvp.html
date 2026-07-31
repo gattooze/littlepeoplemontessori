@@ -211,7 +211,16 @@
      background here. aria-hidden + pointer-events:none since it
      carries no information and must never intercept a tap. -->
 <svg class="watermark" viewBox="220 -20 720 420" aria-hidden="true" focusable="false">
-  <g filter="url(#squig)">
+  <!-- No filter="url(#squigN)" anywhere in this element on purpose: the
+       canopy silhouette below was going fully invisible in real desktop
+       Chrome (confirmed by the user, not reproducible in this session's
+       automated browser) while everything using the OTHER filter
+       (trunk, leaf sprigs, mangoes) rendered fine -- pointing at a
+       GPU-compositing edge case specific to that filter's parameters at
+       this element's size, interacting with the parent's CSS opacity.
+       Not worth chasing further for a faint decorative watermark: flat,
+       unfiltered paths render identically everywhere. -->
+  <g>
     <!-- trunk -->
     <path d="M640 596 C638 500 622 430 606 370 C592 316 586 268 596 216 L622 224 C616 270 622 312 636 366 C652 428 668 500 672 596 Z"
           fill="var(--bark)" stroke="var(--ink)" stroke-width="2.6"/>
@@ -220,7 +229,7 @@
     <path d="M612 258 C662 248 706 256 748 276" fill="none" stroke="var(--ink)" stroke-width="3.4"/>
   </g>
   <g>
-    <g filter="url(#squig2)">
+    <g>
       <path fill="var(--leafbed)" stroke="var(--ink)" stroke-width="2.6" stroke-linejoin="round"
         d="M252 66
            C 262 34, 296 22, 330 26
@@ -244,7 +253,7 @@
            disconnected gray smudges floating inside the canopy, which
            is what made this look broken rather than like a tree. -->
     </g>
-    <g filter="url(#squig)">
+    <g>
       <use href="#leaf-sprig" transform="translate(268 116) scale(-1.1 1.1)"/>
       <use href="#leaf-sprig" transform="translate(372 42) rotate(-20)"/>
       <use href="#leaf-sprig" transform="translate(508 22) rotate(-6) scale(1.15)"/>
@@ -255,7 +264,7 @@
       <use href="#leaf-sprig" transform="translate(600 292) rotate(150) scale(-1 1)"/>
       <use href="#leaf-sprig" transform="translate(474 210) rotate(130)"/>
     </g>
-    <g filter="url(#squig)">
+    <g>
       <g transform="translate(352 64)"><use href="#mango"/></g>
       <g transform="translate(400 62) scale(0.85)"><use href="#mango" style="--m: var(--blush)"/></g>
       <g transform="translate(498 272) scale(0.9)"><use href="#mango"/></g>
