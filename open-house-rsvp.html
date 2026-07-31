@@ -238,10 +238,11 @@
            C 452 60, 430 48, 404 46
            C 370 44, 336 50, 306 56
            C 286 60, 266 62, 252 66 Z"/>
-      <ellipse cx="640" cy="170" rx="60" ry="28" fill="var(--sage-wash)"/>
-      <ellipse cx="690" cy="60" rx="66" ry="26" fill="var(--sage-wash)"/>
-      <ellipse cx="810" cy="210" rx="56" ry="26" fill="var(--sage-wash)"/>
-      <ellipse cx="560" cy="238" rx="56" ry="22" fill="var(--sage-wash)"/>
+      <!-- The homepage version also has four "sage-wash" depth ellipses
+           here suggesting leaf shading -- dropped for this watermark:
+           at low opacity they don't read as shading, they read as
+           disconnected gray smudges floating inside the canopy, which
+           is what made this look broken rather than like a tree. -->
     </g>
     <g filter="url(#squig)">
       <use href="#leaf-sprig" transform="translate(268 116) scale(-1.1 1.1)"/>
