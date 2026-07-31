@@ -599,6 +599,45 @@
   .faq details[open] summary::before { transform: translateY(-3px) rotate(-18deg); background: var(--blush); }
   .faq details p { padding: 0 0 1.2rem 1.55rem; color: var(--ink-2); font-size: var(--t-small); max-width: 40rem; }
 
+  /* ---------- enquiry form ---------- */
+  .form-card {
+    background: var(--ground-2); border: 1px solid var(--line-solid); border-radius: 20px;
+    padding: clamp(1.6rem, 4vw, 2.6rem); max-width: 40rem;
+  }
+  .form-card h3 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+  .form-card > p { color: var(--ink-2); font-size: var(--t-small); margin-bottom: 1.6rem; max-width: 32rem; }
+  .f-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1rem; }
+  .f-field { display: grid; gap: 0.4rem; }
+  .f-field.f-full { grid-column: 1 / -1; }
+  .f-field label {
+    font-family: var(--display); font-weight: 600; font-size: 0.8rem;
+    letter-spacing: 0.02em; color: var(--ink);
+  }
+  .f-field .f-optional { color: var(--ink-2); font-weight: 500; }
+  .f-field input, .f-field select, .f-field textarea {
+    font-family: var(--body); font-size: 1rem; color: var(--ink);
+    background: var(--ground-2); border: 1px solid var(--line-solid); border-radius: 10px;
+    padding: 0.7rem 0.85rem; width: 100%;
+    transition: border-color .2s, background .2s;
+  }
+  .f-field input:focus, .f-field select:focus, .f-field textarea:focus {
+    outline: none; border-color: var(--action); background: var(--ground);
+  }
+  .f-field textarea { resize: vertical; min-height: 5rem; font-family: var(--body); }
+  .f-field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236E655D' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.85rem center; padding-right: 2.2rem; }
+  .f-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .f-submit { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .f-note { font-size: 0.82rem; color: var(--ink-2); }
+  .f-error { color: #C4634A; font-size: 0.85rem; display: none; }
+  .f-error.show { display: block; }
+  .form-card.sent .f-body { display: none; }
+  .form-thanks { display: none; text-align: center; padding: 1rem 0; }
+  .form-card.sent .form-thanks { display: block; }
+  .form-thanks .th-mark { width: 40px; height: 40px; margin: 0 auto 1rem; }
+  .form-thanks h3 { margin-bottom: 0.6rem; }
+  .form-thanks p { color: var(--ink-2); max-width: 26rem; margin: 0 auto; }
+  @media (max-width: 600px) { .f-grid { grid-template-columns: 1fr; } }
+
   /* ---------- footer ---------- */
   .foot { padding-block: clamp(3rem, 7vw, 5rem) 2.5rem; border-top: 1px solid var(--line-solid); margin-top: var(--gap-section); position: relative; }
   .foot-grid { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 2rem; }
@@ -1617,12 +1656,71 @@
         <div>
           <h2>what happens when you enquire</h2>
           <p>Every enquiry gets a reply from a person, not an autoresponder, within one working day.</p>
-          <a class="btn btn-solid" href="tel:+919004012345"><span class="pebble"></span>Request a tour date</a>
+          <a class="btn btn-solid" href="#enquiry-form"><span class="pebble"></span>Fill the form below</a>
         </div>
         <div class="tour-steps">
           <div class="tour-step"><i style="background:var(--blush)"></i><span><b>you tell us about your child</b><span>Age, temperament, what you're hoping for. Two minutes.</span></span></div>
           <div class="tour-step"><i style="background:var(--sage)"></i><span><b>we reply within one working day</b><span>With two or three morning slots that suit the age group.</span></span></div>
           <div class="tour-step"><i style="background:var(--denim)"></i><span><b>you visit, then your child visits</b><span>A quiet morning for you; a settling-in visit for them.</span></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec-tight wrap" id="enquiry-form">
+      <div class="form-card rv">
+        <div class="f-body">
+          <h3>tell us about your child</h3>
+          <p>We'll reply by phone, WhatsApp or email &mdash; whichever you give us &mdash; within one working day with a couple of tour times to pick from.</p>
+          <form id="websiteForm" novalidate>
+            <div class="f-grid">
+              <div class="f-field f-full">
+                <label for="wf-name">Parent's name</label>
+                <input id="wf-name" name="name" type="text" autocomplete="name" required>
+              </div>
+              <div class="f-field">
+                <label for="wf-phone">Phone / WhatsApp</label>
+                <input id="wf-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required>
+              </div>
+              <div class="f-field">
+                <label for="wf-email">Email <span class="f-optional">(optional)</span></label>
+                <input id="wf-email" name="email" type="email" autocomplete="email">
+              </div>
+              <div class="f-field f-full">
+                <label for="wf-program">Child's age</label>
+                <select id="wf-program" name="program" required>
+                  <option value="" disabled selected>Choose one&hellip;</option>
+                  <option value="Under 18 months">Under 18 months</option>
+                  <option value="18 months – 3 years (Toddler)">18 months &ndash; 3 years (Toddler)</option>
+                  <option value="3 – 6 years (Primary)">3 &ndash; 6 years (Primary)</option>
+                  <option value="Daycare only (Casa)">Daycare only (Casa)</option>
+                  <option value="Not sure yet">Not sure yet</option>
+                </select>
+              </div>
+              <div class="f-field f-full">
+                <label for="wf-message">Anything else? <span class="f-optional">(optional)</span></label>
+                <textarea id="wf-message" name="message" rows="3"></textarea>
+              </div>
+              <div class="f-field f-hp" aria-hidden="true">
+                <label for="wf-company">Company</label>
+                <input id="wf-company" name="company" type="text" tabindex="-1" autocomplete="off">
+              </div>
+            </div>
+            <input type="hidden" name="source" value="website">
+            <div class="f-submit">
+              <button class="btn btn-solid" type="submit"><span class="pebble"></span><span class="f-submit-label">Send enquiry</span></button>
+              <span class="f-note">No spam, ever &mdash; this goes straight to us.</span>
+            </div>
+            <p class="f-error" id="wf-error">Something went wrong sending that &mdash; please try again, or call us on <a href="tel:+919004012345" style="color:inherit">+91 90040 12345</a>.</p>
+          </form>
+        </div>
+        <div class="form-thanks">
+          <svg class="th-mark" viewBox="0 0 26 34" aria-hidden="true">
+            <path d="M13 1.6c4.3 0 6.6 2.4 6.5 5.2-.1 2.9-2.6 4.7-6.4 4.7S6.5 9.9 6.5 6.9C6.5 4 8.7 1.6 13 1.6Z" fill="var(--blush)"/>
+            <path d="M13 12.2c5.1-.1 8 2.7 8 6.2 0 3.6-3 6.1-8 6.1s-8-2.4-8-6.1c0-3.6 2.9-6.2 8-6.2Z" fill="var(--sage)"/>
+            <path d="M13 24.6c6.6-.1 10.4 3 10.4 7.3 0 4.4-4 7.4-10.4 7.4S2.6 36.3 2.6 31.9c0-4.3 3.8-7.4 10.4-7.3Z" fill="var(--denim)"/>
+          </svg>
+          <h3>got it &mdash; thank you.</h3>
+          <p>We'll be in touch within one working day. If it's urgent, call us on <a href="tel:+919004012345" style="color:var(--action)">+91 90040 12345</a>.</p>
         </div>
       </div>
     </section>
@@ -1702,9 +1800,32 @@
   </footer>
 </div>
 
+<script src="assets/js/form-kit.js"></script>
 <script>
 (() => {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------------------------------------------------
+     0 - ENQUIRY FORM: posts to the same Apps Script Web App
+     deployment as every other form on the site (routed by
+     form_id -- see /forms/DEPLOY-STEPS.md). form-kit.js handles
+     delivery reliability (retry/beacon/queue) and engagement
+     tracking; this just wires the enquiry form's specifics.
+     --------------------------------------------------------- */
+  const FORM_ENDPOINT = 'PASTE_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+  const enquiryForm = document.getElementById('websiteForm');
+  if (enquiryForm) {
+    const card = enquiryForm.closest('.form-card');
+    FormKit.wire(enquiryForm, {
+      endpoint: FORM_ENDPOINT,
+      formId: 'website_enquiry',
+      onSuccess() {
+        if (card) card.classList.add('sent');
+        enquiryForm.reset();
+      }
+    });
+  }
 
   /* ---------------------------------------------------------
      1 - ROUTER: hash-based pages that behave like real pages.

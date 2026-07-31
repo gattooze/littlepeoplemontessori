@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light only">
+<title>tell us about your child — little people montessori</title>
+<meta name="description" content="Tell us a little about your child and we'll be in touch within one working day with a couple of tour times to pick from.">
+<!-- Open Graph tags: this page is built to be pasted as a raw link into
+     WhatsApp groups, so it needs its own share-preview card rather than
+     inheriting the main site's. -->
+<meta property="og:title" content="little people montessori — tell us about your child">
+<meta property="og:description" content="A Montessori house in Mumbai, under an old mango tree. Tell us about your child and we'll be in touch within one working day.">
+<meta property="og:type" content="website">
+<style>
+  :root {
+    --ground: #F6EFE9; --ground-2: #FBF7F3; --ground-3: #EFE5DC;
+    --ink: #2B2B29; --ink-2: #6E655D;
+    --line-solid: #E2D6CA;
+    --blush: #EEB3BD; --sage: #7B9B6E; --denim: #5C7FB8;
+    --action: #4C6FA8; --action-ink: #FBF7F3;
+    --display: "Avenir Next", Avenir, Futura, "Century Gothic", "Trebuchet MS", system-ui, sans-serif;
+    --body: Charter, "Bitstream Charter", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  }
+  html, body { margin: 0; background: var(--ground); }
+  * { box-sizing: border-box; }
+  body {
+    font-family: var(--body); color: var(--ink); line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 34rem; margin: 0 auto; padding: clamp(1.6rem, 6vw, 3rem) 1.3rem 4rem; }
+  .mark { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: inherit; margin-bottom: 2rem; }
+  .mark-name { font-family: var(--display); font-weight: 600; font-size: 1.05rem; letter-spacing: -0.03em; line-height: 0.95; text-transform: lowercase; }
+  .mark-sub { font-family: var(--display); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-2); }
+  h1 {
+    font-family: var(--display); font-weight: 600; text-transform: lowercase;
+    letter-spacing: -0.025em; line-height: 1.06; font-size: clamp(1.9rem, 7vw, 2.5rem);
+    margin: 0 0 0.8rem; text-wrap: balance;
+  }
+  .lead { color: var(--ink-2); font-size: 1.08rem; margin-bottom: 2rem; max-width: 28rem; }
+  .form-card {
+    background: var(--ground-2); border: 1px solid var(--line-solid); border-radius: 20px;
+    padding: clamp(1.4rem, 5vw, 2rem);
+  }
+  .f-field { display: grid; gap: 0.4rem; margin-bottom: 1.1rem; }
+  .f-field label { font-family: var(--display); font-weight: 600; font-size: 0.8rem; color: var(--ink); }
+  .f-field .f-optional { color: var(--ink-2); font-weight: 500; }
+  .f-field input, .f-field select, .f-field textarea {
+    font-family: var(--body); font-size: 1rem; color: var(--ink);
+    background: var(--ground-2); border: 1px solid var(--line-solid); border-radius: 10px;
+    padding: 0.75rem 0.85rem; width: 100%;
+  }
+  .f-field input:focus, .f-field select:focus, .f-field textarea:focus {
+    outline: none; border-color: var(--action); background: var(--ground);
+  }
+  .f-field textarea { resize: vertical; min-height: 4.5rem; }
+  .f-field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236E655D' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.85rem center; padding-right: 2.2rem; }
+  .f-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .btn {
+    font-family: var(--display); font-weight: 600; font-size: 0.95rem;
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: var(--action); color: var(--action-ink);
+    border: none; border-radius: 999px; padding: 0.85rem 1.6rem;
+    cursor: pointer; width: 100%; justify-content: center;
+    transition: transform .25s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:disabled { opacity: 0.6; cursor: default; transform: none; }
+  .pebble { width: 9px; height: 10px; flex: none; border-radius: 46% 54% 58% 42% / 52% 46% 54% 48%; background: currentColor; }
+  .f-note { font-size: 0.8rem; color: var(--ink-2); text-align: center; margin-top: 0.8rem; }
+  .f-error { color: #C4634A; font-size: 0.85rem; display: none; margin-top: 0.9rem; }
+  .f-error.show { display: block; }
+  .form-card.sent .f-body { display: none; }
+  .form-thanks { display: none; text-align: center; padding: 0.5rem 0; }
+  .form-card.sent .form-thanks { display: block; }
+  .form-thanks svg { width: 36px; height: 47px; margin: 0 auto 1rem; }
+  .form-thanks h2 { font-family: var(--display); font-weight: 600; text-transform: lowercase; letter-spacing: -0.02em; font-size: 1.3rem; margin: 0 0 0.6rem; }
+  .form-thanks p { color: var(--ink-2); margin: 0 auto; max-width: 22rem; }
+  .foot-note { margin-top: 2rem; font-size: 0.85rem; color: var(--ink-2); text-align: center; }
+  .foot-note a { color: var(--action); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="mark" href="https://gattooze.github.io/littlepeoplemontessori/">
+    <svg width="22" height="29" viewBox="0 0 26 34" aria-hidden="true">
+      <path d="M13 1.6c4.3 0 6.6 2.4 6.5 5.2-.1 2.9-2.6 4.7-6.4 4.7S6.5 9.9 6.5 6.9C6.5 4 8.7 1.6 13 1.6Z" fill="var(--blush)"/>
+      <path d="M13 12.2c5.1-.1 8 2.7 8 6.2 0 3.6-3 6.1-8 6.1s-8-2.4-8-6.1c0-3.6 2.9-6.2 8-6.2Z" fill="var(--sage)"/>
+      <path d="M13 24.6c6.6-.1 10.4 3 10.4 7.3 0 4.4-4 7.4-10.4 7.4S2.6 36.3 2.6 31.9c0-4.3 3.8-7.4 10.4-7.3Z" fill="var(--denim)"/>
+    </svg>
+    <span><span class="mark-name">little people</span><br><span class="mark-sub">montessori</span></span>
+  </a>
+
+  <h1>tell us about your child.</h1>
+  <p class="lead">Thanks for finding your way here. Fill this in and we'll be in touch on WhatsApp within one working day with a couple of tour times to pick from.</p>
+
+  <div class="form-card">
+    <div class="f-body">
+      <form id="whatsappForm" novalidate>
+        <div class="f-field">
+          <label for="wa-name">Parent's name</label>
+          <input id="wa-name" name="name" type="text" autocomplete="name" required>
+        </div>
+        <div class="f-field">
+          <label for="wa-phone">WhatsApp number</label>
+          <input id="wa-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required>
+        </div>
+        <div class="f-field">
+          <label for="wa-program">Child's age</label>
+          <select id="wa-program" name="program" required>
+            <option value="" disabled selected>Choose one&hellip;</option>
+            <option value="Under 18 months">Under 18 months</option>
+            <option value="18 months – 3 years (Toddler)">18 months &ndash; 3 years (Toddler)</option>
+            <option value="3 – 6 years (Primary)">3 &ndash; 6 years (Primary)</option>
+            <option value="Daycare only (Casa)">Daycare only (Casa)</option>
+            <option value="Not sure yet">Not sure yet</option>
+          </select>
+        </div>
+        <div class="f-field">
+          <label for="wa-group">Which WhatsApp group did you see this in? <span class="f-optional">(optional)</span></label>
+          <input id="wa-group" name="group" type="text" placeholder="e.g. SK Plaza Residents">
+        </div>
+        <div class="f-field">
+          <label for="wa-timeline">When are you looking to start?</label>
+          <select id="wa-timeline" name="timeline" required>
+            <option value="" disabled selected>Choose one&hellip;</option>
+            <option value="Right away">Right away</option>
+            <option value="This term">This term</option>
+            <option value="Next term">Next term</option>
+            <option value="Just exploring">Just exploring</option>
+          </select>
+        </div>
+        <div class="f-field">
+          <label for="wa-message">Anything else? <span class="f-optional">(optional)</span></label>
+          <textarea id="wa-message" name="message" rows="3"></textarea>
+        </div>
+        <div class="f-field f-hp" aria-hidden="true">
+          <label for="wa-company">Company</label>
+          <input id="wa-company" name="company" type="text" tabindex="-1" autocomplete="off">
+        </div>
+        <input type="hidden" name="source" value="whatsapp">
+        <button class="btn" type="submit"><span class="pebble"></span><span class="f-submit-label">Send</span></button>
+        <p class="f-note">No spam, ever &mdash; this goes straight to us.</p>
+        <p class="f-error" id="wa-error">Something went wrong sending that &mdash; please try again, or message us directly on WhatsApp.</p>
+      </form>
+    </div>
+    <div class="form-thanks">
+      <svg viewBox="0 0 26 34" aria-hidden="true">
+        <path d="M13 1.6c4.3 0 6.6 2.4 6.5 5.2-.1 2.9-2.6 4.7-6.4 4.7S6.5 9.9 6.5 6.9C6.5 4 8.7 1.6 13 1.6Z" fill="var(--blush)"/>
+        <path d="M13 12.2c5.1-.1 8 2.7 8 6.2 0 3.6-3 6.1-8 6.1s-8-2.4-8-6.1c0-3.6 2.9-6.2 8-6.2Z" fill="var(--sage)"/>
+        <path d="M13 24.6c6.6-.1 10.4 3 10.4 7.3 0 4.4-4 7.4-10.4 7.4S2.6 36.3 2.6 31.9c0-4.3 3.8-7.4 10.4-7.3Z" fill="var(--denim)"/>
+      </svg>
+      <h2>got it &mdash; thank you.</h2>
+      <p>We'll message you on WhatsApp within one working day.</p>
+    </div>
+  </div>
+
+  <p class="foot-note">Prefer to talk? Call or WhatsApp us directly on <a href="tel:+919004012345">+91 90040 12345</a>.</p>
+</div>
+
+<script src="assets/js/form-kit.js"></script>
+<script>
+(() => {
+  // Same Apps Script Web App deployment as every other form on the site
+  // -- see /forms/DEPLOY-STEPS.md. form-kit.js handles delivery
+  // reliability, retry/beacon/queue, and engagement tracking.
+  const FORM_ENDPOINT = 'PASTE_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+  const form = document.getElementById('whatsappForm');
+  const card = document.querySelector('.form-card');
+
+  FormKit.wire(form, {
+    endpoint: FORM_ENDPOINT,
+    formId: 'whatsapp_join',
+    onSuccess() {
+      card.classList.add('sent');
+      form.reset();
+    }
+    // No onQueued override: a queued (network-failed) submission falls
+    // back to form-kit's default behavior of showing the .f-error
+    // message, since this page has no redirect-away step forcing an
+    // optimistic UI the way the RSVP form does.
+  });
+})();
+</script>
+</body>
+</html>
