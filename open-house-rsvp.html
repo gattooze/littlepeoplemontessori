@@ -44,6 +44,7 @@
     --ink: #2B2B29; --ink-2: #6E655D;
     --line-solid: #E2D6CA;
     --blush: #EEB3BD; --sage: #7B9B6E; --denim: #5C7FB8;
+    --bark: #D8C3A8; --leafbed: color-mix(in srgb, #7B9B6E 16%, #F6EFE9); --sage-wash: #7B9B6E24;
     --action: #4C6FA8; --action-ink: #FBF7F3;
     --display: "Avenir Next", Avenir, Futura, "Century Gothic", "Trebuchet MS", system-ui, sans-serif;
     --body: Charter, "Bitstream Charter", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
@@ -60,8 +61,8 @@
      eats layout space -- scales with viewport via clamp, so it stays
      proportionate from phone to desktop with no breakpoint needed */
   .watermark {
-    position: fixed; top: -8vw; right: -10vw; z-index: 0;
-    width: clamp(240px, 60vw, 560px); height: auto;
+    position: fixed; top: -6vw; right: -14vw; z-index: 0;
+    width: clamp(320px, 78vw, 720px); height: auto;
     opacity: 0.07; pointer-events: none; overflow: visible;
   }
   .mark { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: inherit; margin-bottom: 1.2rem; }
@@ -166,6 +167,10 @@
       <feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="2" seed="7" result="n"/>
       <feDisplacementMap in="SourceGraphic" in2="n" scale="3.5"/>
     </filter>
+    <filter id="squig2" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="6"/>
+    </filter>
     <g id="leaf-sprig" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
       <path d="M0 0 C6 -8 14 -12 24 -13 C16 -6 8 -2 0 0 Z"/>
       <path d="M0 0 C8 -2 18 0 26 6 C16 6 6 4 0 0 Z"/>
@@ -194,19 +199,67 @@
   </defs>
 </svg>
 
-<!-- Purely decorative background watermark -- a mango branch built
-     from the same tiny reused shapes as the header spot, just scaled
-     way up and faded. aria-hidden + pointer-events:none since it
+<!-- Purely decorative background watermark -- the same mango tree
+     canopy + trunk from the homepage hero scene (index.html), lifted
+     directly since this standalone page has no access to that shared
+     markup. Static on purpose: no sway/hang animation, no click
+     handler, no parakeet or tyre swing -- those only earn their keep
+     on the homepage where the tree is the centrepiece, not a faint
+     background here. aria-hidden + pointer-events:none since it
      carries no information and must never intercept a tap. -->
-<svg class="watermark" viewBox="0 0 200 160" aria-hidden="true" focusable="false">
-  <g transform="translate(150 8) scale(1.7)">
-    <path d="M4 58 c26 -10 56 -10 84 0" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
-    <use href="#leaf-sprig" transform="translate(70 54) scale(1.15)"/>
-    <use href="#leaf-sprig" transform="translate(30 50) scale(-1.05 1.05)"/>
-    <use href="#leaf-sprig" transform="translate(50 60) scale(0.9) rotate(8)"/>
-    <use href="#mango" transform="translate(22 76) scale(1.1)" style="--m: var(--blush)"/>
-    <use href="#mango" transform="translate(58 82) scale(0.9)"/>
-    <use href="#mango" transform="translate(84 70) scale(0.75)" style="--m: var(--blush)"/>
+<svg class="watermark" viewBox="220 -20 720 340" aria-hidden="true" focusable="false">
+  <g filter="url(#squig)">
+    <!-- trunk -->
+    <path d="M640 596 C638 500 622 430 606 370 C592 316 586 268 596 216 L622 224 C616 270 622 312 636 366 C652 428 668 500 672 596 Z"
+          fill="var(--bark)" stroke="var(--ink)" stroke-width="2.6"/>
+    <path d="M600 222 C566 194 536 178 505 168" fill="none" stroke="var(--ink)" stroke-width="5"/>
+    <path d="M604 218 C632 178 664 150 704 138" fill="none" stroke="var(--ink)" stroke-width="4"/>
+    <path d="M612 258 C662 248 706 256 748 276" fill="none" stroke="var(--ink)" stroke-width="3.4"/>
+  </g>
+  <g>
+    <g filter="url(#squig2)">
+      <path fill="var(--leafbed)" stroke="var(--ink)" stroke-width="2.6" stroke-linejoin="round"
+        d="M252 66
+           C 262 34, 296 22, 330 26
+           C 356 4, 408 0, 446 12
+           C 488 -12, 548 -14, 588 10
+           C 632 -14, 696 -6, 722 26
+           C 772 14, 818 38, 830 72
+           C 880 84, 898 124, 882 156
+           C 912 192, 898 238, 858 248
+           C 852 288, 808 304, 772 286
+           C 740 314, 690 312, 662 288
+           C 624 310, 576 304, 556 280
+           C 526 292, 498 282, 488 258
+           C 478 200, 472 140, 464 92
+           C 452 60, 430 48, 404 46
+           C 370 44, 336 50, 306 56
+           C 286 60, 266 62, 252 66 Z"/>
+      <ellipse cx="640" cy="170" rx="60" ry="28" fill="var(--sage-wash)"/>
+      <ellipse cx="690" cy="60" rx="66" ry="26" fill="var(--sage-wash)"/>
+      <ellipse cx="810" cy="210" rx="56" ry="26" fill="var(--sage-wash)"/>
+      <ellipse cx="560" cy="238" rx="56" ry="22" fill="var(--sage-wash)"/>
+    </g>
+    <g filter="url(#squig)">
+      <use href="#leaf-sprig" transform="translate(268 116) scale(-1.1 1.1)"/>
+      <use href="#leaf-sprig" transform="translate(372 42) rotate(-20)"/>
+      <use href="#leaf-sprig" transform="translate(508 22) rotate(-6) scale(1.15)"/>
+      <use href="#leaf-sprig" transform="translate(664 8) rotate(-14)"/>
+      <use href="#leaf-sprig" transform="translate(842 72) rotate(16) scale(1.1)"/>
+      <use href="#leaf-sprig" transform="translate(898 158) rotate(30)"/>
+      <use href="#leaf-sprig" transform="translate(846 262) rotate(60) scale(1.05)"/>
+      <use href="#leaf-sprig" transform="translate(600 292) rotate(150) scale(-1 1)"/>
+      <use href="#leaf-sprig" transform="translate(474 210) rotate(130)"/>
+    </g>
+    <g filter="url(#squig)">
+      <g transform="translate(352 64)"><use href="#mango"/></g>
+      <g transform="translate(400 62) scale(0.85)"><use href="#mango" style="--m: var(--blush)"/></g>
+      <g transform="translate(498 272) scale(0.9)"><use href="#mango"/></g>
+      <g transform="translate(566 288)"><use href="#mango" style="--m: var(--blush)"/></g>
+      <g transform="translate(706 306) scale(1.1)"><use href="#mango"/></g>
+      <g transform="translate(788 296) scale(0.9)"><use href="#mango" style="--m: var(--blush)"/></g>
+      <g transform="translate(862 252) scale(0.85)"><use href="#mango"/></g>
+    </g>
   </g>
 </svg>
 
