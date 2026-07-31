@@ -76,14 +76,14 @@
   .lead { color: var(--ink-2); font-size: 1.02rem; margin-bottom: 1.1rem; max-width: 28rem; }
 
   .event-line {
+    display: grid; gap: 0.55rem;
     font-size: 0.85rem; line-height: 1.45; color: var(--ink-2);
     background: var(--ground-3); border: 1px solid var(--line-solid); border-radius: 10px;
-    padding: 0.65rem 0.9rem; margin: 0 0 1.4rem;
+    padding: 0.75rem 0.9rem; margin: 0 0 1.3rem;
   }
-  .event-line strong {
-    display: block; color: var(--ink); font-family: var(--display);
-    font-weight: 600; font-size: 0.9rem; margin-bottom: 0.1rem;
-  }
+  .event-line p { margin: 0; }
+  .event-line strong { color: var(--ink); font-family: var(--display); font-weight: 600; font-size: 0.9rem; }
+  .event-line .ev-note { padding-top: 0.55rem; border-top: 1px solid var(--line-solid); }
 
   .form-card {
     background: var(--ground-2); border: 1px solid var(--line-solid); border-radius: 20px;
@@ -121,11 +121,6 @@
   .f-ac-list.open { display: block; }
   .f-ac-item { padding: 0.65rem 0.85rem; font-size: 0.95rem; cursor: pointer; }
   .f-ac-item:hover, .f-ac-item.f-ac-active { background: var(--ground-3); }
-
-  .note-card {
-    background: var(--blush-wash, #EEB3BD22); border: 1px solid var(--blush);
-    border-radius: 14px; padding: 0.9rem 1rem; margin: 0.4rem 0 1.3rem; font-size: 0.92rem; color: var(--ink);
-  }
 
   .btn {
     font-family: var(--display); font-weight: 600; font-size: 0.95rem;
@@ -204,12 +199,14 @@
     <span class="eyebrow">Open House</span>
   </div>
   <h1>reserve your spot.</h1>
-  <p class="lead">We'd love to show you around. Pick a time below and we'll have everything ready for you.</p>
 
-  <p class="event-line">
-    <strong>Saturday, 22 August 2026</strong>
-    Little People Montessori, Udyam Building, SV Road, Next to Sony Mony, Vile Parle (W), Mumbai &ndash; 400056
-  </p>
+  <div class="event-line">
+    <p><strong>Saturday, 22 August 2026</strong></p>
+    <p>Little People Montessori, Udyam Building, SV Road, Next to Sony Mony, Vile Parle (W), Mumbai &ndash; 400056</p>
+    <p class="ev-note">This first visit works best parent-to-parent &mdash; we'll have plenty of time with your little one at the follow-up visit, so this one's just for the grown-ups.</p>
+  </div>
+
+  <p class="lead">We'd love to show you around. Pick a time below and we'll have everything ready for you.</p>
 
   <div class="form-card">
     <div class="f-body">
@@ -262,10 +259,6 @@
             <!-- Populated by JS below: 20-minute slots, 10:00 AM to
                  7:00 PM, Saturday 22 Aug 2026. -->
           </select>
-        </div>
-
-        <div class="note-card">
-          This first visit works best parent-to-parent &mdash; we'll have plenty of time with your little one at the follow-up visit, so this one's just for the grown-ups.
         </div>
 
         <div class="f-field f-hp" aria-hidden="true">
