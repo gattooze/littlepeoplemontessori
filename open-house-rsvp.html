@@ -63,7 +63,10 @@
   .watermark {
     position: fixed; top: -6vw; right: -14vw; z-index: 0;
     width: clamp(320px, 78vw, 720px); height: auto;
-    opacity: 0.07; pointer-events: none; overflow: visible;
+    opacity: 0.13; pointer-events: none;
+    overflow: hidden; /* crop the trunk cleanly at the viewBox edge --
+      its source path runs all the way to the hero scene's ground line,
+      which is far below this corner-accent crop */
   }
   .mark { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: inherit; margin-bottom: 1.2rem; }
   .mark-name { font-family: var(--display); font-weight: 600; font-size: 1.05rem; letter-spacing: -0.03em; line-height: 0.95; text-transform: lowercase; }
@@ -207,7 +210,7 @@
      on the homepage where the tree is the centrepiece, not a faint
      background here. aria-hidden + pointer-events:none since it
      carries no information and must never intercept a tap. -->
-<svg class="watermark" viewBox="220 -20 720 340" aria-hidden="true" focusable="false">
+<svg class="watermark" viewBox="220 -20 720 420" aria-hidden="true" focusable="false">
   <g filter="url(#squig)">
     <!-- trunk -->
     <path d="M640 596 C638 500 622 430 606 370 C592 316 586 268 596 216 L622 224 C616 270 622 312 636 366 C652 428 668 500 672 596 Z"
