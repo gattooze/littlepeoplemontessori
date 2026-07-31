@@ -48,13 +48,22 @@
     --display: "Avenir Next", Avenir, Futura, "Century Gothic", "Trebuchet MS", system-ui, sans-serif;
     --body: Charter, "Bitstream Charter", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   }
-  html, body { margin: 0; background: var(--ground); }
+  html, body { margin: 0; background: var(--ground); overflow-x: hidden; }
   * { box-sizing: border-box; }
   body {
     font-family: var(--body); color: var(--ink); line-height: 1.65;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 34rem; margin: 0 auto; padding: clamp(1.1rem, 4vw, 1.8rem) 1.3rem 4rem; }
+  .wrap { position: relative; z-index: 1; max-width: 34rem; margin: 0 auto; padding: clamp(1.1rem, 4vw, 1.8rem) 1.3rem 4rem; }
+
+  /* faint decorative background, fixed so it never adds page height or
+     eats layout space -- scales with viewport via clamp, so it stays
+     proportionate from phone to desktop with no breakpoint needed */
+  .watermark {
+    position: fixed; top: -8vw; right: -10vw; z-index: 0;
+    width: clamp(240px, 60vw, 560px); height: auto;
+    opacity: 0.07; pointer-events: none; overflow: visible;
+  }
   .mark { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: inherit; margin-bottom: 1.2rem; }
   .mark-name { font-family: var(--display); font-weight: 600; font-size: 1.05rem; letter-spacing: -0.03em; line-height: 0.95; text-transform: lowercase; }
   .mark-sub { font-family: var(--display); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-2); }
@@ -79,7 +88,7 @@
     display: grid; gap: 0.55rem;
     font-size: 0.85rem; line-height: 1.45; color: var(--ink-2);
     background: var(--ground-3); border: 1px solid var(--line-solid); border-radius: 10px;
-    padding: 0.75rem 0.9rem; margin: 0 0 1.3rem;
+    padding: 0.75rem 0.9rem; margin: 1.4rem 0 0;
   }
   .event-line p { margin: 0; }
   .event-line strong { color: var(--ink); font-family: var(--display); font-weight: 600; font-size: 0.9rem; }
@@ -184,6 +193,23 @@
     </g>
   </defs>
 </svg>
+
+<!-- Purely decorative background watermark -- a mango branch built
+     from the same tiny reused shapes as the header spot, just scaled
+     way up and faded. aria-hidden + pointer-events:none since it
+     carries no information and must never intercept a tap. -->
+<svg class="watermark" viewBox="0 0 200 160" aria-hidden="true" focusable="false">
+  <g transform="translate(150 8) scale(1.7)">
+    <path d="M4 58 c26 -10 56 -10 84 0" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+    <use href="#leaf-sprig" transform="translate(70 54) scale(1.15)"/>
+    <use href="#leaf-sprig" transform="translate(30 50) scale(-1.05 1.05)"/>
+    <use href="#leaf-sprig" transform="translate(50 60) scale(0.9) rotate(8)"/>
+    <use href="#mango" transform="translate(22 76) scale(1.1)" style="--m: var(--blush)"/>
+    <use href="#mango" transform="translate(58 82) scale(0.9)"/>
+    <use href="#mango" transform="translate(84 70) scale(0.75)" style="--m: var(--blush)"/>
+  </g>
+</svg>
+
 <div class="wrap">
   <a class="mark" href="https://gattooze.github.io/littlepeoplemontessori/">
     <svg width="22" height="29" viewBox="0 0 26 34" aria-hidden="true">
@@ -199,13 +225,6 @@
     <span class="eyebrow">Open House</span>
   </div>
   <h1>reserve your spot.</h1>
-
-  <div class="event-line">
-    <p><strong>Saturday, 22 August 2026</strong></p>
-    <p>Little People Montessori, Udyam Building, SV Road, Next to Sony Mony, Vile Parle (W), Mumbai &ndash; 400056</p>
-    <p class="ev-note">This first visit works best parent-to-parent &mdash; we'll have plenty of time with your little one at the follow-up visit, so this one's just for the grown-ups.</p>
-  </div>
-
   <p class="lead">We'd love to show you around. Pick a time below and we'll have everything ready for you.</p>
 
   <div class="form-card">
@@ -277,10 +296,16 @@
         <path d="M13 12.2c5.1-.1 8 2.7 8 6.2 0 3.6-3 6.1-8 6.1s-8-2.4-8-6.1c0-3.6 2.9-6.2 8-6.2Z" fill="var(--sage)"/>
         <path d="M13 24.6c6.6-.1 10.4 3 10.4 7.3 0 4.4-4 7.4-10.4 7.4S2.6 36.3 2.6 31.9c0-4.3 3.8-7.4 10.4-7.3Z" fill="var(--denim)"/>
       </svg>
-      <h2>you're in &mdash; see you there.</h2>
-      <p>We've sent a confirmation to your email with your time slot.</p>
-      <p class="redirect-note">Taking you to our Instagram now&hellip;</p>
+      <h2 id="thanksHeading">you're in &mdash; see you there.</h2>
+      <p>We've sent a confirmation to your email with your time slot. We can't wait to show you around.</p>
+      <p class="redirect-note">Taking you to our Instagram now &mdash; come say hello!</p>
     </div>
+  </div>
+
+  <div class="event-line">
+    <p><strong>Saturday, 22 August 2026</strong></p>
+    <p>Little People Montessori, Udyam Building, SV Road, Next to Sony Mony, Vile Parle (W), Mumbai &ndash; 400056</p>
+    <p class="ev-note">This first visit works best parent-to-parent &mdash; we'll have plenty of time with your little one at the follow-up visit, so this one's just for the grown-ups.</p>
   </div>
 </div>
 
@@ -334,7 +359,9 @@
     'Sion', 'Wadala',
     // Western suburbs
     'Bandra West', 'Bandra East', 'Khar', 'Santacruz West', 'Santacruz East',
-    'Vile Parle West', 'Vile Parle East', 'Andheri West', 'Andheri East',
+    'Vile Parle West', 'Vile Parle East', 'Juhu', 'Versova', 'Four Bungalows',
+    'Lokhandwala Complex', 'Oshiwara', 'Yari Road', 'Seven Bungalows', 'D N Nagar',
+    'Amboli', 'Andheri West', 'Andheri East', 'Marol', 'Sakinaka', 'Chakala',
     'Jogeshwari', 'Goregaon West', 'Goregaon East', 'Malad West', 'Malad East',
     'Kandivali West', 'Kandivali East', 'Borivali West', 'Borivali East',
     'Dahisar', 'Mira Road',
@@ -387,15 +414,24 @@
   // -----------------------------------------------------------
   const form = document.getElementById('rsvpForm');
   const card = document.querySelector('.form-card');
+  const thanksHeading = document.getElementById('thanksHeading');
 
   function goToInstagram() {
     setTimeout(() => { location.href = INSTAGRAM_URL; }, FormKit.REDIRECT_HOLD_MS);
+  }
+
+  function personalizeThanks() {
+    const childName = document.getElementById('rf-child-name').value.trim();
+    thanksHeading.textContent = childName
+      ? `see you soon, ${childName}!`
+      : `you're in — see you there.`;
   }
 
   FormKit.wire(form, {
     endpoint: FORM_ENDPOINT,
     formId: 'open_house_rsvp',
     onSuccess() {
+      personalizeThanks();
       card.classList.add('sent');
       goToInstagram();
     },
@@ -404,6 +440,7 @@
       // for retry (including a same-tab beacon attempt already fired)
       // -- show success anyway rather than alarming a parent over a
       // transient network blip; the data is not lost.
+      personalizeThanks();
       card.classList.add('sent');
       goToInstagram();
     }
