@@ -13,14 +13,37 @@
 <meta property="og:description" content="A Montessori house in Mumbai, under an old mango tree. Tell us about your child and we'll be in touch within one working day.">
 <meta property="og:type" content="website">
 <style>
+  @font-face {
+    font-family: "General Sans"; font-weight: 400; font-style: normal; font-display: swap;
+    src: url("assets/fonts/GeneralSans-Regular.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "General Sans"; font-weight: 500; font-style: normal; font-display: swap;
+    src: url("assets/fonts/GeneralSans-Medium.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "General Sans"; font-weight: 600; font-style: normal; font-display: swap;
+    src: url("assets/fonts/GeneralSans-Semibold.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Synonym"; font-weight: 400; font-style: normal; font-display: swap;
+    src: url("assets/fonts/Synonym-Regular.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Synonym"; font-weight: 500; font-style: normal; font-display: swap;
+    src: url("assets/fonts/Synonym-Medium.woff2") format("woff2");
+  }
   :root {
-    --ground: #F6EFE9; --ground-2: #FBF7F3; --ground-3: #EFE5DC;
-    --ink: #2B2B29; --ink-2: #6E655D;
-    --line-solid: #E2D6CA;
-    --blush: #EEB3BD; --sage: #7B9B6E; --denim: #5C7FB8;
-    --action: #4C6FA8; --action-ink: #FBF7F3;
-    --display: "Avenir Next", Avenir, Futura, "Century Gothic", "Trebuchet MS", system-ui, sans-serif;
-    --body: Charter, "Bitstream Charter", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --ground:      #FDF9F7;
+    --ground-2:    #FFFFFF;
+    --ground-3:    color-mix(in srgb, #FDF9F7 90%, #303030 10%);
+    --ink:         #303030;
+    --ink-2:       color-mix(in srgb, #303030 75%, #FDF9F7);
+    --line-solid:  color-mix(in srgb, #FDF9F7 82%, #303030 18%);
+    --blush: #F2ADB8; --sage: #71895B; --denim: #5377AB;
+    --action: #5377AB; --action-ink: #FDF9F7;
+    --display: "General Sans", "Avenir Next", Avenir, Futura, "Century Gothic", "Trebuchet MS", system-ui, sans-serif;
+    --body: "Synonym", "Avenir Next", Avenir, system-ui, sans-serif;
   }
   html, body { margin: 0; background: var(--ground); }
   * { box-sizing: border-box; }
@@ -30,6 +53,8 @@
   }
   .wrap { max-width: 34rem; margin: 0 auto; padding: clamp(1.6rem, 6vw, 3rem) 1.3rem 4rem; }
   .mark { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: inherit; margin-bottom: 2rem; }
+  .mark-icon { display: block; transition: transform .4s cubic-bezier(.2,.9,.3,1.4); }
+  .mark:hover .mark-icon { transform: translateY(-2px) rotate(-4deg); }
   .mark-name { font-family: var(--display); font-weight: 600; font-size: 1.05rem; letter-spacing: -0.03em; line-height: 0.95; text-transform: lowercase; }
   .mark-sub { font-family: var(--display); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-2); }
   h1 {
@@ -54,7 +79,7 @@
     outline: none; border-color: var(--action); background: var(--ground);
   }
   .f-field textarea { resize: vertical; min-height: 4.5rem; }
-  .f-field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236E655D' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.85rem center; padding-right: 2.2rem; }
+  .f-field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23636262' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.85rem center; padding-right: 2.2rem; }
   .f-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   .f-phone-split { display: grid; grid-template-columns: 7.2rem 1fr; gap: 0.6rem; }
 
@@ -96,7 +121,7 @@
   .form-card.sent .f-body { display: none; }
   .form-thanks { display: none; text-align: center; padding: 0.5rem 0; }
   .form-card.sent .form-thanks { display: block; }
-  .form-thanks svg { width: 36px; height: 47px; margin: 0 auto 1rem; }
+  .form-thanks img { width: 26px; height: 47px; margin: 0 auto 1rem; }
   .form-thanks h2 { font-family: var(--display); font-weight: 600; text-transform: lowercase; letter-spacing: -0.02em; font-size: 1.3rem; margin: 0 0 0.6rem; }
   .form-thanks p { color: var(--ink-2); margin: 0 auto; max-width: 22rem; }
   .foot-note { margin-top: 2rem; font-size: 0.85rem; color: var(--ink-2); text-align: center; }
@@ -105,12 +130,8 @@
 </head>
 <body>
 <div class="wrap">
-  <a class="mark" href="https://gattooze.github.io/littlepeoplemontessori/">
-    <svg width="22" height="29" viewBox="0 0 26 34" aria-hidden="true">
-      <path d="M13 1.6c4.3 0 6.6 2.4 6.5 5.2-.1 2.9-2.6 4.7-6.4 4.7S6.5 9.9 6.5 6.9C6.5 4 8.7 1.6 13 1.6Z" fill="var(--blush)"/>
-      <path d="M13 12.2c5.1-.1 8 2.7 8 6.2 0 3.6-3 6.1-8 6.1s-8-2.4-8-6.1c0-3.6 2.9-6.2 8-6.2Z" fill="var(--sage)"/>
-      <path d="M13 24.6c6.6-.1 10.4 3 10.4 7.3 0 4.4-4 7.4-10.4 7.4S2.6 36.3 2.6 31.9c0-4.3 3.8-7.4 10.4-7.3Z" fill="var(--denim)"/>
-    </svg>
+  <a class="mark" href="https://littlepeoplemontessori.com/">
+    <img class="mark-icon" src="assets/img/logomark.png" alt="" width="19" height="34">
     <span><span class="mark-name">little people</span><br><span class="mark-sub">montessori</span></span>
   </a>
 
@@ -177,17 +198,13 @@
       </form>
     </div>
     <div class="form-thanks">
-      <svg viewBox="0 0 26 34" aria-hidden="true">
-        <path d="M13 1.6c4.3 0 6.6 2.4 6.5 5.2-.1 2.9-2.6 4.7-6.4 4.7S6.5 9.9 6.5 6.9C6.5 4 8.7 1.6 13 1.6Z" fill="var(--blush)"/>
-        <path d="M13 12.2c5.1-.1 8 2.7 8 6.2 0 3.6-3 6.1-8 6.1s-8-2.4-8-6.1c0-3.6 2.9-6.2 8-6.2Z" fill="var(--sage)"/>
-        <path d="M13 24.6c6.6-.1 10.4 3 10.4 7.3 0 4.4-4 7.4-10.4 7.4S2.6 36.3 2.6 31.9c0-4.3 3.8-7.4 10.4-7.3Z" fill="var(--denim)"/>
-      </svg>
+      <img src="assets/img/logomark.png" alt="" width="26" height="47">
       <h2>got it &mdash; thank you.</h2>
       <p>We'll message you on WhatsApp within one working day.</p>
     </div>
   </div>
 
-  <p class="foot-note">Prefer to talk? Call or WhatsApp us directly on <a href="tel:+919004012345">+91 90040 12345</a>.</p>
+  <p class="foot-note">Prefer to talk? Call or WhatsApp us directly on <a href="tel:+919137880091">+91 91378 80091</a>.</p>
 </div>
 
 <script src="assets/js/form-kit.js"></script>

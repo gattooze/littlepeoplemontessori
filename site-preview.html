@@ -11,7 +11,7 @@
      own reference while the real content is finished. -->
 <meta name="description" content="Little People Montessori -- a Montessori house in Mumbai for children 18 months to 6 years, with a casa daycare and a canopy of after-hours classes, under an old mango tree.">
 <style>
-  html, body { margin: 0; padding: 0; background: #F6EFE9; }
+  html, body { margin: 0; padding: 0; background: #FDF9F7; }
 </style>
 </head>
 <body>
@@ -19,37 +19,62 @@
 
 <style>
   /* ============================================================
+     LITTLE PEOPLE MONTESSORI -- brand fonts (final assets, Aug 2026)
+     Self-hosted WOFF2, converted from the supplied OTF files.
+     ============================================================ */
+  @font-face {
+    font-family: "General Sans"; font-weight: 400; font-style: normal; font-display: swap;
+    src: url("assets/fonts/GeneralSans-Regular.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "General Sans"; font-weight: 500; font-style: normal; font-display: swap;
+    src: url("assets/fonts/GeneralSans-Medium.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "General Sans"; font-weight: 600; font-style: normal; font-display: swap;
+    src: url("assets/fonts/GeneralSans-Semibold.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Synonym"; font-weight: 400; font-style: normal; font-display: swap;
+    src: url("assets/fonts/Synonym-Regular.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Synonym"; font-weight: 500; font-style: normal; font-display: swap;
+    src: url("assets/fonts/Synonym-Medium.woff2") format("woff2");
+  }
+
+  /* ============================================================
      LITTLE PEOPLE MONTESSORI -- design tokens
-     Palette sampled from the logo; the building wears the same
-     three bands (blush / sage / denim) top to bottom.
+     Colors are the exact brand swatch values (Aug 2026 brand docs),
+     not the earlier by-eye approximation. Same tokens as index.html.
      ============================================================ */
   :root {
-    --ground:      #F6EFE9;
-    --ground-2:    #FBF7F3;
-    --ground-3:    #EFE5DC;
-    --ink:         #2B2B29;
-    --ink-2:       #6E655D;
+    --ground:      #FDF9F7;
+    --ground-2:    #FFFFFF;
+    --ground-3:    color-mix(in srgb, #FDF9F7 90%, #303030 10%);
+    --ink:         #303030;
+    --ink-2:       color-mix(in srgb, #303030 75%, #FDF9F7);
     --ink-3:       #9C918780;
-    --line:        #2B2B2914;
-    --line-solid:  #E2D6CA;
+    --line:        #30303014;
+    --line-solid:  color-mix(in srgb, #FDF9F7 82%, #303030 18%);
 
-    --blush:       #EEB3BD;
-    --sage:        #7B9B6E;
-    --denim:       #5C7FB8;
+    --blush:       #F2ADB8;
+    --sage:        #71895B;
+    --denim:       #5377AB;
     --mango:       #E8B84B;
-    --rose:        #DB93A1;
+    --rose:        #89373E;
     --bark:        #D8C3A8;
-    --leafbed:     color-mix(in srgb, #7B9B6E 16%, #F6EFE9);
+    --leafbed:     color-mix(in srgb, var(--sage) 16%, var(--ground));
 
-    --blush-wash:  #EEB3BD33;
-    --sage-wash:   #7B9B6E24;
-    --denim-wash:  #5C7FB81F;
+    --blush-wash:  #F4DCDC;
+    --sage-wash:   #D8ECD6;
+    --denim-wash:  #CBDAEA;
 
-    --action:      #4C6FA8;
-    --action-ink:  #FBF7F3;
+    --action:      #5377AB;
+    --action-ink:  #FDF9F7;
 
-    --display: "Avenir Next", Avenir, Futura, "Century Gothic", "Trebuchet MS", system-ui, sans-serif;
-    --body: Charter, "Bitstream Charter", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --display: "General Sans", "Avenir Next", Avenir, Futura, "Century Gothic", "Trebuchet MS", system-ui, sans-serif;
+    --body: "Synonym", "Avenir Next", Avenir, system-ui, sans-serif;
 
     --t-hero:  clamp(2.6rem, 5.8vw, 5rem);
     --t-h2:    clamp(2rem, 4.2vw, 3.2rem);
@@ -62,7 +87,7 @@
     --pad: clamp(1.4rem, 5vw, 4rem);
     --gap-section: clamp(4.5rem, 9vw, 8rem);
     --measure: 34rem;
-    --shadow: 0 1px 2px #2b2b2908, 0 12px 34px -18px #2b2b2938;
+    --shadow: 0 1px 2px #30303008, 0 12px 34px -18px #30303038;
     --nav-h: 84px; /* measured rendered height of .nav, used to fit the hero in one screen on desktop */
   }
 
@@ -72,7 +97,7 @@
      though every element we style is explicitly cream -- because nothing
      ever painted that native background layer. */
   html { color-scheme: light only; }
-  html, body { background: #F6EFE9; margin: 0; padding: 0; }
+  html, body { background: #FDF9F7; margin: 0; padding: 0; }
 
   /* This site commits to one light palette on purpose -- the bougainvillea
      pinks and sage greens are tuned for the cream ground, and a dark
@@ -169,9 +194,8 @@
     font-family: var(--display); font-size: 0.53rem; font-weight: 600;
     letter-spacing: 0.28em; text-transform: uppercase; color: var(--ink-2);
   }
-  .mark svg .s { transition: transform .5s cubic-bezier(.2,.9,.3,1.4); transform-origin: center; }
-  .mark:hover svg .s1 { transform: translateY(-2.5px) rotate(-8deg); }
-  .mark:hover svg .s2 { transform: translateY(-1.2px) rotate(4deg); }
+  .mark-icon { display: block; transition: transform .4s cubic-bezier(.2,.9,.3,1.4); }
+  .mark:hover .mark-icon { transform: translateY(-2px) rotate(-4deg); }
 
   .nav-links { display: flex; gap: 1.5rem; align-items: center; }
   .nav-links a {
@@ -629,7 +653,7 @@
     outline: none; border-color: var(--action); background: var(--ground);
   }
   .f-field textarea { resize: vertical; min-height: 5rem; font-family: var(--body); }
-  .f-field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236E655D' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.85rem center; padding-right: 2.2rem; }
+  .f-field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23636262' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.85rem center; padding-right: 2.2rem; }
   .f-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   .f-phone-split { display: grid; grid-template-columns: 7.2rem 1fr; gap: 0.6rem; }
 
@@ -661,7 +685,7 @@
   .form-card.sent .f-body { display: none; }
   .form-thanks { display: none; text-align: center; padding: 1rem 0; }
   .form-card.sent .form-thanks { display: block; }
-  .form-thanks .th-mark { width: 40px; height: 40px; margin: 0 auto 1rem; }
+  .form-thanks .th-mark { width: 26px; height: 47px; margin: 0 auto 1rem; }
   .form-thanks h3 { margin-bottom: 0.6rem; }
   .form-thanks p { color: var(--ink-2); max-width: 26rem; margin: 0 auto; }
   @media (max-width: 600px) { .f-grid { grid-template-columns: 1fr; } }
@@ -869,11 +893,7 @@
   <nav class="nav" id="nav">
     <div class="nav-in">
       <a class="mark" href="#/" aria-label="little people montessori, home">
-        <svg width="26" height="34" viewBox="0 0 26 34" aria-hidden="true">
-          <path class="s s1" d="M13 1.6c4.3 0 6.6 2.4 6.5 5.2-.1 2.9-2.6 4.7-6.4 4.7S6.5 9.9 6.5 6.9C6.5 4 8.7 1.6 13 1.6Z" fill="var(--blush)"/>
-          <path class="s s2" d="M13 12.2c5.1-.1 8 2.7 8 6.2 0 3.6-3 6.1-8 6.1s-8-2.4-8-6.1c0-3.6 2.9-6.2 8-6.2Z" fill="var(--sage)"/>
-          <path class="s s3" d="M13 24.6c6.6-.1 10.4 3 10.4 7.3 0 4.4-4 7.4-10.4 7.4S2.6 36.3 2.6 31.9c0-4.3 3.8-7.4 10.4-7.3Z" fill="var(--denim)"/>
-        </svg>
+        <img class="mark-icon" src="assets/img/logomark.png" alt="" width="19" height="34">
         <span>
           <span class="mark-name">little people</span><br>
           <span class="mark-sub">Montessori</span>
@@ -1660,8 +1680,8 @@
       <div class="contact-cards">
         <div class="ccard rv">
           <span class="label">Call or write</span>
-          <b>+91 90040 12345</b>
-          <a href="tel:+919004012345">Ring us on a weekday between 9 and 4</a>
+          <b>+91 91378 80091</b>
+          <a href="tel:+919137880091">Ring us on a weekday between 9 and 4</a>
           <a class="tbd" href="#/admissions">hello@littlepeoplemontessori.in &mdash; to confirm</a>
         </div>
         <div class="ccard rv">
@@ -1747,17 +1767,13 @@
               <button class="btn btn-solid" type="submit"><span class="pebble"></span><span class="f-submit-label">Send enquiry</span></button>
               <span class="f-note">No spam, ever &mdash; this goes straight to us.</span>
             </div>
-            <p class="f-error" id="wf-error">Something went wrong sending that &mdash; please try again, or call us on <a href="tel:+919004012345" style="color:inherit">+91 90040 12345</a>.</p>
+            <p class="f-error" id="wf-error">Something went wrong sending that &mdash; please try again, or call us on <a href="tel:+919137880091" style="color:inherit">+91 91378 80091</a>.</p>
           </form>
         </div>
         <div class="form-thanks">
-          <svg class="th-mark" viewBox="0 0 26 34" aria-hidden="true">
-            <path d="M13 1.6c4.3 0 6.6 2.4 6.5 5.2-.1 2.9-2.6 4.7-6.4 4.7S6.5 9.9 6.5 6.9C6.5 4 8.7 1.6 13 1.6Z" fill="var(--blush)"/>
-            <path d="M13 12.2c5.1-.1 8 2.7 8 6.2 0 3.6-3 6.1-8 6.1s-8-2.4-8-6.1c0-3.6 2.9-6.2 8-6.2Z" fill="var(--sage)"/>
-            <path d="M13 24.6c6.6-.1 10.4 3 10.4 7.3 0 4.4-4 7.4-10.4 7.4S2.6 36.3 2.6 31.9c0-4.3 3.8-7.4 10.4-7.3Z" fill="var(--denim)"/>
-          </svg>
+          <img class="th-mark" src="assets/img/logomark.png" alt="" width="26" height="34">
           <h3>got it &mdash; thank you.</h3>
-          <p>We'll be in touch within one working day. If it's urgent, call us on <a href="tel:+919004012345" style="color:var(--action)">+91 90040 12345</a>.</p>
+          <p>We'll be in touch within one working day. If it's urgent, call us on <a href="tel:+919137880091" style="color:var(--action)">+91 91378 80091</a>.</p>
         </div>
       </div>
     </section>
@@ -1801,11 +1817,7 @@
     <div class="foot-grid">
       <div class="foot-col">
         <a class="mark" href="#/" style="margin-bottom:0.8rem">
-          <svg width="26" height="34" viewBox="0 0 26 34" aria-hidden="true">
-            <path d="M13 1.6c4.3 0 6.6 2.4 6.5 5.2-.1 2.9-2.6 4.7-6.4 4.7S6.5 9.9 6.5 6.9C6.5 4 8.7 1.6 13 1.6Z" fill="var(--blush)"/>
-            <path d="M13 12.2c5.1-.1 8 2.7 8 6.2 0 3.6-3 6.1-8 6.1s-8-2.4-8-6.1c0-3.6 2.9-6.2 8-6.2Z" fill="var(--sage)"/>
-            <path d="M13 24.6c6.6-.1 10.4 3 10.4 7.3 0 4.4-4 7.4-10.4 7.4S2.6 36.3 2.6 31.9c0-4.3 3.8-7.4 10.4-7.3Z" fill="var(--denim)"/>
-          </svg>
+          <img class="mark-icon" src="assets/img/logomark.png" alt="" width="19" height="34">
           <span><span class="mark-name">little people</span><br><span class="mark-sub">Montessori</span></span>
         </a>
         <span>An AMI-informed Montessori house in Mumbai for children 18 months to 6 years &mdash; with a casa daycare and a canopy of after-hours classes, under an old mango tree.</span>
@@ -1818,7 +1830,7 @@
       </div>
       <div class="foot-col">
         <h4>Contact</h4>
-        <a href="tel:+919004012345">+91 90040 12345</a>
+        <a href="tel:+919137880091">+91 91378 80091</a>
         <span class="tbd">Email &mdash; to confirm</span>
         <span>littlepeoplemontessori.in</span>
       </div>

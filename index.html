@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light only">
 <meta name="description" content="Little People Montessori -- a Montessori house in Mumbai, opening soon. Join us for our first Admissions Open House on Saturday, 22 August 2026.">
 <style>
-  html, body { margin: 0; padding: 0; background: #F6EFE9; }
+  html, body { margin: 0; padding: 0; background: #FDF9F7; }
 </style>
 </head>
 <body>
@@ -14,35 +14,62 @@
 
 <style>
   /* ============================================================
+     LITTLE PEOPLE MONTESSORI -- brand fonts (final assets, Aug 2026)
+     Self-hosted WOFF2, converted from the supplied OTF files.
+     ============================================================ */
+  @font-face {
+    font-family: "General Sans"; font-weight: 400; font-style: normal; font-display: swap;
+    src: url("assets/fonts/GeneralSans-Regular.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "General Sans"; font-weight: 500; font-style: normal; font-display: swap;
+    src: url("assets/fonts/GeneralSans-Medium.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "General Sans"; font-weight: 600; font-style: normal; font-display: swap;
+    src: url("assets/fonts/GeneralSans-Semibold.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Synonym"; font-weight: 400; font-style: normal; font-display: swap;
+    src: url("assets/fonts/Synonym-Regular.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Synonym"; font-weight: 500; font-style: normal; font-display: swap;
+    src: url("assets/fonts/Synonym-Medium.woff2") format("woff2");
+  }
+
+  /* ============================================================
      LITTLE PEOPLE MONTESSORI -- design tokens
-     Same tokens as the main site (site-preview.html) so this page
-     drops in cleanly once the full content goes live again.
+     Colors are the exact brand swatch values (Aug 2026 brand docs),
+     not the earlier by-eye approximation. Same tokens as the main
+     site (site-preview.html) so this page drops in cleanly once the
+     full content goes live again.
      ============================================================ */
   :root {
-    --ground:      #F6EFE9;
-    --ground-2:    #FBF7F3;
-    --ground-3:    #EFE5DC;
-    --ink:         #2B2B29;
-    --ink-2:       #6E655D;
-    --line:        #2B2B2914;
-    --line-solid:  #E2D6CA;
+    --ground:      #FDF9F7;
+    --ground-2:    #FFFFFF;
+    --ground-3:    color-mix(in srgb, #FDF9F7 90%, #303030 10%);
+    --ink:         #303030;
+    --ink-2:       color-mix(in srgb, #303030 75%, #FDF9F7);
+    --line:        #30303014;
+    --line-solid:  color-mix(in srgb, #FDF9F7 82%, #303030 18%);
 
-    --blush:       #EEB3BD;
-    --sage:        #7B9B6E;
-    --denim:       #5C7FB8;
-    --rose:        #DB93A1;
+    --blush:       #F2ADB8;
+    --sage:        #71895B;
+    --denim:       #5377AB;
+    --rose:        #89373E;
     --bark:        #D8C3A8;
-    --leafbed:     color-mix(in srgb, #7B9B6E 16%, #F6EFE9);
+    --leafbed:     color-mix(in srgb, var(--sage) 16%, var(--ground));
 
-    --blush-wash:  #EEB3BD33;
-    --sage-wash:   #7B9B6E24;
-    --denim-wash:  #5C7FB81F;
+    --blush-wash:  #F4DCDC;
+    --sage-wash:   #D8ECD6;
+    --denim-wash:  #CBDAEA;
 
-    --action:      #4C6FA8;
-    --action-ink:  #FBF7F3;
+    --action:      #5377AB;
+    --action-ink:  #FDF9F7;
 
-    --display: "Avenir Next", Avenir, Futura, "Century Gothic", "Trebuchet MS", system-ui, sans-serif;
-    --body: Charter, "Bitstream Charter", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --display: "General Sans", "Avenir Next", Avenir, Futura, "Century Gothic", "Trebuchet MS", system-ui, sans-serif;
+    --body: "Synonym", "Avenir Next", Avenir, system-ui, sans-serif;
 
     --t-hero:  clamp(2.6rem, 5.8vw, 5rem);
     --t-h2:    clamp(1.9rem, 3.8vw, 2.7rem);
@@ -56,7 +83,7 @@
   }
 
   html { color-scheme: light only; }
-  html, body { background: #F6EFE9; margin: 0; padding: 0; }
+  html, body { background: #FDF9F7; margin: 0; padding: 0; }
 
   .lp {
     background: var(--ground);
@@ -128,9 +155,8 @@
   .mark { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; }
   .mark-name { font-family: var(--display); font-weight: 600; font-size: 1.12rem; letter-spacing: -0.045em; line-height: 0.92; text-transform: lowercase; }
   .mark-sub { font-family: var(--display); font-size: 0.53rem; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase; color: var(--ink-2); }
-  .mark svg .s { transition: transform .5s cubic-bezier(.2,.9,.3,1.4); transform-origin: center; }
-  .mark:hover svg .s1 { transform: translateY(-2.5px) rotate(-8deg); }
-  .mark:hover svg .s2 { transform: translateY(-1.2px) rotate(4deg); }
+  .mark-icon { display: block; transition: transform .4s cubic-bezier(.2,.9,.3,1.4); }
+  .mark:hover .mark-icon { transform: translateY(-2px) rotate(-4deg); }
 
   /* ---------- illustration plumbing ---------- */
   svg .ink { fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
@@ -339,11 +365,7 @@
   <nav class="nav" id="nav">
     <div class="nav-in">
       <a class="mark" href="/" aria-label="little people montessori, home">
-        <svg width="26" height="34" viewBox="0 0 26 34" aria-hidden="true">
-          <path class="s s1" d="M13 1.6c4.3 0 6.6 2.4 6.5 5.2-.1 2.9-2.6 4.7-6.4 4.7S6.5 9.9 6.5 6.9C6.5 4 8.7 1.6 13 1.6Z" fill="var(--blush)"/>
-          <path class="s s2" d="M13 12.2c5.1-.1 8 2.7 8 6.2 0 3.6-3 6.1-8 6.1s-8-2.4-8-6.1c0-3.6 2.9-6.2 8-6.2Z" fill="var(--sage)"/>
-          <path class="s s3" d="M13 24.6c6.6-.1 10.4 3 10.4 7.3 0 4.4-4 7.4-10.4 7.4S2.6 36.3 2.6 31.9c0-4.3 3.8-7.4 10.4-7.3Z" fill="var(--denim)"/>
-        </svg>
+        <img class="mark-icon" src="assets/img/logomark.png" alt="" width="19" height="34">
         <span>
           <span class="mark-name">little people</span><br>
           <span class="mark-sub">Montessori</span>
@@ -687,9 +709,9 @@
     <!-- ============ OPEN HOUSE ANNOUNCEMENT ============ -->
     <section class="announce wrap">
       <div class="announce-card rv">
-        <div class="label">First Open House</div>
+        <div class="label">Open House</div>
         <h2>come see it for yourself.</h2>
-        <p>Meet the school, walk the rooms, and see what real work looks like for little hands. Our first Admissions Open House is Saturday, 22 August 2026.</p>
+        <p>Meet the school, walk the rooms, and see what real work looks like for little hands. Our Admissions Open House is Saturday, 22 August 2026.</p>
         <a class="btn btn-solid" href="open-house-rsvp.html?utm_source=website&amp;utm_medium=coming_soon_page&amp;utm_campaign=open_house_aug2026">
           <span class="pebble"></span>Reserve your spot
         </a>
@@ -718,23 +740,21 @@
     <div class="foot-grid">
       <div class="foot-col">
         <a class="mark" href="/" style="margin-bottom:0.8rem">
-          <svg width="26" height="34" viewBox="0 0 26 34" aria-hidden="true">
-            <path d="M13 1.6c4.3 0 6.6 2.4 6.5 5.2-.1 2.9-2.6 4.7-6.4 4.7S6.5 9.9 6.5 6.9C6.5 4 8.7 1.6 13 1.6Z" fill="var(--blush)"/>
-            <path d="M13 12.2c5.1-.1 8 2.7 8 6.2 0 3.6-3 6.1-8 6.1s-8-2.4-8-6.1c0-3.6 2.9-6.2 8-6.2Z" fill="var(--sage)"/>
-            <path d="M13 24.6c6.6-.1 10.4 3 10.4 7.3 0 4.4-4 7.4-10.4 7.4S2.6 36.3 2.6 31.9c0-4.3 3.8-7.4 10.4-7.3Z" fill="var(--denim)"/>
-          </svg>
+          <img class="mark-icon" src="assets/img/logomark.png" alt="" width="19" height="34">
           <span><span class="mark-name">little people</span><br><span class="mark-sub">Montessori</span></span>
         </a>
         <span>An AMI-informed Montessori house in Mumbai for children 18 months to 6 years &mdash; with a casa daycare and a canopy of after-hours classes, under an old mango tree.</span>
       </div>
       <div class="foot-col">
         <h4>Visit</h4>
-        <span>SK Plaza</span>
-        <span>Mumbai</span>
+        <span>Little People Montessori</span>
+        <span>SV Road, Vile Parle (West)</span>
+        <span>Mumbai &ndash; 400056</span>
       </div>
       <div class="foot-col">
         <h4>Contact</h4>
-        <a href="tel:+919004012345">+91 90040 12345</a>
+        <a href="tel:+919137880091">+91 91378 80091</a>
+        <a href="mailto:info@littlepeoplemontessori.com">info@littlepeoplemontessori.com</a>
         <span>littlepeoplemontessori.com</span>
       </div>
     </div>
