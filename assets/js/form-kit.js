@@ -255,6 +255,100 @@
   }
 
   /* ---------------------------------------------------------
+     Country-code phone field: a flag+dial-code <select> plus a
+     plain digits-only <input>, kept visually separate (better UX
+     than making someone edit a pre-filled "+91 " prefix), synced
+     into one hidden field so the Sheet still gets a single "phone"
+     value with the code affixed -- no schema change, no separate
+     column. Flags are computed from the ISO code (regional-
+     indicator Unicode trick), not hand-typed, so there's no risk
+     of a mismatched/miscopied emoji across 50+ entries.
+     --------------------------------------------------------- */
+  const COUNTRIES = [
+    // [ISO 3166-1 alpha-2, dial code, name] -- India first as the default.
+    ['IN', '91', 'India'],
+    ['AE', '971', 'United Arab Emirates'],
+    ['AF', '93', 'Afghanistan'],
+    ['AU', '61', 'Australia'],
+    ['AT', '43', 'Austria'],
+    ['BH', '973', 'Bahrain'],
+    ['BD', '880', 'Bangladesh'],
+    ['BE', '32', 'Belgium'],
+    ['BR', '55', 'Brazil'],
+    ['CA', '1', 'Canada'],
+    ['CN', '86', 'China'],
+    ['DK', '45', 'Denmark'],
+    ['EG', '20', 'Egypt'],
+    ['FI', '358', 'Finland'],
+    ['FR', '33', 'France'],
+    ['DE', '49', 'Germany'],
+    ['HK', '852', 'Hong Kong'],
+    ['ID', '62', 'Indonesia'],
+    ['IE', '353', 'Ireland'],
+    ['IL', '972', 'Israel'],
+    ['IT', '39', 'Italy'],
+    ['JP', '81', 'Japan'],
+    ['KE', '254', 'Kenya'],
+    ['KW', '965', 'Kuwait'],
+    ['MY', '60', 'Malaysia'],
+    ['MV', '960', 'Maldives'],
+    ['MU', '230', 'Mauritius'],
+    ['MX', '52', 'Mexico'],
+    ['NP', '977', 'Nepal'],
+    ['NL', '31', 'Netherlands'],
+    ['NZ', '64', 'New Zealand'],
+    ['NG', '234', 'Nigeria'],
+    ['NO', '47', 'Norway'],
+    ['OM', '968', 'Oman'],
+    ['PK', '92', 'Pakistan'],
+    ['PH', '63', 'Philippines'],
+    ['PL', '48', 'Poland'],
+    ['PT', '351', 'Portugal'],
+    ['QA', '974', 'Qatar'],
+    ['RU', '7', 'Russia'],
+    ['SA', '966', 'Saudi Arabia'],
+    ['SG', '65', 'Singapore'],
+    ['ZA', '27', 'South Africa'],
+    ['KR', '82', 'South Korea'],
+    ['ES', '34', 'Spain'],
+    ['LK', '94', 'Sri Lanka'],
+    ['SE', '46', 'Sweden'],
+    ['CH', '41', 'Switzerland'],
+    ['TW', '886', 'Taiwan'],
+    ['TZ', '255', 'Tanzania'],
+    ['TH', '66', 'Thailand'],
+    ['TR', '90', 'Turkey'],
+    ['GB', '44', 'United Kingdom'],
+    ['US', '1', 'United States'],
+    ['VN', '84', 'Vietnam']
+  ];
+
+  function flagEmoji(iso2) {
+    return iso2.toUpperCase().replace(/./g, (c) => String.fromCodePoint(127397 + c.charCodeAt(0)));
+  }
+
+  /**
+   * @param {HTMLSelectElement} countrySelect  Populated by this call.
+   * @param {HTMLInputElement} numberInput     Plain digits, user-facing.
+   * @param {HTMLInputElement} hiddenPhoneInput  The actual submitted
+   *   field (e.g. name="phone") -- kept in sync as "+<dial> <digits>".
+   */
+  function wireCountryPhone(countrySelect, numberInput, hiddenPhoneInput) {
+    countrySelect.innerHTML = COUNTRIES.map(([iso, dial, name]) => {
+      const label = `${flagEmoji(iso)} +${dial} ${name}`;
+      return `<option value="+${dial}"${iso === 'IN' ? ' selected' : ''}>${label}</option>`;
+    }).join('');
+
+    function sync() {
+      const digits = numberInput.value.trim();
+      hiddenPhoneInput.value = digits ? `${countrySelect.value} ${digits}` : '';
+    }
+    countrySelect.addEventListener('change', sync);
+    numberInput.addEventListener('input', sync);
+    sync();
+  }
+
+  /* ---------------------------------------------------------
      Public API
      --------------------------------------------------------- */
   const FormKit = {
@@ -359,6 +453,11 @@
      *  still running underneath, and a bounded hold before navigating
      *  away so the retry/beacon sequence gets a real window first. */
     REDIRECT_HOLD_MS,
+
+    /** Populates a country-code <select> (flag + dial code, India
+     *  default) and keeps a hidden phone field in sync as
+     *  "+<dial> <digits>" -- see wireCountryPhone above. */
+    wireCountryPhone,
 
     _internal: { classifyDevice, captureUTM, uuid } // exposed for local testing only
   };

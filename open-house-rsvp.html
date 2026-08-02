@@ -111,6 +111,8 @@
   .f-field label { font-family: var(--display); font-weight: 600; font-size: 0.8rem; color: var(--ink); }
   .f-row { display: grid; grid-template-columns: 1fr; gap: 1.1rem; }
   .f-row.f-split { grid-template-columns: 1fr 8.5rem; gap: 0.7rem; align-items: end; }
+  .f-phone-split { display: grid; grid-template-columns: 9.5rem 1fr; gap: 0.6rem; }
+  .f-phone-split select { font-size: 0.92rem; }
   .f-field input, .f-field select, .f-field textarea {
     font-family: var(--body); font-size: 1rem; color: var(--ink);
     background: var(--ground-2); border: 1px solid var(--line-solid); border-radius: 10px;
@@ -322,8 +324,12 @@
           <input id="rf-parent-name" name="parent_name" type="text" autocomplete="name" required>
         </div>
         <div class="f-field">
-          <label for="rf-parent-phone">Phone (ideally WhatsApp)</label>
-          <input id="rf-parent-phone" name="parent_phone" type="tel" inputmode="tel" autocomplete="tel" required>
+          <label for="rf-parent-phone-number">Phone (ideally WhatsApp)</label>
+          <div class="f-phone-split">
+            <select id="rf-parent-phone-country" aria-label="Country code"></select>
+            <input id="rf-parent-phone-number" type="tel" inputmode="tel" autocomplete="tel" required>
+          </div>
+          <input type="hidden" id="rf-parent-phone" name="parent_phone">
         </div>
         <div class="f-field">
           <label for="rf-parent-email">Email</label>
@@ -481,6 +487,12 @@
   const form = document.getElementById('rsvpForm');
   const card = document.querySelector('.form-card');
   const thanksHeading = document.getElementById('thanksHeading');
+
+  FormKit.wireCountryPhone(
+    document.getElementById('rf-parent-phone-country'),
+    document.getElementById('rf-parent-phone-number'),
+    document.getElementById('rf-parent-phone')
+  );
 
   function goToInstagram() {
     setTimeout(() => { location.href = INSTAGRAM_URL; }, FormKit.REDIRECT_HOLD_MS);
