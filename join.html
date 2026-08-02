@@ -56,8 +56,29 @@
   .f-field textarea { resize: vertical; min-height: 4.5rem; }
   .f-field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236E655D' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.85rem center; padding-right: 2.2rem; }
   .f-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-  .f-phone-split { display: grid; grid-template-columns: 9.5rem 1fr; gap: 0.6rem; }
-  .f-phone-split select { font-size: 0.92rem; }
+  .f-phone-split { display: grid; grid-template-columns: 7.2rem 1fr; gap: 0.6rem; }
+
+  /* country-code picker: collapsed button shows flag+code only, the
+     open list shows full country names. */
+  .f-cc { position: relative; }
+  .f-cc-btn {
+    width: 100%; font-family: var(--body); font-size: 1rem; color: var(--ink);
+    background: var(--ground-2); border: 1px solid var(--line-solid); border-radius: 10px;
+    padding: 0.75rem 0.7rem; display: flex; align-items: center; gap: 0.35rem;
+    cursor: pointer; text-align: left;
+  }
+  .f-cc-btn:focus { outline: none; border-color: var(--action); background: var(--ground); }
+  .f-cc-flag { font-size: 1.05rem; line-height: 1; }
+  .f-cc-code { font-variant-numeric: tabular-nums; }
+  .f-cc-list {
+    position: absolute; top: calc(100% + 4px); left: 0; z-index: 10;
+    width: 16rem; max-height: 13rem; overflow-y: auto; margin: 0; padding: 0.3rem; list-style: none;
+    background: var(--ground-2); border: 1px solid var(--line-solid); border-radius: 10px;
+    box-shadow: 0 8px 24px -8px rgba(43,43,41,.25); display: none;
+  }
+  .f-cc-list.open { display: block; }
+  .f-cc-item { padding: 0.55rem 0.7rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+  .f-cc-item:hover, .f-cc-item.f-cc-active { background: var(--ground-3); }
   .btn {
     font-family: var(--display); font-weight: 600; font-size: 0.95rem;
     display: inline-flex; align-items: center; gap: 0.6rem;
@@ -106,8 +127,13 @@
         <div class="f-field">
           <label for="wa-phone-number">WhatsApp number</label>
           <div class="f-phone-split">
-            <select id="wa-phone-country" aria-label="Country code"></select>
-            <input id="wa-phone-number" type="tel" inputmode="tel" autocomplete="tel" required>
+            <div class="f-cc" id="wa-phone-cc">
+              <button type="button" class="f-cc-btn" aria-haspopup="listbox" aria-expanded="false">
+                <span class="f-cc-flag"></span><span class="f-cc-code"></span>
+              </button>
+              <ul class="f-cc-list" role="listbox"></ul>
+            </div>
+            <input id="wa-phone-number" type="tel" inputmode="numeric" autocomplete="tel" required>
           </div>
           <input type="hidden" id="wa-phone" name="phone">
         </div>
@@ -123,8 +149,8 @@
           </select>
         </div>
         <div class="f-field">
-          <label for="wa-group">Which WhatsApp group did you see this in? <span class="f-optional">(optional)</span></label>
-          <input id="wa-group" name="group" type="text" placeholder="e.g. SK Plaza Residents">
+          <label for="wa-group">Which WhatsApp group did you see this in?</label>
+          <input id="wa-group" name="group" type="text" placeholder="e.g. SK Plaza Residents" required>
         </div>
         <div class="f-field">
           <label for="wa-timeline">When are you looking to start?</label>
@@ -137,8 +163,8 @@
           </select>
         </div>
         <div class="f-field">
-          <label for="wa-message">Anything else? <span class="f-optional">(optional)</span></label>
-          <textarea id="wa-message" name="message" rows="3"></textarea>
+          <label for="wa-message">Anything else?</label>
+          <textarea id="wa-message" name="message" rows="3" required></textarea>
         </div>
         <div class="f-field f-hp" aria-hidden="true">
           <label for="wa-company">Company</label>
@@ -176,7 +202,7 @@
   const card = document.querySelector('.form-card');
 
   FormKit.wireCountryPhone(
-    document.getElementById('wa-phone-country'),
+    document.getElementById('wa-phone-cc'),
     document.getElementById('wa-phone-number'),
     document.getElementById('wa-phone')
   );

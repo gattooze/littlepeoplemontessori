@@ -626,8 +626,29 @@
   .f-field textarea { resize: vertical; min-height: 5rem; font-family: var(--body); }
   .f-field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236E655D' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.85rem center; padding-right: 2.2rem; }
   .f-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-  .f-phone-split { display: grid; grid-template-columns: 9.5rem 1fr; gap: 0.6rem; }
-  .f-phone-split select { font-size: 0.92rem; }
+  .f-phone-split { display: grid; grid-template-columns: 7.2rem 1fr; gap: 0.6rem; }
+
+  /* country-code picker: collapsed button shows flag+code only, the
+     open list shows full country names. */
+  .f-cc { position: relative; }
+  .f-cc-btn {
+    width: 100%; font-family: var(--body); font-size: 1rem; color: var(--ink);
+    background: var(--ground-2); border: 1px solid var(--line-solid); border-radius: 10px;
+    padding: 0.7rem 0.6rem; display: flex; align-items: center; gap: 0.3rem;
+    cursor: pointer; text-align: left;
+  }
+  .f-cc-btn:focus { outline: none; border-color: var(--action); background: var(--ground); }
+  .f-cc-flag { font-size: 1.05rem; line-height: 1; }
+  .f-cc-code { font-variant-numeric: tabular-nums; }
+  .f-cc-list {
+    position: absolute; top: calc(100% + 4px); left: 0; z-index: 10;
+    width: 16rem; max-height: 13rem; overflow-y: auto; margin: 0; padding: 0.3rem; list-style: none;
+    background: var(--ground-2); border: 1px solid var(--line-solid); border-radius: 10px;
+    box-shadow: 0 8px 24px -8px rgba(43,43,41,.25); display: none;
+  }
+  .f-cc-list.open { display: block; }
+  .f-cc-item { padding: 0.55rem 0.7rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+  .f-cc-item:hover, .f-cc-item.f-cc-active { background: var(--ground-3); }
   .f-submit { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
   .f-note { font-size: 0.82rem; color: var(--ink-2); }
   .f-error { color: #C4634A; font-size: 0.85rem; display: none; }
@@ -1682,14 +1703,19 @@
               <div class="f-field">
                 <label for="wf-phone-number">Phone / WhatsApp</label>
                 <div class="f-phone-split">
-                  <select id="wf-phone-country" aria-label="Country code"></select>
-                  <input id="wf-phone-number" type="tel" inputmode="tel" autocomplete="tel" required>
+                  <div class="f-cc" id="wf-phone-cc">
+                    <button type="button" class="f-cc-btn" aria-haspopup="listbox" aria-expanded="false">
+                      <span class="f-cc-flag"></span><span class="f-cc-code"></span>
+                    </button>
+                    <ul class="f-cc-list" role="listbox"></ul>
+                  </div>
+                  <input id="wf-phone-number" type="tel" inputmode="numeric" autocomplete="tel" required>
                 </div>
                 <input type="hidden" id="wf-phone" name="phone">
               </div>
               <div class="f-field">
-                <label for="wf-email">Email <span class="f-optional">(optional)</span></label>
-                <input id="wf-email" name="email" type="email" autocomplete="email">
+                <label for="wf-email">Email</label>
+                <input id="wf-email" name="email" type="email" autocomplete="email" required>
               </div>
               <div class="f-field f-full">
                 <label for="wf-program">Child's age</label>
@@ -1703,8 +1729,8 @@
                 </select>
               </div>
               <div class="f-field f-full">
-                <label for="wf-message">Anything else? <span class="f-optional">(optional)</span></label>
-                <textarea id="wf-message" name="message" rows="3"></textarea>
+                <label for="wf-message">Anything else?</label>
+                <textarea id="wf-message" name="message" rows="3" required></textarea>
               </div>
               <div class="f-field f-hp" aria-hidden="true">
                 <label for="wf-company">Company</label>
@@ -1824,7 +1850,7 @@
   if (enquiryForm) {
     const card = enquiryForm.closest('.form-card');
     FormKit.wireCountryPhone(
-      document.getElementById('wf-phone-country'),
+      document.getElementById('wf-phone-cc'),
       document.getElementById('wf-phone-number'),
       document.getElementById('wf-phone')
     );

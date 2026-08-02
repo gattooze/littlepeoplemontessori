@@ -328,24 +328,86 @@
   }
 
   /**
-   * @param {HTMLSelectElement} countrySelect  Populated by this call.
-   * @param {HTMLInputElement} numberInput     Plain digits, user-facing.
+   * A flag+code picker, not a native <select> -- the collapsed button
+   * only ever shows the flag and dial code (e.g. "🇮🇳 +91"); the full
+   * country name only appears in the open dropdown list. A native
+   * <select> can't do this (its closed state always mirrors whichever
+   * <option> text is selected), so this is a small custom listbox
+   * matching the same interaction pattern as the location autocomplete
+   * already on the RSVP page (button/list, mousedown-to-select so a
+   * click can't be lost to a blur, Escape/outside-click to close).
+   *
+   * @param {HTMLElement} wrapperEl       Container with .f-cc-btn /
+   *   .f-cc-flag / .f-cc-code / .f-cc-list children (see markup below).
+   * @param {HTMLInputElement} numberInput  Plain digits, user-facing.
+   *   Its `pattern`/`maxlength`/`title` are updated per selected
+   *   country (10-digit for India, a looser 6-14 digit range
+   *   elsewhere) so the browser's own validation enforces it --
+   *   participates in the same checkValidity()/reportValidity() flow
+   *   wire() already calls, no separate validation code needed.
    * @param {HTMLInputElement} hiddenPhoneInput  The actual submitted
-   *   field (e.g. name="phone") -- kept in sync as "+<dial> <digits>".
+   *   field (e.g. name="phone") -- kept in sync as "+<dial><digits>",
+   *   no space, per how the Sheet should store it.
    */
-  function wireCountryPhone(countrySelect, numberInput, hiddenPhoneInput) {
-    countrySelect.innerHTML = COUNTRIES.map(([iso, dial, name]) => {
-      const label = `${flagEmoji(iso)} +${dial} ${name}`;
-      return `<option value="+${dial}"${iso === 'IN' ? ' selected' : ''}>${label}</option>`;
-    }).join('');
+  function wireCountryPhone(wrapperEl, numberInput, hiddenPhoneInput) {
+    const btn = wrapperEl.querySelector('.f-cc-btn');
+    const flagEl = wrapperEl.querySelector('.f-cc-flag');
+    const codeEl = wrapperEl.querySelector('.f-cc-code');
+    const list = wrapperEl.querySelector('.f-cc-list');
+
+    list.innerHTML = COUNTRIES.map(([iso, dial, name]) =>
+      `<li class="f-cc-item" role="option">${flagEmoji(iso)} +${dial} ${name}</li>`
+    ).join('');
+    const items = Array.from(list.querySelectorAll('.f-cc-item'));
+    let activeIndex = 0;
 
     function sync() {
-      const digits = numberInput.value.trim();
-      hiddenPhoneInput.value = digits ? `${countrySelect.value} ${digits}` : '';
+      const digits = numberInput.value.replace(/\D/g, '');
+      hiddenPhoneInput.value = digits ? `+${COUNTRIES[activeIndex][1]}${digits}` : '';
     }
-    countrySelect.addEventListener('change', sync);
+
+    function applyCountry(index) {
+      activeIndex = index;
+      const [, dial, name] = COUNTRIES[index];
+      flagEl.textContent = flagEmoji(COUNTRIES[index][0]);
+      codeEl.textContent = `+${dial}`;
+      btn.setAttribute('aria-label', `Country code, currently ${name}, plus ${dial}`);
+      items.forEach((el, i) => el.classList.toggle('f-cc-active', i === index));
+      if (dial === '91') {
+        numberInput.pattern = '[0-9]{10}';
+        numberInput.maxLength = 10;
+        numberInput.title = 'Enter a 10-digit mobile number';
+      } else {
+        numberInput.pattern = '[0-9]{6,14}';
+        numberInput.removeAttribute('maxlength');
+        numberInput.title = 'Enter your mobile number, digits only';
+      }
+      sync();
+    }
+
+    function openList() { list.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+    function closeList() { list.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+
+    btn.addEventListener('click', () => {
+      list.classList.contains('open') ? closeList() : openList();
+    });
+    btn.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); openList(); applyCountry(Math.min(activeIndex + 1, items.length - 1)); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); applyCountry(Math.max(activeIndex - 1, 0)); }
+      else if (e.key === 'Escape') closeList();
+    });
+    list.addEventListener('mousedown', (e) => {
+      const item = e.target.closest('.f-cc-item');
+      if (!item) return;
+      applyCountry(items.indexOf(item));
+      closeList();
+    });
+    document.addEventListener('click', (e) => {
+      if (!wrapperEl.contains(e.target)) closeList();
+    });
     numberInput.addEventListener('input', sync);
-    sync();
+
+    applyCountry(0); // India, first in COUNTRIES
   }
 
   /* ---------------------------------------------------------
@@ -454,9 +516,10 @@
      *  away so the retry/beacon sequence gets a real window first. */
     REDIRECT_HOLD_MS,
 
-    /** Populates a country-code <select> (flag + dial code, India
-     *  default) and keeps a hidden phone field in sync as
-     *  "+<dial> <digits>" -- see wireCountryPhone above. */
+    /** Wires a flag+dial-code picker (collapsed view shows flag+code
+     *  only, full names in the open list; India default) and keeps a
+     *  hidden phone field in sync as "+<dial><digits>", no space --
+     *  see wireCountryPhone above. */
     wireCountryPhone,
 
     _internal: { classifyDevice, captureUTM, uuid } // exposed for local testing only
