@@ -186,16 +186,8 @@
     display: flex; align-items: center; gap: 1.4rem; position: relative;
   }
   .mark { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; margin-right: auto; }
-  .mark-name {
-    font-family: var(--display); font-weight: 600; font-size: 1.12rem;
-    letter-spacing: -0.045em; line-height: 0.92; text-transform: lowercase;
-  }
-  .mark-sub {
-    font-family: var(--display); font-size: 0.53rem; font-weight: 600;
-    letter-spacing: 0.28em; text-transform: uppercase; color: var(--ink-2);
-  }
-  .mark-icon { display: block; transition: transform .4s cubic-bezier(.2,.9,.3,1.4); }
-  .mark:hover .mark-icon { transform: translateY(-2px) rotate(-4deg); }
+  .logo-img { display: block; width: auto; transition: transform .4s cubic-bezier(.2,.9,.3,1.4); }
+  .mark:hover .logo-img { transform: translateY(-2px); }
 
   .nav-links { display: flex; gap: 1.5rem; align-items: center; }
   .nav-links a {
@@ -697,6 +689,15 @@
   .foot-col h4 { font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 0.35rem; font-weight: 600; }
   .foot-col a, .foot-col span { font-size: var(--t-small); color: var(--ink-2); text-decoration: none; transition: color .2s; }
   .foot-col a:hover { color: var(--action); }
+  .foot-social { display: flex; gap: 0.6rem; margin-top: 0.9rem; }
+  .foot-social a {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--ground-3); color: var(--ink-2);
+    transition: background .2s, color .2s, transform .2s;
+  }
+  .foot-social a:hover { background: var(--action); color: var(--action-ink); transform: translateY(-2px); }
+  .foot-social svg { width: 18px; height: 18px; }
   .foot-note {
     margin-top: 3rem; padding-top: 1.4rem; border-top: 1px solid var(--line);
     display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between;
@@ -893,11 +894,7 @@
   <nav class="nav" id="nav">
     <div class="nav-in">
       <a class="mark" href="#/" aria-label="little people montessori, home">
-        <img class="mark-icon" src="assets/img/logomark.png" alt="" width="19" height="34">
-        <span>
-          <span class="mark-name">little people</span><br>
-          <span class="mark-sub">Montessori</span>
-        </span>
+        <img class="logo-img" src="assets/img/logo-horizontal.png" alt="little people montessori" height="44">
       </a>
       <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false">
         <svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true">
@@ -1817,10 +1814,17 @@
     <div class="foot-grid">
       <div class="foot-col">
         <a class="mark" href="#/" style="margin-bottom:0.8rem">
-          <img class="mark-icon" src="assets/img/logomark.png" alt="" width="19" height="34">
-          <span><span class="mark-name">little people</span><br><span class="mark-sub">Montessori</span></span>
+          <img class="logo-img" src="assets/img/logo-horizontal.png" alt="little people montessori" height="40">
         </a>
         <span>An AMI-informed Montessori house in Mumbai for children 18 months to 6 years &mdash; with a casa daycare and a canopy of after-hours classes, under an old mango tree.</span>
+        <div class="foot-social">
+          <a href="https://www.instagram.com/littlepeople_montessori/" target="_blank" rel="noopener" aria-label="Follow us on Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8" fill="none"/><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8" fill="none"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg>
+          </a>
+          <a href="https://wa.me/919137880091?text=Hi%2C%20I%20would%20like%20to%20know%20more%20about%20the%20school." target="_blank" rel="noopener" aria-label="Message us on WhatsApp">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.79 13.5L3 21l4.5-1.18A9 9 0 1 0 12 3Z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/><path d="M8.5 8.3c.2-.5.4-.5.6-.5h.5c.15 0 .35 0 .5.4.2.5.6 1.5.65 1.6.05.15.1.3 0 .5-.1.2-.15.3-.3.45-.15.15-.3.3-.15.55.5.85 1.05 1.4 1.9 1.85.2.1.3.1.45-.05.15-.15.6-.7.75-.95.15-.25.3-.2.5-.1.2.05 1.3.6 1.5.7.2.1.35.15.4.25.05.15.05.75-.2 1.45-.25.7-1.45 1.3-2 1.35-.5.05-1.1.1-3.55-.75-2.95-1.05-4.85-4-5-4.2-.15-.2-1.2-1.6-1.2-3.05s.75-2.2 1-2.5Z" fill="currentColor"/></svg>
+          </a>
+        </div>
       </div>
       <div class="foot-col">
         <h4>Visit</h4>
