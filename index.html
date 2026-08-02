@@ -205,8 +205,22 @@
   .hero-extras { display: none; }
 
   /* ---------- hero ---------- */
-  .hero { padding-top: clamp(1.6rem, 4vw, 3rem); padding-inline: var(--pad); }
-  .hero-copy { display: grid; gap: 1rem; text-align: center; justify-items: center; }
+  /* Below the 1080px breakpoint the hero isn't overlaid on the
+     illustration (see @media (min-width: 1080px) below) -- copy sits
+     above the scene and both flow naturally. Without a floor here the
+     stacked content is shorter than the viewport, so the next section
+     bleeds into the first screen; min-height + centering keeps the
+     header's bottom edge at the fold on every size up to that
+     breakpoint, same as the desktop treatment achieves via a fixed
+     height. */
+  .hero {
+    padding-top: clamp(1.6rem, 4vw, 3rem);
+    padding-bottom: clamp(1.6rem, 4vw, 3rem);
+    padding-inline: var(--pad);
+    min-height: calc(100svh - var(--nav-h));
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .hero-copy { display: grid; gap: 1rem; text-align: center; justify-items: center; flex: none; }
   .hero h1 { font-size: var(--t-hero); max-width: 17ch; }
   .hero h1 em { font-style: normal; color: var(--denim); }
   .hero-lead { font-size: var(--t-lead); color: var(--ink-2); max-width: 30rem; line-height: 1.55; }
