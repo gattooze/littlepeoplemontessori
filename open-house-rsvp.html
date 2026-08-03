@@ -12,30 +12,14 @@
 <title>Open House RSVP — little people montessori</title>
 <meta name="description" content="Reserve your spot at our Open House -- Saturday, 22 August 2026.">
 
-<!-- ============================================================
-     GA4 -- OPTIONAL, SAFE TO LEAVE AS A PLACEHOLDER.
-     form-kit.js's tracking calls all check `typeof gtag === 'function'`
-     first, so nothing breaks or errors if this is never wired up --
-     the events just go nowhere until a real Measurement ID is pasted
-     in below. Get one free at analytics.google.com (Admin -> Create
-     Property -> Data Streams -> Web) -- a 2-minute form, not the
-     Apps Script auth flow.
-     ============================================================ -->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FZBXL0KV8W"></script>
 <script>
-  window.GA_MEASUREMENT_ID = 'PASTE_GA4_MEASUREMENT_ID_HERE'; // e.g. 'G-XXXXXXXXXX'
-</script>
-<script>
-  (function () {
-    if (window.GA_MEASUREMENT_ID.indexOf('PASTE_') === 0) return;
-    var s = document.createElement('script');
-    s.async = true;
-    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + window.GA_MEASUREMENT_ID;
-    document.head.appendChild(s);
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function () { dataLayer.push(arguments); };
-    gtag('js', new Date());
-    gtag('config', window.GA_MEASUREMENT_ID);
-  })();
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FZBXL0KV8W');
 </script>
 
 <style>
