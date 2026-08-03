@@ -411,6 +411,26 @@
   }
 
   /* ---------------------------------------------------------
+     Generic CTA click tracking: any element with data-cta="label"
+     anywhere on the page fires a GA4 cta_click event on click, with
+     no per-page wiring beyond including this script -- one delegated
+     document-level listener, same pattern as the field-engagement
+     tracker above, so it automatically covers a CTA added to any
+     current or future page. Doesn't duplicate GA4's own automatic
+     outbound-click tracking (Instagram/WhatsApp links) -- this is
+     for same-domain CTAs and tel:/mailto: links, which Enhanced
+     Measurement does not capture as their own named event.
+     --------------------------------------------------------- */
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-cta]');
+    if (!el) return;
+    gtagEvent('cta_click', {
+      cta_label: el.dataset.cta,
+      cta_href: el.getAttribute('href') || null
+    });
+  });
+
+  /* ---------------------------------------------------------
      Public API
      --------------------------------------------------------- */
   const FormKit = {
