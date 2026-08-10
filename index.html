@@ -833,6 +833,7 @@
   const applyViewBox = () => scene.setAttribute('viewBox', wideMQ.matches ? VB_WIDE : VB_NARROW);
   applyViewBox();
   wideMQ.addEventListener('change', applyViewBox);
+  window.addEventListener('resize', applyViewBox);
   const drops = document.getElementById('drops');
   const GROUND_Y = 584;
   const NS = 'http://www.w3.org/2000/svg';
