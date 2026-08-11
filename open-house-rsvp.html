@@ -351,8 +351,8 @@
           <div class="f-field">
             <label for="rf-child-age-unit">&nbsp;</label>
             <select id="rf-child-age-unit" name="child_age_unit" required>
-              <option value="years" selected>Years</option>
-              <option value="months">Months</option>
+              <option value="years">Years</option>
+              <option value="months" selected>Months</option>
             </select>
           </div>
         </div>
@@ -439,15 +439,14 @@
   const INSTAGRAM_URL = 'https://www.instagram.com/littlepeople_montessori/';
 
   // -----------------------------------------------------------
-  // Time slots: generated, not hand-typed -- 20-minute intervals
-  // across a 9-hour window is 28 entries, too easy to fat-finger
-  // an AM/PM by hand. Edit the four constants below if the date
-  // or window changes.
+  // Time slots: generated, not hand-typed -- too easy to fat-finger
+  // an AM/PM by hand across many entries. Edit the four constants
+  // below if the date or window changes.
   // -----------------------------------------------------------
   const SLOT_DATE_LABEL = 'Sat, 22 Aug';
   const SLOT_START_MIN = 10 * 60;   // 10:00 AM
-  const SLOT_END_MIN = 19 * 60;     // 7:00 PM
-  const SLOT_INTERVAL_MIN = 20;
+  const SLOT_END_MIN = 15 * 60;     // 3:00 PM
+  const SLOT_INTERVAL_MIN = 30;
 
   function formatSlotTime(totalMin) {
     const h = Math.floor(totalMin / 60);
