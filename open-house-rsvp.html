@@ -109,6 +109,9 @@
   .event-line p { margin: 0; }
   .event-line strong { color: var(--ink); font-family: var(--display); font-weight: 600; font-size: 0.9rem; }
   .event-line .ev-note { padding-top: 0.55rem; border-top: 1px solid var(--line-solid); }
+  .event-line .visit-link { display: flex; align-items: flex-start; gap: 0.4rem; color: var(--ink-2); text-decoration: none; transition: color .2s; }
+  .event-line .visit-link:hover { color: var(--action); }
+  .event-line .visit-link .pin-icon { flex: none; width: 15px; height: 15px; margin-top: 0.1rem; }
   .foot-social { display: flex; justify-content: center; gap: 0.6rem; margin: 1.4rem 0 0; }
   .foot-social a {
     display: inline-flex; align-items: center; justify-content: center;
@@ -416,7 +419,12 @@
 
   <div class="event-line">
     <p><strong>Saturday, 22 August 2026</strong></p>
-    <p>Little People Montessori, Udyam Building, SV Road, Next to Sony Mony, Vile Parle (W), Mumbai &ndash; 400056</p>
+    <p>
+      <a class="visit-link" href="https://share.google/m8iVH0WSUsXct0YPH" target="_blank" rel="noopener">
+        <svg class="pin-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span>Little People Montessori, Next to Acme Regency, SV Road, Vile Parle (West), Mumbai &ndash; 400056</span>
+      </a>
+    </p>
     <p class="ev-note">This first visit works best parent-to-parent &mdash; we'll have plenty of time with your little one at the follow-up visit, so this one's just for the grown-ups.</p>
   </div>
 
