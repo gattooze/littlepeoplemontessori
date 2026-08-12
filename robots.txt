@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /rsvp/
+Disallow: /join.html
+Disallow: /site-preview.html
+
+Sitemap: https://littlepeoplemontessori.com/sitemap.xml
