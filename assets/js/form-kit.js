@@ -143,21 +143,34 @@
 
   async function attemptFetch(endpoint, formData) {
     const res = await fetch(endpoint, { method: 'POST', body: formData });
-    let ok = res.ok;
-    try { ok = (await res.json()).ok !== false; } catch (_) { /* opaque response still counts as success */ }
-    if (!ok) throw new Error('rejected');
+    let body = null;
+    try { body = await res.json(); } catch (_) { /* opaque response still counts as success */ }
+    if (body && body.ok === false) {
+      // A definitive rejection from the server (e.g. a full RSVP slot)
+      // -- not a transient failure. Retrying won't help (the same
+      // business rule will reject it again) and queuing it would leave
+      // a submission stuck forever silently failing every retry, so
+      // this must never be treated the same as a network blip.
+      const err = new Error(body.error || 'rejected');
+      err.rejection = body;
+      throw err;
+    }
     return true;
   }
 
   async function sendWithRetry(endpoint, formData) {
     try {
       return await attemptFetch(endpoint, formData);
-    } catch (_) {
+    } catch (err) {
+      if (err && err.rejection) return { rejected: err.rejection };
       for (const delay of RETRY_DELAYS_MS) {
         await sleep(delay);
         try {
           return await attemptFetch(endpoint, formData);
-        } catch (_) { /* keep going */ }
+        } catch (err2) {
+          if (err2 && err2.rejection) return { rejected: err2.rejection };
+          /* transient -- keep going */
+        }
       }
     }
     return false;
@@ -445,6 +458,13 @@
      * @param {Function} [opts.onSuccess]  Called after a confirmed (or
      *                                     optimistically assumed, see
      *                                     redirect timing) success.
+     * @param {Function} [opts.onRejected] Called with the server's JSON
+     *                                     body ({ok:false, error, message})
+     *                                     when it explicitly rejects the
+     *                                     submission (e.g. a full RSVP
+     *                                     slot) -- never retried/queued.
+     *                                     Falls back to the .f-error
+     *                                     element if not given.
      * @param {Function} [opts.onError]    Called if every attempt and
      *                                     the queue write both fail to
      *                                     even start (e.g. FormData
@@ -502,22 +522,34 @@
         };
         document.addEventListener('pagehide', beaconOnExit, { once: true });
 
-        const delivered = await sendWithRetry(endpoint, formData);
+        const result = await sendWithRetry(endpoint, formData);
 
         document.removeEventListener('pagehide', beaconOnExit);
 
-        if (delivered) {
+        if (result === true) {
           form.dataset.lpmSubmitted = 'true';
           unqueueSubmission(idempotencyKey);
           gtagEvent('form_submit_success', { form_id: formId });
           if (opts.onSuccess) opts.onSuccess();
+        } else if (result && result.rejected) {
+          // The server explicitly rejected this submission for a real
+          // reason (e.g. a full RSVP slot) -- must NOT be queued/retried
+          // or shown as success; that would tell the visitor they're
+          // confirmed when they're not.
+          gtagEvent('form_submit_fail', { form_id: formId, reject_reason: result.rejected.error || 'rejected' });
+          if (opts.onRejected) {
+            opts.onRejected(result.rejected);
+          } else if (errorEl) {
+            errorEl.textContent = result.rejected.message || 'That submission was rejected -- please check the form and try again.';
+            errorEl.classList.add('show');
+          }
         } else {
           // Don't tell the visitor it failed outright -- queue it so a
           // later page load (or the beacon that may still land) can
           // still deliver it, and let the UI proceed optimistically if
           // the caller wants that (see open-house-rsvp.html).
           queueSubmission(formId, payloadObj);
-          gtagEvent('form_submit_fail', { form_id: formId });
+          gtagEvent('form_submit_fail', { form_id: formId, reject_reason: 'network' });
           if (opts.onQueued) {
             opts.onQueued();
           } else if (errorEl) {

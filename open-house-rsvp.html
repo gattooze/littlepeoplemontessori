@@ -172,6 +172,33 @@
   .f-hint { font-size: 0.78rem; color: var(--ink-2); }
   .f-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
+  /* time-slot picker: real buttons (not a native <select>) so a full
+     slot can actually be shown red/disabled -- <option> elements can't
+     be styled with a background colour consistently across browsers. */
+  .rf-slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(7.2rem, 1fr)); gap: 0.55rem; }
+  .rf-slot-btn {
+    font-family: var(--body); font-size: 0.92rem; color: var(--ink);
+    background: var(--ground-2); border: 1px solid var(--line-solid); border-radius: 10px;
+    padding: 0.6rem 0.5rem; cursor: pointer; text-align: center;
+    display: flex; flex-direction: column; gap: 0.2rem; align-items: center;
+    transition: border-color .15s, background .15s;
+  }
+  .rf-slot-btn:hover:not(:disabled) { border-color: var(--action); }
+  .rf-slot-btn:focus { outline: none; border-color: var(--action); box-shadow: 0 0 0 3px color-mix(in srgb, var(--action) 25%, transparent); }
+  .rf-slot-time { font-family: var(--display); font-weight: 600; }
+  .rf-slot-note { font-size: 0.72rem; color: var(--ink-2); }
+  .rf-slot-btn.is-selected { border-color: var(--action); background: color-mix(in srgb, var(--action) 12%, var(--ground-2)); }
+  .rf-slot-btn.is-selected .rf-slot-note { color: var(--action); }
+  .rf-slot-btn.is-full {
+    background: color-mix(in srgb, #C4634A 10%, var(--ground-2));
+    border-color: color-mix(in srgb, #C4634A 40%, var(--line-solid));
+    cursor: not-allowed; opacity: 0.85;
+  }
+  .rf-slot-btn.is-full .rf-slot-time { color: #A2543D; }
+  .rf-slot-btn.is-full .rf-slot-note { color: #C4634A; font-weight: 600; }
+  .f-slot-error { color: #C4634A; }
+  .f-slot-error[hidden] { display: none; }
+
   /* location autocomplete */
   .f-autocomplete { position: relative; }
   .f-ac-list {
@@ -391,12 +418,13 @@
 
         <span class="f-section-label">Your visit</span>
         <div class="f-field">
-          <label for="rf-slot">Time slot</label>
-          <select id="rf-slot" name="slot" required>
-            <option value="" disabled selected>Choose a time&hellip;</option>
-            <!-- Populated by JS below: 20-minute slots, 10:00 AM to
-                 7:00 PM, Saturday 22 Aug 2026. -->
-          </select>
+          <label id="rf-slot-label">Time slot</label>
+          <div class="rf-slot-grid" id="rf-slot-picker" role="group" aria-labelledby="rf-slot-label">
+            <!-- Populated by JS below, from the live Sheet count for
+                 each slot -- see FORM_ENDPOINT?action=slot_counts. -->
+          </div>
+          <input type="hidden" id="rf-slot" name="slot">
+          <p class="f-hint f-slot-error" id="rf-slot-error" hidden>Please choose a time slot.</p>
         </div>
 
         <div class="f-field f-hp" aria-hidden="true">
@@ -448,13 +476,14 @@
 
   // -----------------------------------------------------------
   // Time slots: generated, not hand-typed -- too easy to fat-finger
-  // an AM/PM by hand across many entries. Edit the four constants
-  // below if the date or window changes.
+  // an AM/PM by hand across many entries. Edit the constants below
+  // if the date, window, or per-slot capacity changes.
   // -----------------------------------------------------------
   const SLOT_DATE_LABEL = 'Sat, 22 Aug';
   const SLOT_START_MIN = 10 * 60;   // 10:00 AM
   const SLOT_END_MIN = 13 * 60 + 30; // 1:30 PM
   const SLOT_INTERVAL_MIN = 30;
+  const SLOT_CAPACITY = 4; // keep in sync with SLOT_CAPACITY in apps-script.gs
 
   function formatSlotTime(totalMin) {
     const h = Math.floor(totalMin / 60);
@@ -464,12 +493,106 @@
     return `${h12}:${String(m).padStart(2, '0')} ${period}`;
   }
 
-  const slotSelect = document.getElementById('rf-slot');
+  const SLOT_TIMES = [];
   for (let t = SLOT_START_MIN; t <= SLOT_END_MIN; t += SLOT_INTERVAL_MIN) {
-    const opt = document.createElement('option');
-    opt.value = opt.textContent = `${SLOT_DATE_LABEL} — ${formatSlotTime(t)}`;
-    slotSelect.appendChild(opt);
+    SLOT_TIMES.push(formatSlotTime(t));
   }
+
+  // -----------------------------------------------------------
+  // Time-slot picker: real counts fetched from the Sheet (via
+  // apps-script.gs's ?action=slot_counts), each slot capped at
+  // SLOT_CAPACITY real RSVPs -- full slots render red/disabled/
+  // "Booked". Open slots deliberately UNDERstate how many are left
+  // (a random 2 or 3, never more than the true number) to create
+  // reasonable urgency without ever overstating availability; the
+  // real number is only ever used to decide full vs. not-full, and
+  // apps-script.gs enforces the real cap server-side regardless of
+  // what this page displays.
+  // -----------------------------------------------------------
+  let slotCounts = {};
+  let selectedSlotValue = '';
+
+  const slotPicker = document.getElementById('rf-slot-picker');
+  const slotHidden = document.getElementById('rf-slot');
+  const slotErrorEl = document.getElementById('rf-slot-error');
+
+  function pickDisplayCount(remaining) {
+    const fake = Math.random() < 0.5 ? 2 : 3;
+    return Math.min(remaining, fake);
+  }
+
+  function selectSlot(btn, value) {
+    selectedSlotValue = value;
+    slotHidden.value = value;
+    slotErrorEl.hidden = true;
+    slotErrorEl.textContent = 'Please choose a time slot.'; // reset in case a previous onRejected overwrote it
+    Array.from(slotPicker.children).forEach((el) => {
+      const isSel = el === btn;
+      el.classList.toggle('is-selected', isSel);
+      el.setAttribute('aria-pressed', isSel ? 'true' : 'false');
+    });
+  }
+
+  function renderSlots() {
+    slotPicker.innerHTML = '';
+    SLOT_TIMES.forEach((time) => {
+      const fullValue = `${SLOT_DATE_LABEL} — ${time}`;
+      const booked = slotCounts[time] || 0;
+      const remaining = SLOT_CAPACITY - booked;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      // Real focus/blur on this button drives form-kit's existing
+      // delegated field_focus/field_blur tracking for "slot" -- no
+      // extra glue needed, same as any other named field. type="button"
+      // elements are never included in FormData, so sharing this name
+      // across every slot button (and the separate hidden input that
+      // actually carries the submitted value) is safe.
+      btn.name = 'slot';
+      btn.dataset.slot = fullValue;
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'rf-slot-time';
+      timeSpan.textContent = time;
+      btn.appendChild(timeSpan);
+
+      const noteSpan = document.createElement('span');
+      noteSpan.className = 'rf-slot-note';
+
+      if (remaining <= 0) {
+        btn.className = 'rf-slot-btn is-full';
+        btn.disabled = true;
+        noteSpan.textContent = 'Booked';
+      } else {
+        btn.className = 'rf-slot-btn';
+        const shown = pickDisplayCount(remaining);
+        noteSpan.textContent = `${shown} slot${shown === 1 ? '' : 's'} left`;
+        btn.addEventListener('click', () => selectSlot(btn, fullValue));
+      }
+      btn.appendChild(noteSpan);
+
+      if (fullValue === selectedSlotValue) btn.classList.add('is-selected');
+      btn.setAttribute('aria-pressed', fullValue === selectedSlotValue ? 'true' : 'false');
+
+      slotPicker.appendChild(btn);
+    });
+  }
+
+  async function refreshSlotAvailability() {
+    try {
+      const res = await fetch(`${FORM_ENDPOINT}?action=slot_counts`, { method: 'GET' });
+      const data = await res.json();
+      slotCounts = (data && data.counts) || {};
+    } catch (_) {
+      // Fall back to "show every slot as open" -- apps-script.gs still
+      // enforces the real cap at submission time regardless, so the
+      // worst case here is a stale picker, never an actual overbook.
+      slotCounts = {};
+    }
+    renderSlots();
+  }
+
+  refreshSlotAvailability();
 
   // -----------------------------------------------------------
   // Location autocomplete: suggest-as-you-type, never forces a
@@ -561,6 +684,20 @@
       : `you're in — see you there.`;
   }
 
+  // Native required/checkValidity() can't message on a hidden input
+  // (there's nothing visible to anchor a validation bubble to), so the
+  // slot field gets its own guard -- registered on the capture phase so
+  // it always runs before form-kit's own (bubble-phase) submit handler,
+  // regardless of listener registration order.
+  form.addEventListener('submit', (e) => {
+    if (!slotHidden.value) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      slotErrorEl.hidden = false;
+      slotPicker.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, true);
+
   FormKit.wire(form, {
     endpoint: FORM_ENDPOINT,
     formId: 'open_house_rsvp',
@@ -577,6 +714,25 @@
       personalizeThanks();
       card.classList.add('sent');
       goToInstagram();
+    },
+    onRejected(rejection) {
+      // The slot they picked filled up between page load and submit
+      // (or the picker was stale) -- refresh real availability and
+      // tell them plainly, rather than silently showing "you're in".
+      if (rejection && rejection.error === 'slot_full') {
+        slotErrorEl.textContent = rejection.message || 'That time just filled up — please choose another.';
+        slotErrorEl.hidden = false;
+        selectedSlotValue = '';
+        slotHidden.value = '';
+        refreshSlotAvailability();
+        slotPicker.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        const errorEl = document.getElementById('rf-error');
+        if (errorEl) {
+          errorEl.textContent = (rejection && rejection.message) || 'Something went wrong — please try again.';
+          errorEl.classList.add('show');
+        }
+      }
     }
   });
 })();
