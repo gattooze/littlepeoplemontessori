@@ -234,6 +234,7 @@
      --------------------------------------------------------- */
   function wireEngagementTracking(form, formId) {
     let started = false;
+    let abandoned = false;
     let lastField = null;
 
     form.addEventListener('focusin', (e) => {
@@ -253,8 +254,15 @@
       gtagEvent('field_blur', { form_id: formId, field_name: name });
     });
 
-    const abandonBeacon = (endpoint) => {
-      if (!started || form.dataset.lpmSubmitted === 'true') return;
+    // Fires at most once per form per session: pagehide and
+    // visibilitychange both fire on every tab-switch/app-background, not
+    // just the final close, so without this guard one visitor who
+    // checked another tab a few times mid-fill would log as several
+    // different "abandons" instead of one (or zero, if they came back
+    // and finished).
+    const abandonBeacon = () => {
+      if (!started || abandoned || form.dataset.lpmSubmitted === 'true') return;
+      abandoned = true;
       gtagEvent('field_abandon', { form_id: formId, field_name: lastField || '(none)' });
       // Best-effort analytics beacon only -- not a form submission, so
       // no payload/endpoint needed beyond the gtag call above unless a
