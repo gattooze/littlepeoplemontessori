@@ -61,6 +61,118 @@
     }
   }
 
+  /** Best-effort human label for a field -- name/id fallback used only
+   *  for the GA4 field_name param (see form_validation_fail below), not
+   *  shown to the visitor (the inline message sits right under the
+   *  field, so re-naming it in the message text would be redundant). */
+  function labelForField(form, el) {
+    if (el.id) {
+      const lbl = form.querySelector(`label[for="${el.id}"]`);
+      if (lbl && lbl.textContent.trim()) return lbl.textContent.trim();
+    }
+    return el.name || el.id || null;
+  }
+
+  /* ---------------------------------------------------------
+     Inline field-level validation errors: a short message riding on
+     the SAME line as the field's own label (right-aligned, small,
+     red) -- not a new line under the input, not a single generic
+     banner. That's the fix for the 2026-08-19 incident (see wire()
+     below). One <style> injected once, shared by every form on this
+     kit rather than duplicated per-page -- any current or future
+     form using the same .f-field > label convention picks this up
+     automatically, no per-page markup or CSS required.
+
+     Turning the label into a flex row is safe even on fields that
+     never show an error: <label> is inline by default, but as a
+     direct child of .f-field's CSS grid it's already blockified
+     (grid/flex children always compute to their block equivalent
+     regardless of the specified display), so switching it to
+     display:flex changes how its children lay out, not whether the
+     label itself behaves as a block. margin-left:auto on the error
+     span (not justify-content:space-between on the label) is what
+     actually pushes it to the far right -- that stays correct even
+     if a label has other children before the error (e.g. an "(if
+     applicable)" note), where space-between would instead spread
+     gaps between every child. flex-wrap lets a genuinely-too-long
+     combination fall to a second line rather than clipping or
+     overflowing, for any future form with longer labels/messages. */
+  let fieldErrCssInjected = false;
+  function ensureFieldErrCss() {
+    if (fieldErrCssInjected) return;
+    fieldErrCssInjected = true;
+    const style = document.createElement('style');
+    style.textContent = '.f-field label{display:flex;align-items:baseline;flex-wrap:wrap;' +
+      'row-gap:0.15rem;column-gap:0.6rem;}' +
+      '.f-field-err{display:none;margin-left:auto;color:#C4634A;font-size:0.72rem;' +
+      'font-weight:500;text-align:right;}.f-field-err.show{display:inline-block;}' +
+      '.f-field-invalid{border-color:#C4634A !important;}';
+    document.head.appendChild(style);
+  }
+
+  /** Human-friendly message per constraint, since the browser's own
+   *  el.validationMessage is inconsistent across browsers/locales (and
+   *  on some mobile browsers is either unhelpfully terse or oddly
+   *  phrased for a non-technical parent reading it). Short on purpose
+   *  -- these share a line with the label, not a fresh line of their
+   *  own to spread out on. */
+  function friendlyValidationMessage(el) {
+    const v = el.validity;
+    if (v.valueMissing) return 'Required';
+    if (v.typeMismatch) return el.type === 'email' ? 'Enter a valid email address' : 'Enter a valid value';
+    if (v.patternMismatch) return 'Check the format';
+    if (v.tooShort || v.tooLong) return 'Check the length';
+    if (v.rangeUnderflow || v.rangeOverflow) return 'Enter a valid range';
+    return el.validationMessage || 'Check this field';
+  }
+
+  /** The field's own <label> is the append target, not the input and
+   *  not the wrapping .f-field -- that's what puts the message on the
+   *  same line as the field name instead of a new line under the
+   *  input. Falls back to the .f-field wrapper (old below-field
+   *  behavior) for the rare field with no associated <label>, e.g. a
+   *  future form that skips one -- still correct, just not inline.
+   *  Every field on every current form (RSVP, admissions, join) has
+   *  one, confirmed by grep. */
+  function fieldErrorTarget(el) {
+    const wrap = el.closest('.f-field');
+    if (!wrap) return el.parentElement;
+    return wrap.querySelector('label') || wrap;
+  }
+
+  function showFieldError(el) {
+    ensureFieldErrCss();
+    const wrap = fieldErrorTarget(el);
+    let err = wrap.querySelector(':scope > .f-field-err');
+    if (!err) {
+      err = document.createElement('span');
+      err.className = 'f-field-err';
+      wrap.appendChild(err);
+    }
+    err.textContent = friendlyValidationMessage(el);
+    err.classList.add('show');
+    el.classList.add('f-field-invalid');
+    el.setAttribute('aria-invalid', 'true');
+
+    // Live-clear as soon as this specific field becomes valid again --
+    // don't make the visitor re-click Submit (or re-blur) just to find
+    // out they fixed it. Guarded so calling showFieldError() again on
+    // the same field (blur, then a later submit attempt, both hitting
+    // the same still-invalid field) doesn't stack duplicate listeners.
+    if (!el.dataset.lpmClearWired) {
+      el.dataset.lpmClearWired = 'true';
+      const clear = () => {
+        if (el.checkValidity()) {
+          err.classList.remove('show');
+          el.classList.remove('f-field-invalid');
+          el.removeAttribute('aria-invalid');
+        }
+      };
+      el.addEventListener('input', clear);
+      el.addEventListener('change', clear);
+    }
+  }
+
   /** Lightweight, dependency-free device/browser classification -- good
    *  enough for "which kind of phone are people using", not a full UA
    *  parser. */
@@ -483,11 +595,35 @@
     wire(form, opts) {
       const { endpoint, formId } = opts;
       const errorEl = form.querySelector('.f-error');
+      // Captured once, up front -- restored verbatim before showing the
+      // generic network-fail message, since the validation-fail branch
+      // below temporarily overwrites errorEl's text with a different
+      // message. Without this, a form with no onQueued override (e.g.
+      // join.html) would show a stale validation message on a later,
+      // unrelated network failure in the same page session.
+      const defaultErrorHTML = errorEl ? errorEl.innerHTML : '';
       const submitBtn = form.querySelector('button[type="submit"]');
       const submitLabel = form.querySelector('.f-submit-label');
       const defaultLabel = submitLabel ? submitLabel.textContent : '';
 
       wireEngagementTracking(form, formId);
+
+      // Validate on blur, not only on submit -- waiting until Submit to
+      // show a visitor their first invalid field is exactly the "ancient
+      // UX" this fix was supposed to move past. willValidate is true for
+      // every real form control that participates in constraint
+      // validation (skips buttons, disabled fields, the honeypot's
+      // tabindex="-1" input is simply never reached by real tab/blur
+      // traffic anyway). Only fires ON BLUR, never while still typing --
+      // showFieldError() itself wires the live-clear 'input' listener,
+      // so once shown this way it still disappears the moment it's
+      // fixed, same as the submit-triggered path.
+      Array.from(form.elements).forEach((el) => {
+        if (!el.willValidate) return;
+        el.addEventListener('blur', () => {
+          if (!el.checkValidity()) showFieldError(el);
+        });
+      });
 
       // Flush anything orphaned from a previous visit as soon as we
       // know where to send it.
@@ -499,7 +635,27 @@
         gtagEvent('form_submit_attempt', { form_id: formId });
 
         if (!form.checkValidity()) {
-          form.reportValidity();
+          // A single generic banner (native reportValidity(), or an
+          // earlier version of this fix) isn't enough -- confirmed via a
+          // real incident (2026-08-19, RSVP form, iOS Safari): a visitor
+          // hit an invalid field, got only the browser's own inline
+          // tooltip, didn't notice it, and clicked Submit repeatedly
+          // over several minutes with zero visible feedback before
+          // giving up for two hours. This instead shows a small message
+          // directly under EVERY invalid field at once (not just the
+          // first -- fixing one only to discover a second on the next
+          // click is its own bad experience), clears each one live as
+          // it's fixed, and blocks submission until all are resolved.
+          const invalidEls = Array.from(form.querySelectorAll(':invalid'));
+          invalidEls.forEach(showFieldError);
+          gtagEvent('form_validation_fail', {
+            form_id: formId,
+            field_name: invalidEls.map((el) => el.name || el.id || 'unknown').join(',')
+          });
+          if (invalidEls[0] && typeof invalidEls[0].scrollIntoView === 'function') {
+            invalidEls[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            invalidEls[0].focus({ preventScroll: true });
+          }
           return;
         }
         if (typeof endpoint !== 'string' || endpoint.indexOf('PASTE_') === 0) {
@@ -561,6 +717,7 @@
           if (opts.onQueued) {
             opts.onQueued();
           } else if (errorEl) {
+            errorEl.innerHTML = defaultErrorHTML;
             errorEl.classList.add('show');
           }
         }

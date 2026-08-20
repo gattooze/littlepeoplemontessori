@@ -199,6 +199,20 @@
   .f-slot-error { color: #C4634A; }
   .f-slot-error[hidden] { display: none; }
 
+  /* Sold-out state: every real time slot still renders as a normal
+     "Booked" tile (see renderSlots) -- the wall of red is the point,
+     real scarcity rather than something hidden away. This 9th tile is
+     the one exception: spans the full row so it reads as the one
+     remaining option, not just another grid square. */
+  .rf-slot-btn-contact {
+    grid-column: 1 / -1; padding: 0.9rem 0.8rem;
+    background: color-mix(in srgb, var(--action) 10%, var(--ground-2));
+    border-color: color-mix(in srgb, var(--action) 45%, var(--line-solid));
+  }
+  .rf-slot-btn-contact .rf-slot-time { color: var(--action); }
+  .rf-slot-btn-contact:hover { border-color: var(--action); }
+  .rf-slot-btn-contact.is-selected { background: color-mix(in srgb, var(--action) 18%, var(--ground-2)); }
+
   /* location autocomplete */
   .f-autocomplete { position: relative; }
   .f-ac-list {
@@ -440,7 +454,7 @@
     <div class="form-thanks">
       <img src="assets/img/logomark.png" alt="" width="26" height="47">
       <h2 id="thanksHeading">you're in &mdash; see you there.</h2>
-      <p>We've sent a confirmation to your email with your time slot. We can't wait to show you around.</p>
+      <p id="thanksBody">We've sent a confirmation to your email with your time slot. We can't wait to show you around.</p>
       <p class="redirect-note">Taking you to our Instagram now &mdash; come say hello!</p>
     </div>
   </div>
@@ -483,7 +497,11 @@
   const SLOT_START_MIN = 10 * 60;   // 10:00 AM
   const SLOT_END_MIN = 13 * 60 + 30; // 1:30 PM
   const SLOT_INTERVAL_MIN = 30;
-  const SLOT_CAPACITY = 4; // keep in sync with SLOT_CAPACITY in apps-script.gs -- base/fallback only; apps-script.gs's 80%-full failsafe can bump an individual slot's real capacity above this, reported per-slot in slot_counts' `capacities` map
+  const SLOT_CAPACITY = 4; // keep in sync with SLOT_CAPACITY in apps-script.gs -- base/fallback only; apps-script.gs's global failsafe (every slot at once, once total real bookings cross its threshold) can bump every slot's real capacity above this, reported in slot_counts' `capacities` map
+  // Pseudo-slot offered once every real time is full (including any
+  // failsafe bonus seats) -- keep this exact string in sync with
+  // CONTACT_ME_TIME in apps-script.gs.
+  const CONTACT_ME_TIME = 'Please contact me';
 
   function formatSlotTime(totalMin) {
     const h = Math.floor(totalMin / 60);
@@ -527,6 +545,12 @@
     slotHidden.value = value;
     slotErrorEl.hidden = true;
     slotErrorEl.textContent = 'Please choose a time slot.'; // reset in case a previous onRejected overwrote it
+
+    const submitLabelEl = document.querySelector('.f-submit-label');
+    if (submitLabelEl) {
+      submitLabelEl.textContent = value.indexOf(CONTACT_ME_TIME) !== -1 ? 'Send my details' : 'Reserve my spot';
+    }
+
     Array.from(slotPicker.children).forEach((el) => {
       const isSel = el === btn;
       el.classList.toggle('is-selected', isSel);
@@ -536,11 +560,52 @@
 
   function renderSlots() {
     slotPicker.innerHTML = '';
-    SLOT_TIMES.forEach((time) => {
-      const fullValue = `${SLOT_DATE_LABEL} — ${time}`;
+
+    const remainingByTime = SLOT_TIMES.map((time) => {
       const booked = slotCounts[time] || 0;
       const capacity = slotCapacities[time] || SLOT_CAPACITY;
-      const remaining = capacity - booked;
+      return capacity - booked;
+    });
+    const allFull = remainingByTime.every((remaining) => remaining <= 0);
+
+    // 9th, always-pickable tile renders first (above the 8 real times)
+    // once everything is sold out -- it comes pre-selected since there's
+    // nothing else valid left to pick, so it needs to be the first thing
+    // a visitor sees, not something they have to scroll past a wall of
+    // "Booked" tiles to find.
+    let contactBtn = null;
+    if (allFull) {
+      slotPicker.classList.add('is-sold-out');
+
+      const contactValue = `${SLOT_DATE_LABEL} — ${CONTACT_ME_TIME}`;
+      contactBtn = document.createElement('button');
+      contactBtn.type = 'button';
+      contactBtn.name = 'slot';
+      contactBtn.dataset.slot = contactValue;
+      contactBtn.className = 'rf-slot-btn rf-slot-btn-contact';
+
+      const contactTimeSpan = document.createElement('span');
+      contactTimeSpan.className = 'rf-slot-time';
+      contactTimeSpan.textContent = 'Get in touch with me';
+      contactBtn.appendChild(contactTimeSpan);
+
+      const contactNoteSpan = document.createElement('span');
+      contactNoteSpan.className = 'rf-slot-note';
+      contactNoteSpan.textContent = 'All our slots are booked out. You are on the waitlist. Our team will reach out to you irrespective. Please go ahead and submit.';
+      contactBtn.appendChild(contactNoteSpan);
+
+      contactBtn.addEventListener('click', () => selectSlot(contactBtn, contactValue));
+      slotPicker.appendChild(contactBtn);
+    } else {
+      slotPicker.classList.remove('is-sold-out');
+    }
+
+    // Every real time still renders, even once all-full -- a grid of
+    // "Booked" tiles is the point (real scarcity, not hidden away), not
+    // something to route around.
+    SLOT_TIMES.forEach((time, i) => {
+      const fullValue = `${SLOT_DATE_LABEL} — ${time}`;
+      const remaining = remainingByTime[i];
 
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -578,6 +643,13 @@
 
       slotPicker.appendChild(btn);
     });
+
+    if (allFull) {
+      // Default-selected: every real slot is genuinely full, so a
+      // visitor who never touches the picker can still submit -- there's
+      // nothing else valid left to pick anyway.
+      selectSlot(contactBtn, contactBtn.dataset.slot);
+    }
   }
 
   async function refreshSlotAvailability() {
@@ -683,9 +755,14 @@
 
   function personalizeThanks() {
     const childName = document.getElementById('rf-child-name').value.trim();
-    thanksHeading.textContent = childName
-      ? `see you soon, ${childName}!`
-      : `you're in — see you there.`;
+    const thanksBody = document.getElementById('thanksBody');
+    if (selectedSlotValue.indexOf(CONTACT_ME_TIME) !== -1) {
+      thanksHeading.textContent = childName ? `thanks — we'll be in touch, ${childName}'s family!` : `thanks — we'll be in touch!`;
+      thanksBody.textContent = "Every slot is full right now, but we've noted your details and will personally reach out to find a time that works.";
+    } else {
+      thanksHeading.textContent = childName ? `see you soon, ${childName}!` : `you're in — see you there.`;
+      thanksBody.textContent = "We've sent a confirmation to your email with your time slot. We can't wait to show you around.";
+    }
   }
 
   // Native required/checkValidity() can't message on a hidden input
