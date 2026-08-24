@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Open House Feedback — Little People Montessori</title>
+<style>
+  :root {
+    --ground: #FDF9F7; --ink: #303030; --ink-2: #6B6663;
+    --line: #D7CCC0; --denim: #5377AB; --blush: #F2ADB8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--ground); color: var(--ink); line-height: 1.5;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  .brand { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--denim); margin-bottom: 0.6rem; }
+  h1 { font-size: 1.5rem; margin: 0 0 0.5rem; line-height: 1.2; }
+  .lead { color: var(--ink-2); font-size: 0.95rem; margin: 0 0 2rem; }
+
+  .f-field { margin-bottom: 1.6rem; }
+  label { display: block; font-weight: 600; font-size: 0.95rem; margin-bottom: 0.5rem; }
+  textarea, select {
+    width: 100%; font: inherit; font-size: 1rem; color: var(--ink);
+    border: 1px solid var(--line); border-radius: 0.5rem; padding: 0.7rem 0.8rem;
+    background: #fff; resize: vertical;
+  }
+  textarea { min-height: 5rem; }
+  textarea:focus, select:focus, .radio input:focus + span { outline: 2px solid var(--denim); outline-offset: 1px; }
+
+  .radio-group { display: grid; gap: 0.5rem; }
+  .radio { display: flex; align-items: center; gap: 0.6rem; border: 1px solid var(--line); border-radius: 0.5rem; padding: 0.7rem 0.8rem; background: #fff; }
+  .radio input { width: 1.05rem; height: 1.05rem; accent-color: var(--denim); flex: none; }
+  .radio span { font-size: 0.98rem; }
+
+  button {
+    width: 100%; font: inherit; font-size: 1rem; font-weight: 600; color: #fff;
+    background: var(--denim); border: none; border-radius: 0.6rem; padding: 0.85rem;
+    cursor: pointer; margin-top: 0.5rem;
+  }
+  button:active { opacity: 0.85; }
+  .f-error { display: none; color: #C4634A; font-size: 0.85rem; margin-top: 0.8rem; }
+  .f-error.show { display: block; }
+  .f-hp { position: absolute; left: -9999px; }
+
+  .thanks { display: none; text-align: center; padding-top: 3rem; }
+  .thanks.show { display: block; }
+  .thanks h1 { margin-bottom: 0.6rem; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div id="formView">
+    <div class="brand">Little People Montessori</div>
+    <h1>How was your visit?</h1>
+    <p class="lead">Just three quick questions — your answers are anonymous.</p>
+
+    <form id="fbForm" novalidate>
+      <input type="hidden" id="fb-token" name="token">
+      <div class="f-field f-hp"><label for="fb-company">Company</label><input id="fb-company" name="company" type="text" tabindex="-1" autocomplete="off"></div>
+
+      <div class="f-field">
+        <label for="fb-stayed">What's one thing that stayed with you from your visit?</label>
+        <textarea id="fb-stayed" name="stayed_with_you" required></textarea>
+      </div>
+
+      <div class="f-field">
+        <label for="fb-concern">What's your biggest concern about the school?</label>
+        <textarea id="fb-concern" name="biggest_concern" required></textarea>
+      </div>
+
+      <div class="f-field">
+        <label>Which programme would you choose?</label>
+        <div class="radio-group">
+          <label class="radio"><input type="radio" name="program_choice" value="Parent-Toddler" required><span>Parent-Toddler</span></label>
+          <label class="radio"><input type="radio" name="program_choice" value="Toddler"><span>Toddler</span></label>
+          <label class="radio"><input type="radio" name="program_choice" value="Primary"><span>Primary</span></label>
+        </div>
+      </div>
+
+      <button type="submit"><span id="fb-submit-label">Submit feedback</span></button>
+      <p class="f-error" id="fb-error">Something went wrong sending that — please try again in a moment.</p>
+    </form>
+  </div>
+
+  <div class="thanks" id="thanksView">
+    <h1>Thank you.</h1>
+    <p class="lead">We really appreciate you taking the time to share this.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbzUkmj133aJEQD5728vo_HXosOT_a54CwY33VM9n2rc3o4GQacg1hDTlqKTjDmsizsb/exec';
+  var form = document.getElementById('fbForm');
+  var errorEl = document.getElementById('fb-error');
+  var submitLabel = document.getElementById('fb-submit-label');
+
+  var params = new URLSearchParams(location.search);
+  document.getElementById('fb-token').value = params.get('r') || '';
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    if (form.company.value) return; // honeypot
+
+    submitLabel.textContent = 'Sending…';
+    errorEl.classList.remove('show');
+
+    var fd = new FormData(form);
+    fd.append('form_id', 'open_house_feedback');
+
+    fetch(ENDPOINT, { method: 'POST', body: fd })
+      .then(function (res) { return res.json(); })
+      .then(function (json) {
+        if (!json || json.ok !== true) throw new Error('rejected');
+        document.getElementById('formView').style.display = 'none';
+        document.getElementById('thanksView').classList.add('show');
+      })
+      .catch(function () {
+        submitLabel.textContent = 'Submit feedback';
+        errorEl.classList.add('show');
+      });
+  });
+})();
+</script>
+
+</body>
+</html>
