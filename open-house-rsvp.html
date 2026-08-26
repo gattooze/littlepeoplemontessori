@@ -432,13 +432,21 @@
 
         <span class="f-section-label">Your visit</span>
         <div class="f-field">
-          <label id="rf-slot-label">Time slot</label>
-          <div class="rf-slot-grid" id="rf-slot-picker" role="group" aria-labelledby="rf-slot-label">
-            <!-- Populated by JS below, from the live Sheet count for
-                 each slot -- see FORM_ENDPOINT?action=slot_counts. -->
+          <p class="f-hint">Our first Open House was booked out. If you're still keen to visit, let us know below and our team will be in touch.</p>
+          <div style="display:none" aria-hidden="true">
+            <label id="rf-slot-label">Time slot</label>
+            <div class="rf-slot-grid" id="rf-slot-picker" role="group" aria-labelledby="rf-slot-label">
+              <!-- Populated by JS below, from the live Sheet count for
+                   each slot -- see FORM_ENDPOINT?action=slot_counts. Kept
+                   in the DOM (just hidden) rather than removed, so its
+                   existing JS still runs and auto-selects the "get in
+                   touch" pseudo-slot -- everyone visiting now is past the
+                   one real Open House date, so there's nothing left to
+                   actually pick. -->
+            </div>
+            <input type="hidden" id="rf-slot" name="slot">
+            <p class="f-hint f-slot-error" id="rf-slot-error" hidden>Please choose a time slot.</p>
           </div>
-          <input type="hidden" id="rf-slot" name="slot">
-          <p class="f-hint f-slot-error" id="rf-slot-error" hidden>Please choose a time slot.</p>
         </div>
 
         <div class="f-field f-hp" aria-hidden="true">
@@ -460,7 +468,6 @@
   </div>
 
   <div class="event-line">
-    <p><strong>Saturday, 22 August 2026</strong></p>
     <p>
       <a class="visit-link" href="https://share.google/m8iVH0WSUsXct0YPH" target="_blank" rel="noopener">
         <svg class="pin-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
