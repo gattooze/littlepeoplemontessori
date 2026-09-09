@@ -267,15 +267,9 @@
       <form id="gtkForm" novalidate>
 
         <span class="f-section-label">About your child</span>
-        <div class="f-row f-split-2">
-          <div class="f-field">
-            <label for="gk-child-name">Child's full name</label>
-            <input id="gk-child-name" name="child_full_name" type="text" autocomplete="off" required>
-          </div>
-          <div class="f-field">
-            <label for="gk-child-called">Name they're usually called</label>
-            <input id="gk-child-called" name="child_called_name" type="text" autocomplete="off">
-          </div>
+        <div class="f-field">
+          <label for="gk-child-name">Child's full name</label>
+          <input id="gk-child-name" name="child_full_name" type="text" autocomplete="off" required>
         </div>
         <div class="f-field">
           <label for="gk-child-dob">Date of birth</label>
@@ -356,14 +350,6 @@
           </div>
         </div>
         <div class="f-field">
-          <label>Does your child generally sleep independently?</label>
-          <div class="f-radio-group">
-            <label class="f-radio-opt"><input type="radio" name="sleeps_independently" value="Yes">Yes</label>
-            <label class="f-radio-opt"><input type="radio" name="sleeps_independently" value="No">No</label>
-            <label class="f-radio-opt"><input type="radio" name="sleeps_independently" value="Sometimes">Sometimes</label>
-          </div>
-        </div>
-        <div class="f-field">
           <label for="gk-sleep-notes">Anything about their sleep routine that would be helpful for us to know?</label>
           <textarea id="gk-sleep-notes" name="sleep_notes" rows="2"></textarea>
         </div>
@@ -428,11 +414,6 @@
             <textarea id="gk-med-details" name="medication_details" rows="2" placeholder="Please provide details"></textarea>
           </div>
         </div>
-        <div class="f-field">
-          <label for="gk-development">Anything related to your child's development, movement, speech, hearing, vision, sensory needs or emotional wellbeing you'd like us to know?</label>
-          <textarea id="gk-development" name="development_notes" rows="2"></textarea>
-        </div>
-
         <span class="f-section-label">Your family</span>
         <div class="f-field">
           <label for="gk-family-practices">Are there any routines, traditions, cultural practices or family circumstances that are important for us to know or respect?</label>
@@ -559,12 +540,12 @@
 
   // -----------------------------------------------------------
   // Pre-fill from a link the admissions team sends per family, e.g.
-  // ?child=Arjun%20Agrawal&called=Arjun&dob=2023-01-01 -- pure
+  // ?child=Arjun%20Agrawal&dob=2023-01-01 -- pure
   // convenience on top of data admissions already has; the form
   // works identically (just blank) with no params at all.
   // -----------------------------------------------------------
   const prefillParams = new URLSearchParams(location.search);
-  const prefillMap = { child: 'gk-child-name', called: 'gk-child-called', dob: 'gk-child-dob' };
+  const prefillMap = { child: 'gk-child-name', dob: 'gk-child-dob' };
   Object.entries(prefillMap).forEach(([param, id]) => {
     const val = prefillParams.get(param);
     if (val) document.getElementById(id).value = val;
@@ -578,7 +559,7 @@
   const thanksHeading = document.getElementById('thanksHeading');
 
   function personalizeThanks() {
-    const name = (document.getElementById('gk-child-called').value || document.getElementById('gk-child-name').value).trim();
+    const name = document.getElementById('gk-child-name').value.trim();
     thanksHeading.textContent = name ? `thank you for sharing this, ${name}'s family.` : `thank you.`;
   }
 
