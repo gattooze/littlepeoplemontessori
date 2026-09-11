@@ -59,16 +59,37 @@
   .status { font-size: 0.82rem; padding: 0 2px; }
   .status.ok { color: var(--sage); }
   .status.err { color: #C4634A; }
+  .gate-hint { font-size: 0.78rem; color: var(--ink-2); width: 100%; }
+  .gate-hint.hidden { display: none; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(48,48,48,.55); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .modal-overlay[hidden] { display: none; }
+  .modal { background: #fff; border-radius: 14px; padding: 24px; max-width: 360px; width: 100%; font-family: var(--body); }
+  .modal h2 { font-family: var(--display); font-size: 1.1rem; margin: 0 0 8px; }
+  .modal p { color: var(--ink-2); font-size: 0.9rem; margin: 0 0 18px; }
+  .modal-choices { display: flex; gap: 10px; }
+  .modal-choices .btn { flex: 1; justify-content: center; }
+  .modal-password { margin-top: 18px; border-top: 1px solid var(--line-soft); padding-top: 16px; }
+  .modal-password label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+  .modal-password input {
+    width: 100%; font: inherit; font-size: 0.95rem; padding: 0.6rem 0.7rem;
+    border: 1px solid var(--line-soft); border-radius: 8px; margin-bottom: 6px;
+  }
+  .modal-error { color: #C4634A; font-size: 0.82rem; min-height: 1.2em; margin-bottom: 4px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
 
   /* ---------- the receipt itself ---------- */
   #receipt {
-    width: 210mm; min-height: 297mm; margin: 0 auto; padding: 14mm 15mm 12mm;
+    width: 210mm; height: 297mm; margin: 0 auto; padding: 14mm 15mm 12mm;
     background: var(--ground); position: relative; overflow: hidden;
     border-radius: 4px; box-shadow: 0 10px 40px -12px rgba(43,43,41,.3);
   }
   .wm-tree { position: absolute; z-index: 0; top: 6mm; right: -6mm; height: 280mm; width: 46mm; opacity: 0.9; }
   .wm-ground { position: absolute; z-index: 0; left: 0; bottom: 6mm; width: 210mm; height: 12mm; opacity: 0.85; }
-  .r-content { position: relative; z-index: 1; }
+  .r-content {
+    position: relative; z-index: 1; height: 100%;
+    display: flex; flex-direction: column;
+  }
 
   .r-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6mm; }
   .r-head img { height: 9.5mm; width: auto; display: block; }
@@ -114,7 +135,19 @@
   .words-row input:focus { outline: none; border-color: var(--denim); }
   .words-row .only { color: var(--ink-2); white-space: nowrap; }
 
-  .sign-row { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 1mm; gap: 6mm; }
+  .sign-row {
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 6mm;
+    /* auto top-margin, not a fixed one -- pins this + the footer note below it
+       to the bottom of the fixed-height page regardless of how tall the two
+       cards above render. html2canvas's own layout engine (a reimplementation,
+       not the real browser) was measured to lay out the same flex/baseline
+       rows a few mm more compactly than the live page does, which otherwise
+       shows up as random extra dead space at the very bottom of the PDF --
+       confirmed by extracting the raw embedded image straight out of a
+       generated PDF. This makes the whole template self-correcting instead
+       of chasing an exact pixel match between two different layout engines. */
+    margin-top: auto;
+  }
   .sign-block .for { font-family: var(--display); font-weight: 600; font-size: 10.5pt; margin-bottom: 4mm; }
   .sign-stack { position: relative; width: 55mm; height: 5mm; }
   .sign-img { position: absolute; left: 0; bottom: -1mm; height: 14mm; width: auto; object-fit: contain; }
@@ -130,6 +163,16 @@
 
   .note-strip { display: inline-flex; align-items: center; gap: 2mm; background: var(--ink); color: var(--ground); border-radius: 999px; padding: 2mm 4.5mm; font-size: 8.6pt; font-style: italic; font-weight: 600; margin-top: 2mm; }
   .note-strip .dot { width: 1.8mm; height: 1.8mm; border-radius: 50%; background: var(--denim); flex: none; }
+
+  /* Only ever added to a test/sample clone right before capture -- never
+     part of the live page markup -- so a genuine receipt can't accidentally
+     ship with this and a test one can't accidentally pass for genuine. */
+  .sample-stamp {
+    position: absolute; z-index: 5; top: 48%; left: 50%; transform: translate(-50%, -50%) rotate(-16deg);
+    font-family: var(--display); font-weight: 700; font-size: 30pt; letter-spacing: 0.12em;
+    color: rgba(196, 99, 74, .38); border: 3px solid rgba(196, 99, 74, .38); border-radius: 6px;
+    padding: 3mm 8mm; white-space: nowrap; pointer-events: none; text-transform: uppercase;
+  }
 
   @media print {
     html, body { background: #fff; }
@@ -181,11 +224,32 @@
   <div class="toolbar no-print">
     <h1>Fee Receipt: generate, print, or email</h1>
     <button class="btn btn-outline" id="btnPrint" type="button">Print</button>
-    <button class="btn btn-solid" id="btnDownload" type="button">Download PDF</button>
+    <button class="btn btn-solid" id="btnGenerate" type="button">Generate Fee Receipt</button>
     <div class="send-row">
       <input type="email" id="parentEmail" placeholder="Parent's email to send this receipt to">
-      <button class="btn btn-solid" id="btnSend" type="button">Send Receipt by Email</button>
+      <button class="btn btn-solid" id="btnSend" type="button" disabled>Send Receipt by Email</button>
       <span class="status" id="sendStatus"></span>
+      <div class="gate-hint" id="gateHint">Generate a final receipt (with password) first to unlock sending.</div>
+    </div>
+  </div>
+
+  <div class="modal-overlay no-print" id="genModal" hidden>
+    <div class="modal">
+      <h2>Generate fee receipt</h2>
+      <p>Choose how this receipt should be generated.</p>
+      <div class="modal-choices">
+        <button class="btn btn-outline" id="btnChooseTest" type="button">Test / Sample</button>
+        <button class="btn btn-solid" id="btnChooseFinal" type="button">Final Receipt</button>
+      </div>
+      <div class="modal-password" id="modalPassword" hidden>
+        <label for="finalPasswordInput">Password required for a final receipt</label>
+        <input type="password" id="finalPasswordInput" placeholder="Password" autocomplete="off">
+        <div class="modal-error" id="modalError"></div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" id="btnPasswordCancel" type="button">Cancel</button>
+          <button class="btn btn-solid" id="btnPasswordConfirm" type="button">Confirm</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -480,7 +544,7 @@
   }
   ensureWatermarkRasters().catch(() => {}); // warm the cache; re-attempted on demand if this fails
 
-  function buildStaticClone() {
+  function buildStaticClone(isTest) {
     const clone = document.getElementById('receipt').cloneNode(true);
     clone.querySelectorAll('input, select, textarea').forEach((el) => {
       // Read the value from the LIVE element (by id), not the clone's own
@@ -513,18 +577,24 @@
       img.className = 'wm-ground';
       clone.querySelector('.wm-ground').replaceWith(img);
     }
+    if (isTest) {
+      const stamp = document.createElement('div');
+      stamp.className = 'sample-stamp';
+      stamp.textContent = 'Sample, not valid';
+      clone.appendChild(stamp);
+    }
     return clone;
   }
 
-  function receiptFilename() {
+  function receiptFilename(isTest) {
     const child = $('f-child').value.trim() || 'receipt';
-    return `Fee Receipt - ${child}.pdf`;
+    return `${isTest ? 'SAMPLE - ' : ''}Fee Receipt - ${child}.pdf`;
   }
 
-  function pdfOptions(w, h) {
+  function pdfOptions(w, h, isTest) {
     return {
       margin: 0,
-      filename: receiptFilename(),
+      filename: receiptFilename(isTest),
       image: { type: 'jpeg', quality: 0.98 },
       // width/height/windowWidth/windowHeight passed explicitly --
       // html2canvas's own auto-measurement of the clone's height
@@ -540,13 +610,28 @@
       // whole capture sideways, cropping content on one edge and leaving a
       // blank strip on the other (confirmed by extracting the exact PDF
       // blob a real "Download PDF" click produced and inspecting it).
-      html2canvas: { scale: 2, useCORS: true, width: w, height: h, windowWidth: w, windowHeight: h, scrollX: 0, scrollY: 0, x: 0, y: 0 },
+      html2canvas: {
+        scale: 2, useCORS: true, width: w, height: h, windowWidth: w, windowHeight: h, scrollX: 0, scrollY: 0, x: 0, y: 0,
+        // html2canvas builds its OWN separate clone (a fresh iframe document)
+        // to render from, so document.fonts.ready on the real page says
+        // nothing about that document's fonts. onclone returning a promise
+        // makes html2canvas wait for it before rendering -- cheap insurance
+        // against fallback-font text even though it wasn't the actual cause
+        // of the "extra space at the bottom" bug (see #receipt/.sign-row
+        // below for that real fix: html2canvas's own layout engine measures
+        // the same flex/baseline rows a few mm shorter than the real browser
+        // does, confirmed by extracting the raw embedded image out of a
+        // generated PDF -- the fixed-height + margin-top:auto layout makes
+        // the template self-correcting instead of chasing an exact pixel
+        // match between two different layout engines).
+        onclone: (clonedDoc) => (clonedDoc.fonts && clonedDoc.fonts.ready) || Promise.resolve()
+      },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       pagebreak: { mode: ['avoid-all'] }
     };
   }
 
-  async function withOffscreenClone(fn) {
+  async function withOffscreenClone(fn, isTest) {
     // NOTE: this deliberately does NOT position the clone off-screen
     // (e.g. left:-9999px) -- html2canvas silently produces a blank
     // capture for elements placed far outside the viewport in this
@@ -562,7 +647,7 @@
     // measured content past 297mm and spill a blank second page.
     await (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).catch(() => {});
     window.scrollTo(0, 0); // belt-and-suspenders alongside the html2canvas scrollX/scrollY:0 options above
-    const clone = buildStaticClone();
+    const clone = buildStaticClone(isTest);
     clone.style.position = 'fixed';
     clone.style.top = '0';
     clone.style.left = '0';
@@ -610,11 +695,67 @@
       .finally(() => { clone.remove(); overlay.remove(); });
   }
 
-  $('btnDownload').addEventListener('click', () => {
-    withOffscreenClone((clone, w, h) => html2pdf().set(pdfOptions(w, h)).from(clone).save());
+  // ---- generate: test/sample vs final (password-gated) ----
+  // The password check here is purely for immediate UI feedback -- it's
+  // visible to anyone who views source, same as any client-side check
+  // always is. Real enforcement lives on the server: apps-script.gs
+  // independently re-checks this same password before it will ever log a
+  // submission to the Fee Receipts sheet or treat it as "final", so a
+  // request crafted by hand claiming is_final=true without the real
+  // password is rejected there regardless of what the client sent.
+  const FEE_RECEIPT_PASSWORD = 'l1ttl3p30pl3';
+  let isFinalReceipt = false;
+  let finalPassword = '';
+
+  function setGateState(final) {
+    isFinalReceipt = final;
+    $('btnSend').disabled = !final;
+    $('gateHint').classList.toggle('hidden', final);
+  }
+  setGateState(false);
+
+  const genModal = $('genModal');
+  function openGenModal() {
+    $('modalPassword').hidden = true;
+    $('finalPasswordInput').value = '';
+    $('modalError').textContent = '';
+    genModal.hidden = false;
+  }
+  function closeGenModal() { genModal.hidden = true; }
+
+  $('btnGenerate').addEventListener('click', openGenModal);
+  $('btnPasswordCancel').addEventListener('click', closeGenModal);
+  genModal.addEventListener('click', (e) => { if (e.target === genModal) closeGenModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !genModal.hidden) closeGenModal(); });
+
+  $('btnChooseTest').addEventListener('click', () => {
+    closeGenModal();
+    setGateState(false);
+    withOffscreenClone((clone, w, h) => html2pdf().set(pdfOptions(w, h, true)).from(clone).save(), true);
   });
 
-  // ---- email send ----
+  $('btnChooseFinal').addEventListener('click', () => {
+    $('modalPassword').hidden = false;
+    $('finalPasswordInput').focus();
+  });
+
+  $('finalPasswordInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') $('btnPasswordConfirm').click();
+  });
+
+  $('btnPasswordConfirm').addEventListener('click', () => {
+    const pw = $('finalPasswordInput').value;
+    if (pw !== FEE_RECEIPT_PASSWORD) {
+      $('modalError').textContent = 'Incorrect password.';
+      return;
+    }
+    finalPassword = pw;
+    closeGenModal();
+    setGateState(true);
+    withOffscreenClone((clone, w, h) => html2pdf().set(pdfOptions(w, h, false)).from(clone).save(), false);
+  });
+
+  // ---- email send (only reachable once a final receipt has been generated) ----
   const statusEl = $('sendStatus');
   $('btnSend').addEventListener('click', async () => {
     const email = $('parentEmail').value.trim();
@@ -636,7 +777,7 @@
 
     try {
       const pdfBlob = await withOffscreenClone((clone, w, h) =>
-        html2pdf().set(pdfOptions(w, h)).from(clone).outputPdf('blob')
+        html2pdf().set(pdfOptions(w, h, false)).from(clone).outputPdf('blob'), false
       );
       const base64 = await new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -649,6 +790,8 @@
 
       const fd = new FormData();
       fd.append('form_id', 'fee_receipt');
+      fd.append('is_final', 'true');
+      fd.append('receipt_password', finalPassword);
       fd.append('parent_email', email);
       fd.append('receipt_no', $('f-receipt-no').value);
       fd.append('date', formatDateDisplay($('f-date').value));
@@ -676,7 +819,7 @@
       statusEl.textContent = 'Could not send. Please try again.';
       statusEl.className = 'status err';
     } finally {
-      btn.disabled = false;
+      btn.disabled = !isFinalReceipt;
     }
   });
 })();
