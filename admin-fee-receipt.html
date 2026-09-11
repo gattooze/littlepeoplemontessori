@@ -14,6 +14,7 @@
 <title>Fee Receipt - Little People Montessori (admin)</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
   @font-face { font-family: "General Sans"; font-weight: 400; src: url("assets/fonts/GeneralSans-Regular.woff2") format("woff2"); }
@@ -69,7 +70,7 @@
   .wm-ground { position: absolute; z-index: 0; left: 0; bottom: 6mm; width: 210mm; height: 12mm; opacity: 0.85; }
   .r-content { position: relative; z-index: 1; }
 
-  .r-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8mm; }
+  .r-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6mm; }
   .r-head img { height: 9.5mm; width: auto; display: block; }
   .r-date { display: flex; align-items: baseline; gap: 2mm; font-size: 10.5pt; }
   .r-date label { color: var(--ink-2); }
@@ -80,13 +81,13 @@
   }
   .r-date input[type="date"]:focus { outline: none; border-color: var(--denim); }
 
-  h1 { font-family: var(--display); font-weight: 600; font-size: 22pt; text-transform: lowercase; margin: 0 0 8mm; letter-spacing: -0.01em; }
+  h1 { font-family: var(--display); font-weight: 600; font-size: 22pt; text-transform: lowercase; margin: 0 0 6mm; letter-spacing: -0.01em; }
 
-  .card { background: var(--ground-2); border: 1px solid var(--line-soft); border-radius: 4mm; padding: 5mm 6mm 6mm; margin-bottom: 5mm; }
+  .card { background: var(--ground-2); border: 1px solid var(--line-soft); border-radius: 4mm; padding: 5mm 6mm 6mm; margin-bottom: 4mm; }
   .card-label { display: flex; align-items: center; gap: 2mm; font-family: var(--display); font-weight: 600; font-size: 8.2pt; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 4mm; }
   .card-label .dot { width: 2.4mm; height: 2.4mm; border-radius: 50%; flex: none; }
 
-  .r-row { display: flex; align-items: baseline; gap: 3mm; margin-bottom: 3.6mm; font-size: 11pt; }
+  .r-row { display: flex; align-items: baseline; gap: 3mm; margin-bottom: 3mm; font-size: 11pt; }
   .r-row:last-child { margin-bottom: 0; }
   .r-row label { font-family: var(--display); font-weight: 600; white-space: nowrap; }
   .r-row input[type="text"], .r-row select, .r-row input[type="number"] {
@@ -107,18 +108,24 @@
   .amt-cell input:focus { outline: none; border-color: var(--denim); }
   .amt-cell.total input { font-weight: 600; }
 
-  .words-row { font-size: 10.5pt; margin-bottom: 3.6mm; display: flex; align-items: baseline; gap: 2mm; flex-wrap: wrap; }
+  .words-row { font-size: 10.5pt; margin-bottom: 3mm; display: flex; align-items: baseline; gap: 2mm; flex-wrap: wrap; }
   .words-row label { font-family: var(--display); font-weight: 600; display: block; width: 100%; margin-bottom: 1mm; }
   .words-row input { flex: 1; min-width: 100mm; font-family: var(--body); font-size: 10.5pt; border: none; border-bottom: 1px solid var(--line); background: transparent; padding: 1mm; }
   .words-row input:focus { outline: none; border-color: var(--denim); }
   .words-row .only { color: var(--ink-2); white-space: nowrap; }
 
-  .sign-block { margin-top: 4mm; }
-  .sign-block .for { font-family: var(--display); font-weight: 600; font-size: 10.5pt; margin-bottom: 10mm; }
-  .sign-line { width: 55mm; border-bottom: 1px solid var(--ink); margin-bottom: 1.5mm; }
-  .sign-block .caption { font-size: 9pt; color: var(--ink-2); }
+  .sign-row { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 1mm; gap: 6mm; }
+  .sign-block .for { font-family: var(--display); font-weight: 600; font-size: 10.5pt; margin-bottom: 4mm; }
+  .sign-stack { position: relative; width: 55mm; height: 5mm; }
+  .sign-img { position: absolute; left: 2mm; bottom: 1.5mm; height: 8mm; width: auto; max-width: 40mm; object-fit: contain; }
+  .stamp-img { position: absolute; right: -4mm; bottom: -4mm; height: 16mm; width: auto; opacity: 0.85; mix-blend-mode: multiply; }
+  .sign-line { position: absolute; left: 0; right: 0; bottom: 0; border-bottom: 1px solid var(--ink); }
+  .sign-block .caption { font-size: 9pt; color: var(--ink-2); margin-top: 1.5mm; }
+  .qr-block { text-align: center; flex: none; }
+  .qr-img { width: 14mm; height: 14mm; display: block; }
+  .qr-caption { font-size: 7pt; color: var(--ink-2); margin-top: 0.5mm; }
 
-  .note-strip { display: inline-flex; align-items: center; gap: 2mm; background: var(--ink); color: var(--ground); border-radius: 999px; padding: 2mm 4.5mm; font-size: 8.6pt; font-style: italic; font-weight: 600; margin-top: 6mm; }
+  .note-strip { display: inline-flex; align-items: center; gap: 2mm; background: var(--ink); color: var(--ground); border-radius: 999px; padding: 2mm 4.5mm; font-size: 8.6pt; font-style: italic; font-weight: 600; margin-top: 2mm; }
   .note-strip .dot { width: 1.8mm; height: 1.8mm; border-radius: 50%; background: var(--denim); flex: none; }
 
   @media print {
@@ -286,10 +293,20 @@
         <div class="r-row"><label for="f-ref">Transaction / Cheque Reference:</label><input type="text" id="f-ref" placeholder="Optional"></div>
       </div>
 
-      <div class="sign-block">
-        <div class="for">For Little People Montessori</div>
-        <div class="sign-line"></div>
-        <div class="caption">Authorised Signatory</div>
+      <div class="sign-row">
+        <div class="sign-block">
+          <div class="for">For Little People Montessori</div>
+          <div class="sign-stack">
+            <img class="sign-img" id="sigImg" alt="Authorised signature" hidden>
+            <img class="stamp-img" id="stampImg" alt="" hidden>
+            <div class="sign-line"></div>
+          </div>
+          <div class="caption">Authorised Signatory</div>
+        </div>
+        <div class="qr-block">
+          <img class="qr-img" id="qrImg" alt="Scan to verify this receipt">
+          <div class="qr-caption">Scan to verify</div>
+        </div>
       </div>
 
       <div class="note-strip"><span class="dot"></span>Fees once paid are non-refundable and non-transferable.</div>
@@ -328,6 +345,27 @@
   yearSelect.value = yearLabel(startYr);
 
   $('f-receipt-no').value = `LPM-${today.getFullYear()}${pad2(today.getMonth()+1)}${pad2(today.getDate())}-${Math.floor(1000 + Math.random()*9000)}`;
+
+  // ---- QR verification code ----
+  // Lets anyone holding the receipt (a parent, a bank, an auditor) scan it
+  // and confirm against the Fee Receipts sheet that it's genuine and the
+  // printed details actually match the record -- real verifiability, not
+  // just a signature/stamp that looks right.
+  const VERIFY_URL = 'https://littlepeoplemontessori.com/verify-receipt.html';
+  function regenerateQr() {
+    const no = $('f-receipt-no').value.trim();
+    const qrImg = $('qrImg');
+    if (!no) { qrImg.removeAttribute('src'); return; }
+    const holder = document.createElement('div');
+    holder.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
+    document.body.appendChild(holder);
+    new QRCode(holder, { text: `${VERIFY_URL}?no=${encodeURIComponent(no)}`, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M });
+    const canvas = holder.querySelector('canvas');
+    if (canvas) qrImg.src = canvas.toDataURL('image/png');
+    holder.remove();
+  }
+  $('f-receipt-no').addEventListener('input', regenerateQr);
+  regenerateQr();
 
   // ---- Indian-numbering amount-in-words ----
   function numberToWordsIndian(num) {

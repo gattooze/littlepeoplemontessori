@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Verify Fee Receipt — Little People Montessori</title>
+<style>
+  :root {
+    --ground: #FDF9F7; --ink: #303030; --ink-2: #6B6663;
+    --line: #D7CCC0; --denim: #5377AB; --blush: #F2ADB8; --sage: #71895B;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--ground); color: var(--ink); line-height: 1.5;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  .brand { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--denim); margin-bottom: 0.6rem; }
+  h1 { font-size: 1.4rem; margin: 0 0 1.75rem; line-height: 1.2; }
+
+  .state { display: none; }
+  .state.show { display: block; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.95rem;
+    padding: 0.6rem 1rem; border-radius: 999px; margin-bottom: 1.5rem;
+  }
+  .badge.ok { background: #E9F0E4; color: var(--sage); }
+  .badge.no { background: #F7E4E0; color: #C4634A; }
+
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 0.75rem; padding: 1.25rem 1.4rem; }
+  .row { display: flex; justify-content: space-between; gap: 1rem; padding: 0.55rem 0; border-bottom: 1px solid var(--line); font-size: 0.95rem; }
+  .row:last-child { border-bottom: none; }
+  .row .k { color: var(--ink-2); }
+  .row .v { font-weight: 600; text-align: right; }
+
+  .lead { color: var(--ink-2); font-size: 0.95rem; }
+  .no-input { display: flex; gap: 0.5rem; margin-top: 1.5rem; }
+  .no-input input {
+    flex: 1; font: inherit; font-size: 0.95rem; color: var(--ink);
+    border: 1px solid var(--line); border-radius: 0.5rem; padding: 0.65rem 0.8rem; background: #fff;
+  }
+  .no-input button {
+    font: inherit; font-size: 0.95rem; font-weight: 600; color: #fff;
+    background: var(--denim); border: none; border-radius: 0.5rem; padding: 0.65rem 1rem; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Little People Montessori</div>
+  <h1>Fee receipt verification</h1>
+
+  <div class="state show" id="stateLoading"><p class="lead">Checking receipt&hellip;</p></div>
+
+  <div class="state" id="stateFound">
+    <div class="badge ok">&#10003; Genuine receipt on record</div>
+    <div class="card">
+      <div class="row"><span class="k">Receipt No.</span><span class="v" id="vNo"></span></div>
+      <div class="row"><span class="k">Date</span><span class="v" id="vDate"></span></div>
+      <div class="row"><span class="k">Child's name</span><span class="v" id="vChild"></span></div>
+      <div class="row"><span class="k">Programme</span><span class="v" id="vProgramme"></span></div>
+      <div class="row"><span class="k">Academic Year</span><span class="v" id="vYear"></span></div>
+      <div class="row"><span class="k">Total received</span><span class="v" id="vTotal"></span></div>
+      <div class="row"><span class="k">Mode of payment</span><span class="v" id="vMode"></span></div>
+    </div>
+  </div>
+
+  <div class="state" id="stateNotFound">
+    <div class="badge no">&#10007; Not found</div>
+    <p class="lead">No receipt matches this number in our records. If you believe this is a mistake, please contact the school office directly rather than relying on this page alone.</p>
+  </div>
+
+  <div class="state" id="stateNoNumber">
+    <p class="lead">Enter a receipt number to verify it against our records.</p>
+    <div class="no-input">
+      <input type="text" id="noInput" placeholder="e.g. LPM-20260911-4784">
+      <button id="btnCheck" type="button">Check</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzUkmj133aJEQD5728vo_HXosOT_a54CwY33VM9n2rc3o4GQacg1hDTlqKTjDmsizsb/exec';
+  const $ = (id) => document.getElementById(id);
+  const states = ['stateLoading', 'stateFound', 'stateNotFound', 'stateNoNumber'];
+  function show(id) { states.forEach((s) => $(s).classList.toggle('show', s === id)); }
+
+  async function checkReceipt(no) {
+    show('stateLoading');
+    try {
+      const res = await fetch(`${FORM_ENDPOINT}?action=verify_receipt&no=${encodeURIComponent(no)}`);
+      const json = await res.json();
+      if (json && json.ok && json.found) {
+        $('vNo').textContent = json.receiptNo || no;
+        $('vDate').textContent = json.date || '-';
+        $('vChild').textContent = json.childName || '-';
+        $('vProgramme').textContent = `${json.programme || '-'}${json.hours ? ' (' + json.hours + 'h)' : ''}`;
+        $('vYear').textContent = json.academicYear || '-';
+        $('vTotal').textContent = json.totalAmount ? `Rs. ${Number(json.totalAmount).toLocaleString('en-IN')}` : '-';
+        $('vMode').textContent = json.paymentMode || '-';
+        show('stateFound');
+      } else {
+        show('stateNotFound');
+      }
+    } catch (err) {
+      show('stateNotFound');
+    }
+  }
+
+  const params = new URLSearchParams(location.search);
+  const no = params.get('no');
+  if (no) {
+    checkReceipt(no.trim());
+  } else {
+    show('stateNoNumber');
+  }
+
+  $('btnCheck').addEventListener('click', () => {
+    const val = $('noInput').value.trim();
+    if (val) checkReceipt(val);
+  });
+  $('noInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') $('btnCheck').click();
+  });
+})();
+</script>
+</body>
+</html>
