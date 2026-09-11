@@ -150,10 +150,16 @@
   }
   .sign-block .for { font-family: var(--display); font-weight: 600; font-size: 10.5pt; margin-bottom: 4mm; }
   .sign-stack { position: relative; width: 55mm; height: 5mm; }
-  .sign-img { position: absolute; left: 0; bottom: -1mm; height: 14mm; width: auto; object-fit: contain; }
+  /* Hidden on screen (and in print, which isn't gated by the
+     Generate/password flow at all) -- only ever shown in the offscreen
+     clone built for a PDF/email capture, via an inline style override
+     applied right before that specific capture. Never visible while
+     someone is just filling in the form, and never producible by hitting
+     Print directly without going through Generate. */
+  .sign-img { position: absolute; left: 0; bottom: -1mm; height: 14mm; width: auto; object-fit: contain; display: none; }
   .stamp-img {
     position: absolute; left: 6mm; bottom: -7mm; height: 18mm; width: auto;
-    opacity: 0.92; mix-blend-mode: multiply; transform: rotate(-8deg);
+    opacity: 0.92; mix-blend-mode: multiply; transform: rotate(-8deg); display: none;
   }
   .sign-line { position: absolute; left: 0; right: 0; bottom: 0; border-bottom: 1px solid var(--ink); }
   .sign-block .caption { font-size: 9pt; color: var(--ink-2); margin-top: 1.5mm; }
@@ -229,7 +235,7 @@
       <input type="email" id="parentEmail" placeholder="Parent's email to send this receipt to">
       <button class="btn btn-solid" id="btnSend" type="button" disabled>Send Receipt by Email</button>
       <span class="status" id="sendStatus"></span>
-      <div class="gate-hint" id="gateHint">Generate a final receipt (with password) first to unlock sending.</div>
+      <div class="gate-hint" id="gateHint">Generate a receipt first to unlock sending (sample or final).</div>
     </div>
   </div>
 
@@ -577,6 +583,12 @@
       img.className = 'wm-ground';
       clone.querySelector('.wm-ground').replaceWith(img);
     }
+    // The signature and stamp are display:none on the live page/print --
+    // only this offscreen PDF/email capture clone ever shows them.
+    const sigImg = clone.querySelector('.sign-img');
+    if (sigImg) sigImg.style.display = 'block';
+    const stampImg = clone.querySelector('.stamp-img');
+    if (stampImg) stampImg.style.display = 'block';
     if (isTest) {
       const stamp = document.createElement('div');
       stamp.className = 'sample-stamp';
@@ -704,15 +716,22 @@
   // request crafted by hand claiming is_final=true without the real
   // password is rejected there regardless of what the client sent.
   const FEE_RECEIPT_PASSWORD = 'l1ttl3p30pl3';
+  let hasGenerated = false;
   let isFinalReceipt = false;
   let finalPassword = '';
 
-  function setGateState(final) {
+  // Sending is unlocked by generating a receipt at all, test or final --
+  // a sample can be emailed freely (e.g. to check formatting) without the
+  // password, since it's watermarked and never gets logged/verified either
+  // way. The password only gates whether THIS particular send is treated
+  // as final (logged + verifiable) or stays a sample on the backend too.
+  function setGateState(generated, final) {
+    hasGenerated = generated;
     isFinalReceipt = final;
-    $('btnSend').disabled = !final;
-    $('gateHint').classList.toggle('hidden', final);
+    $('btnSend').disabled = !generated;
+    $('gateHint').classList.toggle('hidden', generated);
   }
-  setGateState(false);
+  setGateState(false, false);
 
   const genModal = $('genModal');
   function openGenModal() {
@@ -730,7 +749,8 @@
 
   $('btnChooseTest').addEventListener('click', () => {
     closeGenModal();
-    setGateState(false);
+    finalPassword = '';
+    setGateState(true, false);
     withOffscreenClone((clone, w, h) => html2pdf().set(pdfOptions(w, h, true)).from(clone).save(), true);
   });
 
@@ -751,11 +771,11 @@
     }
     finalPassword = pw;
     closeGenModal();
-    setGateState(true);
+    setGateState(true, true);
     withOffscreenClone((clone, w, h) => html2pdf().set(pdfOptions(w, h, false)).from(clone).save(), false);
   });
 
-  // ---- email send (only reachable once a final receipt has been generated) ----
+  // ---- email send (reachable after generating either a sample or a final receipt) ----
   const statusEl = $('sendStatus');
   $('btnSend').addEventListener('click', async () => {
     const email = $('parentEmail').value.trim();
@@ -775,9 +795,10 @@
     statusEl.textContent = 'Generating PDF…';
     statusEl.className = 'status';
 
+    const isTest = !isFinalReceipt;
     try {
       const pdfBlob = await withOffscreenClone((clone, w, h) =>
-        html2pdf().set(pdfOptions(w, h, false)).from(clone).outputPdf('blob'), false
+        html2pdf().set(pdfOptions(w, h, isTest)).from(clone).outputPdf('blob'), isTest
       );
       const base64 = await new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -790,7 +811,7 @@
 
       const fd = new FormData();
       fd.append('form_id', 'fee_receipt');
-      fd.append('is_final', 'true');
+      fd.append('is_final', isFinalReceipt ? 'true' : 'false');
       fd.append('receipt_password', finalPassword);
       fd.append('parent_email', email);
       fd.append('receipt_no', $('f-receipt-no').value);
@@ -819,7 +840,7 @@
       statusEl.textContent = 'Could not send. Please try again.';
       statusEl.className = 'status err';
     } finally {
-      btn.disabled = !isFinalReceipt;
+      btn.disabled = !hasGenerated;
     }
   });
 })();
