@@ -11,7 +11,7 @@
      now with a small trusted team; if this becomes a real concern,
      it needs an actual login gate before it's shared more widely. -->
 <meta name="robots" content="noindex, nofollow">
-<title>Fee Receipt — Little People Montessori (admin)</title>
+<title>Fee Receipt - Little People Montessori (admin)</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -73,6 +73,12 @@
   .r-head img { height: 9.5mm; width: auto; display: block; }
   .r-date { display: flex; align-items: baseline; gap: 2mm; font-size: 10.5pt; }
   .r-date label { color: var(--ink-2); }
+  .r-date input[type="date"] {
+    font-family: var(--body); font-size: 10.5pt; color: var(--ink);
+    border: none; border-bottom: 1px solid var(--line); background: transparent;
+    padding: 1mm 1mm 1.5mm;
+  }
+  .r-date input[type="date"]:focus { outline: none; border-color: var(--denim); }
 
   h1 { font-family: var(--display); font-weight: 600; font-size: 22pt; text-transform: lowercase; margin: 0 0 8mm; letter-spacing: -0.01em; }
 
@@ -120,7 +126,8 @@
     .no-print { display: none !important; }
     .app-wrap { padding: 0; max-width: none; }
     #receipt { box-shadow: none; border-radius: 0; margin: 0; }
-    .r-row input, .r-row select, .amt-cell input, .words-row input { border-bottom-color: transparent; }
+    .r-row input, .r-row select, .amt-cell input, .words-row input, .r-date input { border-bottom-color: transparent; }
+    .r-date input[type="date"]::-webkit-calendar-picker-indicator { display: none; }
     @page { size: 210mm 297mm; margin: 0; }
   }
 </style>
@@ -162,7 +169,7 @@
 
 <div class="app-wrap">
   <div class="toolbar no-print">
-    <h1>Fee Receipt — generate, print, or email</h1>
+    <h1>Fee Receipt: generate, print, or email</h1>
     <button class="btn btn-outline" id="btnPrint" type="button">Print</button>
     <button class="btn btn-solid" id="btnDownload" type="button">Download PDF</button>
     <div class="send-row">
@@ -210,7 +217,7 @@
         <img src="assets/img/logo-horizontal.png" alt="Little People Montessori">
         <div class="r-date">
           <label for="f-date">Date:</label>
-          <input type="text" id="f-date" value="">
+          <input type="date" id="f-date">
         </div>
       </div>
 
@@ -234,7 +241,7 @@
             <option>3</option><option>4</option><option selected>5</option><option>6</option>
           </select>
         </div>
-        <div class="r-row"><label for="f-year">Academic Year:</label><input type="text" id="f-year" value=""></div>
+        <div class="r-row"><label for="f-year">Academic Year:</label><select id="f-year"></select></div>
         <div class="r-row"><label for="f-receipt-no">Receipt No.:</label><input type="text" id="f-receipt-no" value=""></div>
       </div>
 
@@ -264,7 +271,7 @@
 
         <div class="words-row">
           <label for="f-words">Amount in Words:</label>
-          Rupees <input type="text" id="f-words" placeholder="auto-fills from total — edit if needed"> <span class="only">only.</span>
+          Rupees <input type="text" id="f-words" placeholder="auto-fills from total, edit if needed"> <span class="only">only.</span>
         </div>
 
         <div class="r-row">
@@ -298,11 +305,29 @@
 
   // ---- sensible defaults on load ----
   const today = new Date();
-  $('f-date').value = today.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const pad2 = (n) => String(n).padStart(2, '0');
+  $('f-date').value = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
+
+  function yearLabel(y) { return `${y} - ${String(y + 1).slice(2)}`; }
+  function formatDateDisplay(iso) {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-').map(Number);
+    if (!y || !m || !d) return iso;
+    return new Date(y, m - 1, d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
   const julyCutoff = today.getMonth() >= 6; // academic year runs July-May
   const startYr = julyCutoff ? today.getFullYear() : today.getFullYear() - 1;
-  $('f-year').value = `${startYr} - ${String(startYr + 1).slice(2)}`;
-  $('f-receipt-no').value = `LPM-${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}-${Math.floor(1000 + Math.random()*9000)}`;
+  const yearSelect = $('f-year');
+  for (let i = 0; i < 4; i++) {
+    const opt = document.createElement('option');
+    opt.value = yearLabel(startYr + i);
+    opt.textContent = opt.value;
+    yearSelect.appendChild(opt);
+  }
+  yearSelect.value = yearLabel(startYr);
+
+  $('f-receipt-no').value = `LPM-${today.getFullYear()}${pad2(today.getMonth()+1)}${pad2(today.getDate())}-${Math.floor(1000 + Math.random()*9000)}`;
 
   // ---- Indian-numbering amount-in-words ----
   function numberToWordsIndian(num) {
@@ -417,9 +442,19 @@
   function buildStaticClone() {
     const clone = document.getElementById('receipt').cloneNode(true);
     clone.querySelectorAll('input, select, textarea').forEach((el) => {
+      // Read the value from the LIVE element (by id), not the clone's own
+      // -- cloneNode(true) only copies a <select>'s HTML-authored default
+      // option as "selected", not whatever the user actually picked
+      // afterwards (that's live IDL state, never written back to an
+      // attribute). Without this, switching Programme/Hours/Payment Mode
+      // away from their markup default would silently revert to that
+      // default in the generated PDF while showing correctly on-screen.
+      const liveEl = document.getElementById(el.id) || el;
+      const value = liveEl.value;
       const span = document.createElement('span');
       const isAmount = el.closest('.amt-cell');
-      span.textContent = isAmount ? amountDisplay(el.value) : (el.value || '');
+      const isDate = el.id === 'f-date';
+      span.textContent = isAmount ? amountDisplay(value) : isDate ? formatDateDisplay(value) : (value || '');
       span.style.font = 'inherit';
       span.style.color = 'inherit';
       if (el.tagName === 'SELECT' || el.closest('.r-row')) span.style.fontWeight = '400';
@@ -543,7 +578,7 @@
       fd.append('form_id', 'fee_receipt');
       fd.append('parent_email', email);
       fd.append('receipt_no', $('f-receipt-no').value);
-      fd.append('date', $('f-date').value);
+      fd.append('date', formatDateDisplay($('f-date').value));
       fd.append('child_name', $('f-child').value);
       fd.append('parent_name', $('f-parent').value);
       fd.append('programme', $('f-programme').value);
@@ -565,7 +600,7 @@
       statusEl.textContent = `Sent to ${email}.`;
       statusEl.className = 'status ok';
     } catch (err) {
-      statusEl.textContent = 'Could not send — please try again.';
+      statusEl.textContent = 'Could not send. Please try again.';
       statusEl.className = 'status err';
     } finally {
       btn.disabled = false;
