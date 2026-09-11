@@ -117,8 +117,11 @@
   .sign-row { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 1mm; gap: 6mm; }
   .sign-block .for { font-family: var(--display); font-weight: 600; font-size: 10.5pt; margin-bottom: 4mm; }
   .sign-stack { position: relative; width: 55mm; height: 5mm; }
-  .sign-img { position: absolute; left: 2mm; bottom: 1.5mm; height: 8mm; width: auto; max-width: 40mm; object-fit: contain; }
-  .stamp-img { position: absolute; right: -4mm; bottom: -4mm; height: 16mm; width: auto; opacity: 0.85; mix-blend-mode: multiply; }
+  .sign-img { position: absolute; left: 0; bottom: -1mm; height: 14mm; width: auto; object-fit: contain; }
+  .stamp-img {
+    position: absolute; left: 6mm; bottom: -7mm; height: 18mm; width: auto;
+    opacity: 0.92; mix-blend-mode: multiply; transform: rotate(-8deg);
+  }
   .sign-line { position: absolute; left: 0; right: 0; bottom: 0; border-bottom: 1px solid var(--ink); }
   .sign-block .caption { font-size: 9pt; color: var(--ink-2); margin-top: 1.5mm; }
   .qr-block { text-align: center; flex: none; }
@@ -297,8 +300,8 @@
         <div class="sign-block">
           <div class="for">For Little People Montessori</div>
           <div class="sign-stack">
-            <img class="sign-img" id="sigImg" alt="Authorised signature" hidden>
-            <img class="stamp-img" id="stampImg" alt="" hidden>
+            <img class="sign-img" id="sigImg" src="assets/img/signature.png" alt="Authorised signature">
+            <img class="stamp-img" id="stampImg" src="assets/img/stamp.png" alt="">
             <div class="sign-line"></div>
           </div>
           <div class="caption">Authorised Signatory</div>
@@ -551,6 +554,13 @@
     // opaque "generating" overlay so it isn't a jarring flash, and
     // both are removed right after the capture.
     await ensureWatermarkRasters().catch(() => {}); // near-instant if already warm from page load
+    // Wait for the @font-face fonts to actually finish loading -- on a
+    // fast localhost this always wins the race and never mattered during
+    // testing, but on a real visitor's connection, capturing before General
+    // Sans/Synonym are ready falls back to a system font with different
+    // line-height/metrics, which can be just enough taller to push the
+    // measured content past 297mm and spill a blank second page.
+    await (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).catch(() => {});
     window.scrollTo(0, 0); // belt-and-suspenders alongside the html2canvas scrollX/scrollY:0 options above
     const clone = buildStaticClone();
     clone.style.position = 'fixed';
@@ -568,10 +578,27 @@
 
     document.body.appendChild(overlay);
     document.body.appendChild(clone);
+
+    // Wait for every <img> in the clone (signature, stamp, logo, QR) to
+    // actually finish loading before measuring or capturing -- a cloned
+    // <img> re-fetches independently of the live one, and capturing before
+    // that finishes was a real contributor to inconsistent output.
+    // NOTE: img.decode() looks like the right tool here but is unreliable
+    // in this environment -- it was observed to hang forever and never
+    // resolve or reject, so this uses the plain load/error event instead.
+    const imgsReady = Promise.all(
+      Array.from(clone.querySelectorAll('img')).map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve) => {
+          img.addEventListener('load', resolve, { once: true });
+          img.addEventListener('error', resolve, { once: true });
+        });
+      })
+    );
     // setTimeout, not requestAnimationFrame -- rAF pauses entirely while the
     // tab/pane is backgrounded, which would hang PDF generation indefinitely
     // if the user switches away mid-click.
-    return new Promise((resolve) => setTimeout(resolve, 50))
+    return Promise.all([imgsReady, new Promise((resolve) => setTimeout(resolve, 50))])
       .then(() => {
         const rect = clone.getBoundingClientRect();
         // floor (not ceil) the height -- ceiling adds a fractional px that,
