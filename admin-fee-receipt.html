@@ -492,7 +492,14 @@
       // defeats its usual auto-detection), silently producing a
       // correctly-SIZED but entirely BLANK canvas otherwise. Confirmed
       // by sampling canvas pixel data directly while debugging this.
-      html2canvas: { scale: 2, useCORS: true, width: w, height: h, windowWidth: w, windowHeight: h },
+      // scrollX/scrollY/x/y pinned to 0 -- html2canvas computes a
+      // position:fixed element's capture position using the page's current
+      // scroll offset, and that compensation is unreliable: if the page has
+      // ANY horizontal/vertical scroll at capture time, it can shift the
+      // whole capture sideways, cropping content on one edge and leaving a
+      // blank strip on the other (confirmed by extracting the exact PDF
+      // blob a real "Download PDF" click produced and inspecting it).
+      html2canvas: { scale: 2, useCORS: true, width: w, height: h, windowWidth: w, windowHeight: h, scrollX: 0, scrollY: 0, x: 0, y: 0 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       pagebreak: { mode: ['avoid-all'] }
     };
@@ -506,6 +513,7 @@
     // opaque "generating" overlay so it isn't a jarring flash, and
     // both are removed right after the capture.
     await ensureWatermarkRasters().catch(() => {}); // near-instant if already warm from page load
+    window.scrollTo(0, 0); // belt-and-suspenders alongside the html2canvas scrollX/scrollY:0 options above
     const clone = buildStaticClone();
     clone.style.position = 'fixed';
     clone.style.top = '0';
