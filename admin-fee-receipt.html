@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light only">
+<!-- Internal/admin tool, not a parent-facing form -- unlisted, noindex,
+     not linked from nav. IMPORTANT: this is obscurity, not real access
+     control (same caveat as every other unlisted page on this site).
+     Anyone with the URL can generate a receipt-shaped PDF. Fine for
+     now with a small trusted team; if this becomes a real concern,
+     it needs an actual login gate before it's shared more widely. -->
+<meta name="robots" content="noindex, nofollow">
+<title>Fee Receipt — Little People Montessori (admin)</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+  @font-face { font-family: "General Sans"; font-weight: 400; src: url("assets/fonts/GeneralSans-Regular.woff2") format("woff2"); }
+  @font-face { font-family: "General Sans"; font-weight: 500; src: url("assets/fonts/GeneralSans-Medium.woff2") format("woff2"); }
+  @font-face { font-family: "General Sans"; font-weight: 600; src: url("assets/fonts/GeneralSans-Semibold.woff2") format("woff2"); }
+  @font-face { font-family: "Synonym"; font-weight: 400; src: url("assets/fonts/Synonym-Regular.woff2") format("woff2"); }
+  @font-face { font-family: "Synonym"; font-weight: 500; src: url("assets/fonts/Synonym-Medium.woff2") format("woff2"); }
+
+  :root {
+    --ground: #FDF9F7; --ground-2: #FFFFFF;
+    --ink: #303030; --ink-2: #6B6663;
+    --line: #D7CCC0; --line-soft: #E7DFDA;
+    --blush: #F2ADB8; --sage: #71895B; --denim: #5377AB;
+    --bark: #D8C3A8;
+    --display: "General Sans", sans-serif; --body: "Synonym", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #E9E2DC; }
+  body { font-family: var(--body); color: var(--ink); }
+
+  /* ---------- app chrome (toolbar + status), hidden on print ---------- */
+  .app-wrap { max-width: 950px; margin: 0 auto; padding: 20px 16px 60px; }
+  .toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+    background: var(--ground-2); border: 1px solid var(--line-soft); border-radius: 14px;
+    padding: 14px 16px; margin-bottom: 18px;
+  }
+  .toolbar h1 { font-family: var(--display); font-size: 1rem; font-weight: 600; margin: 0; flex: 1 1 auto; }
+  .btn {
+    font-family: var(--display); font-weight: 600; font-size: 0.86rem;
+    border: none; border-radius: 999px; padding: 0.6rem 1.1rem; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+  }
+  .btn-solid { background: var(--denim); color: #fff; }
+  .btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--line-soft); }
+  .btn:disabled { opacity: 0.55; cursor: default; }
+  .send-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%; padding-top: 10px; border-top: 1px solid var(--line-soft); margin-top: 4px; }
+  .send-row input[type="email"] {
+    flex: 1 1 220px; font-family: var(--body); font-size: 0.9rem; padding: 0.55rem 0.75rem;
+    border: 1px solid var(--line-soft); border-radius: 8px; background: var(--ground);
+  }
+  .status { font-size: 0.82rem; padding: 0 2px; }
+  .status.ok { color: var(--sage); }
+  .status.err { color: #C4634A; }
+
+  /* ---------- the receipt itself ---------- */
+  #receipt {
+    width: 210mm; min-height: 297mm; margin: 0 auto; padding: 14mm 15mm 12mm;
+    background: var(--ground); position: relative; overflow: hidden;
+    border-radius: 4px; box-shadow: 0 10px 40px -12px rgba(43,43,41,.3);
+  }
+  .wm-tree { position: absolute; z-index: 0; top: 6mm; right: -6mm; height: 280mm; width: 46mm; opacity: 0.9; }
+  .wm-ground { position: absolute; z-index: 0; left: 0; bottom: 6mm; width: 210mm; height: 12mm; opacity: 0.85; }
+  .r-content { position: relative; z-index: 1; }
+
+  .r-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8mm; }
+  .r-head img { height: 9.5mm; width: auto; display: block; }
+  .r-date { display: flex; align-items: baseline; gap: 2mm; font-size: 10.5pt; }
+  .r-date label { color: var(--ink-2); }
+
+  h1 { font-family: var(--display); font-weight: 600; font-size: 22pt; text-transform: lowercase; margin: 0 0 8mm; letter-spacing: -0.01em; }
+
+  .card { background: var(--ground-2); border: 1px solid var(--line-soft); border-radius: 4mm; padding: 5mm 6mm 6mm; margin-bottom: 5mm; }
+  .card-label { display: flex; align-items: center; gap: 2mm; font-family: var(--display); font-weight: 600; font-size: 8.2pt; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 4mm; }
+  .card-label .dot { width: 2.4mm; height: 2.4mm; border-radius: 50%; flex: none; }
+
+  .r-row { display: flex; align-items: baseline; gap: 3mm; margin-bottom: 3.6mm; font-size: 11pt; }
+  .r-row:last-child { margin-bottom: 0; }
+  .r-row label { font-family: var(--display); font-weight: 600; white-space: nowrap; }
+  .r-row input[type="text"], .r-row select, .r-row input[type="number"] {
+    flex: 1; font-family: var(--body); font-size: 11pt; color: var(--ink);
+    border: none; border-bottom: 1px solid var(--line); background: transparent;
+    padding: 1mm 1mm 1.5mm; min-width: 0;
+  }
+  .r-row select { flex: 0 0 auto; min-width: 60mm; border-bottom: 1px solid var(--line); appearance: none; padding-right: 5mm; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236B6663' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1mm center; }
+  .r-row input:focus, .r-row select:focus { outline: none; border-color: var(--denim); }
+
+  table.pay-table { width: 100%; border-collapse: collapse; margin-bottom: 4mm; }
+  table.pay-table th { text-align: left; font-family: var(--display); font-weight: 600; font-size: 10.5pt; background: #FBE8E9; padding: 3mm 3.5mm; }
+  table.pay-table th.amt { text-align: right; }
+  table.pay-table td { padding: 2.6mm 3.5mm; border-top: 1px solid var(--line-soft); font-size: 10.5pt; }
+  table.pay-table tr.total td { background: #FCF0EF; font-weight: 600; }
+  .amt-cell { display: flex; align-items: baseline; gap: 1.5mm; justify-content: flex-end; }
+  .amt-cell input { width: 32mm; text-align: right; font-family: var(--body); font-size: 10.5pt; border: none; border-bottom: 1px solid var(--line); background: transparent; padding: 0.5mm; }
+  .amt-cell input:focus { outline: none; border-color: var(--denim); }
+  .amt-cell.total input { font-weight: 600; }
+
+  .words-row { font-size: 10.5pt; margin-bottom: 3.6mm; display: flex; align-items: baseline; gap: 2mm; flex-wrap: wrap; }
+  .words-row label { font-family: var(--display); font-weight: 600; display: block; width: 100%; margin-bottom: 1mm; }
+  .words-row input { flex: 1; min-width: 100mm; font-family: var(--body); font-size: 10.5pt; border: none; border-bottom: 1px solid var(--line); background: transparent; padding: 1mm; }
+  .words-row input:focus { outline: none; border-color: var(--denim); }
+  .words-row .only { color: var(--ink-2); white-space: nowrap; }
+
+  .sign-block { margin-top: 4mm; }
+  .sign-block .for { font-family: var(--display); font-weight: 600; font-size: 10.5pt; margin-bottom: 10mm; }
+  .sign-line { width: 55mm; border-bottom: 1px solid var(--ink); margin-bottom: 1.5mm; }
+  .sign-block .caption { font-size: 9pt; color: var(--ink-2); }
+
+  .note-strip { display: inline-flex; align-items: center; gap: 2mm; background: var(--ink); color: var(--ground); border-radius: 999px; padding: 2mm 4.5mm; font-size: 8.6pt; font-style: italic; font-weight: 600; margin-top: 6mm; }
+  .note-strip .dot { width: 1.8mm; height: 1.8mm; border-radius: 50%; background: var(--denim); flex: none; }
+
+  @media print {
+    html, body { background: #fff; }
+    .no-print { display: none !important; }
+    .app-wrap { padding: 0; max-width: none; }
+    #receipt { box-shadow: none; border-radius: 0; margin: 0; }
+    .r-row input, .r-row select, .amt-cell input, .words-row input { border-bottom-color: transparent; }
+    @page { size: 210mm 297mm; margin: 0; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="squig" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3.5"/>
+    </filter>
+    <g id="leaf-sprig" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M0 0 C6 -8 14 -12 24 -13 C16 -6 8 -2 0 0 Z"/>
+      <path d="M0 0 C8 -2 18 0 26 6 C16 6 6 4 0 0 Z"/>
+      <path d="M0 0 C4 8 10 14 20 18 C10 16 2 10 0 0 Z"/>
+    </g>
+    <g id="mango" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M0 -12 C0 -8 1 -5 1 -2" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+      <path d="M0 -2 C7 -4 12 2 10 9 C8 16 0 19 -5 15 C-10 11 -9 2 -4 -1 C-2.5 -2 -1 -2.4 0 -2 Z"
+            fill="var(--blush)" stroke="var(--ink)" stroke-width="1.6"/>
+      <path d="M1 -7 C7 -11 14 -11 19 -8 C13 -5 6 -5 1 -7 Z" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
+    </g>
+    <g id="spot-parakeet" stroke-linecap="round" stroke-linejoin="round">
+      <g filter="url(#squig)">
+        <path d="M6 62 c22 -4 46 -4 70 0" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+        <use href="#leaf-sprig" transform="translate(66 60) scale(0.9)"/>
+        <use href="#mango" transform="translate(22 74) scale(0.85)"/>
+        <g>
+          <path d="M44 32 c8 -1 13 4 13 11 0 9 -6 16 -13 19 -2 -4 -3 -8 -3 -13 0 -8 1 -14 3 -17Z" fill="var(--sage)" stroke="var(--ink)" stroke-width="2.2"/>
+          <path d="M44 62 c-2 6 -3 10 -3 14" fill="none" stroke="var(--ink)" stroke-width="2.4"/>
+          <circle cx="49" cy="38" r="1.4" fill="var(--ink)"/>
+          <path d="M56 38 c3 0 5 1.5 5 3.5 -2 1.5 -4 1.5 -6 0.5" fill="var(--blush)" stroke="var(--ink)" stroke-width="1.6"/>
+        </g>
+      </g>
+    </g>
+  </defs>
+</svg>
+
+<div class="app-wrap">
+  <div class="toolbar no-print">
+    <h1>Fee Receipt — generate, print, or email</h1>
+    <button class="btn btn-outline" id="btnPrint" type="button">Print</button>
+    <button class="btn btn-solid" id="btnDownload" type="button">Download PDF</button>
+    <div class="send-row">
+      <input type="email" id="parentEmail" placeholder="Parent's email to send this receipt to">
+      <button class="btn btn-solid" id="btnSend" type="button">Send Receipt by Email</button>
+      <span class="status" id="sendStatus"></span>
+    </div>
+  </div>
+
+  <div id="receipt">
+    <svg class="wm-tree" viewBox="0 0 90 620" aria-hidden="true" focusable="false">
+      <path d="M45 612 C28 560 60 522 38 468 C22 418 58 382 36 330
+               C20 280 56 242 34 190 C18 140 54 102 40 52 C34 30 48 22 44 6"
+            fill="none" stroke="var(--bark)" stroke-width="4.2" stroke-linecap="round"/>
+      <use href="#leaf-sprig" transform="translate(30 560) rotate(-100) scale(1.1)"/>
+      <use href="#leaf-sprig" transform="translate(58 522) rotate(70) scale(-1.05 1.05)"/>
+      <use href="#leaf-sprig" transform="translate(38 468) rotate(-95)"/>
+      <use href="#leaf-sprig" transform="translate(56 382) rotate(75) scale(-1.1 1.1)"/>
+      <use href="#leaf-sprig" transform="translate(34 330) rotate(-100) scale(1.05)"/>
+      <use href="#leaf-sprig" transform="translate(54 242) rotate(72) scale(-1 1)"/>
+      <use href="#leaf-sprig" transform="translate(34 190) rotate(-98)"/>
+      <use href="#leaf-sprig" transform="translate(54 102) rotate(68) scale(-1.05 1.05)"/>
+      <use href="#leaf-sprig" transform="translate(40 52) rotate(-90) scale(0.95)"/>
+      <g transform="translate(24 420) scale(0.8) rotate(-20)"><use href="#mango"/></g>
+      <g transform="translate(62 300) scale(0.75) rotate(15)"><use href="#mango"/></g>
+      <g transform="translate(26 160) scale(0.7) rotate(-10)"><use href="#mango"/></g>
+      <g transform="translate(40 12) scale(0.55)"><use href="#spot-parakeet"/></g>
+    </svg>
+    <svg class="wm-ground" viewBox="0 0 800 46" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <path d="M0 34 C120 30 260 30 400 33 C540 36 660 34 800 30" fill="none" stroke="var(--ink)" stroke-width="2"/>
+      <g stroke="var(--ink)" stroke-width="1.6" fill="none" stroke-linecap="round">
+        <path d="M60 33 c1 -6 2 -9 5 -12 M66 33 c0 -5 1 -8 3 -11 M71 33 c1 -4 2 -7 4 -9"/>
+        <path d="M180 32 c1 -5 2 -8 4 -11 M186 32 c1 -4 2 -7 4 -9"/>
+        <path d="M330 33 c1 -6 2 -9 5 -12 M337 33 c0 -5 1 -8 3 -11"/>
+        <path d="M470 34 c1 -5 2 -8 4 -11 M476 34 c1 -4 2 -7 4 -9 M481 34 c1 -3 2 -5 3 -7"/>
+        <path d="M600 33 c1 -5 2 -8 4 -11 M606 33 c1 -4 2 -7 4 -9"/>
+        <path d="M730 31 c1 -6 3 -8 5 -10 M736 31 c1 -4 2 -6 4 -8"/>
+      </g>
+      <g transform="translate(410 24) scale(0.55) rotate(60)"><use href="#mango"/></g>
+      <use href="#leaf-sprig" transform="translate(440 26) rotate(10) scale(0.6)"/>
+    </svg>
+
+    <div class="r-content">
+      <div class="r-head">
+        <img src="assets/img/logo-horizontal.png" alt="Little People Montessori">
+        <div class="r-date">
+          <label for="f-date">Date:</label>
+          <input type="text" id="f-date" value="">
+        </div>
+      </div>
+
+      <h1>fee receipt</h1>
+
+      <div class="card">
+        <div class="card-label"><span class="dot" style="background:var(--blush)"></span>Student Details</div>
+        <div class="r-row"><label for="f-child">Child's name:</label><input type="text" id="f-child" placeholder="Full name"></div>
+        <div class="r-row"><label for="f-parent">Parent Name:</label><input type="text" id="f-parent" placeholder="Full name"></div>
+        <div class="r-row">
+          <label for="f-programme">Programme:</label>
+          <select id="f-programme">
+            <option>Parent-Toddler</option>
+            <option selected>Toddler</option>
+            <option>Primary</option>
+          </select>
+        </div>
+        <div class="r-row">
+          <label for="f-hours">Hours:</label>
+          <select id="f-hours">
+            <option>3</option><option>4</option><option selected>5</option><option>6</option>
+          </select>
+        </div>
+        <div class="r-row"><label for="f-year">Academic Year:</label><input type="text" id="f-year" value=""></div>
+        <div class="r-row"><label for="f-receipt-no">Receipt No.:</label><input type="text" id="f-receipt-no" value=""></div>
+      </div>
+
+      <div class="card">
+        <div class="card-label"><span class="dot" style="background:var(--denim)"></span>Payment Details</div>
+        <table class="pay-table">
+          <thead><tr><th>Particulars</th><th class="amt">Amount</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Fee Due for Current Instalment</td>
+              <td><div class="amt-cell">&#8377;<input type="number" id="f-fee-due" value="0" min="0"></div></td>
+            </tr>
+            <tr>
+              <td>Advance Received Towards Next Instalment</td>
+              <td><div class="amt-cell">&#8377;<input type="number" id="f-advance" value="0" min="0"></div></td>
+            </tr>
+            <tr>
+              <td>Other, if applicable</td>
+              <td><div class="amt-cell">&#8377;<input type="number" id="f-other" value="0" min="0"></div></td>
+            </tr>
+            <tr class="total">
+              <td>TOTAL AMOUNT RECEIVED</td>
+              <td><div class="amt-cell total">&#8377;<input type="number" id="f-total" value="0" min="0"></div></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="words-row">
+          <label for="f-words">Amount in Words:</label>
+          Rupees <input type="text" id="f-words" placeholder="auto-fills from total — edit if needed"> <span class="only">only.</span>
+        </div>
+
+        <div class="r-row">
+          <label for="f-mode">Mode of Payment:</label>
+          <select id="f-mode">
+            <option>Bank Transfer</option>
+            <option>Cheque</option>
+            <option>UPI</option>
+            <option>Cash</option>
+          </select>
+        </div>
+        <div class="r-row"><label for="f-ref">Transaction / Cheque Reference:</label><input type="text" id="f-ref" placeholder="Optional"></div>
+      </div>
+
+      <div class="sign-block">
+        <div class="for">For Little People Montessori</div>
+        <div class="sign-line"></div>
+        <div class="caption">Authorised Signatory</div>
+      </div>
+
+      <div class="note-strip"><span class="dot"></span>Fees once paid are non-refundable and non-transferable.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzUkmj133aJEQD5728vo_HXosOT_a54CwY33VM9n2rc3o4GQacg1hDTlqKTjDmsizsb/exec';
+
+  const $ = (id) => document.getElementById(id);
+
+  // ---- sensible defaults on load ----
+  const today = new Date();
+  $('f-date').value = today.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const julyCutoff = today.getMonth() >= 6; // academic year runs July-May
+  const startYr = julyCutoff ? today.getFullYear() : today.getFullYear() - 1;
+  $('f-year').value = `${startYr} - ${String(startYr + 1).slice(2)}`;
+  $('f-receipt-no').value = `LPM-${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}-${Math.floor(1000 + Math.random()*9000)}`;
+
+  // ---- Indian-numbering amount-in-words ----
+  function numberToWordsIndian(num) {
+    num = Math.round(Number(num) || 0);
+    if (num === 0) return 'Zero';
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+      'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    function twoDigit(n) {
+      if (n < 20) return ones[n];
+      return tens[Math.floor(n / 10)] + (n % 10 ? ' ' + ones[n % 10] : '');
+    }
+    function threeDigit(n) {
+      if (n < 100) return twoDigit(n);
+      return ones[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' + twoDigit(n % 100) : '');
+    }
+    const crore = Math.floor(num / 10000000); num %= 10000000;
+    const lakh = Math.floor(num / 100000); num %= 100000;
+    const thousand = Math.floor(num / 1000); num %= 1000;
+    const hundred = num;
+    let parts = [];
+    if (crore) parts.push(threeDigit(crore) + ' Crore');
+    if (lakh) parts.push(threeDigit(lakh) + ' Lakh');
+    if (thousand) parts.push(threeDigit(thousand) + ' Thousand');
+    if (hundred) parts.push(threeDigit(hundred));
+    return parts.join(' ');
+  }
+
+  // ---- auto total + auto words (both stay editable/overridable) ----
+  let wordsEdited = false;
+  $('f-words').addEventListener('input', () => { wordsEdited = true; });
+
+  function recompute() {
+    const fee = parseFloat($('f-fee-due').value) || 0;
+    const adv = parseFloat($('f-advance').value) || 0;
+    const oth = parseFloat($('f-other').value) || 0;
+    const total = fee + adv + oth;
+    $('f-total').value = total;
+    if (!wordsEdited) $('f-words').value = numberToWordsIndian(total);
+  }
+  ['f-fee-due', 'f-advance', 'f-other'].forEach((id) => $(id).addEventListener('input', recompute));
+  $('f-total').addEventListener('input', () => { wordsEdited = false; $('f-words').value = numberToWordsIndian($('f-total').value); wordsEdited = false; });
+  recompute();
+
+  // ---- print ----
+  $('btnPrint').addEventListener('click', () => window.print());
+
+  // ---- PDF generation (client-side, used for both download and email) ----
+  // html2canvas (bundled inside html2pdf.js) can't reliably render live
+  // <input>/<select> elements -- Chrome's own internal styling for form
+  // controls uses modern CSS color functions html2canvas's parser
+  // rejects outright. The fix is to snapshot a STATIC clone instead:
+  // every input/select in the clone becomes plain text showing its
+  // current value, which sidesteps the rendering problem entirely and
+  // produces a cleaner-looking PDF (no input borders/backgrounds) than
+  // trying to capture the live form controls ever would have.
+  function amountDisplay(val) {
+    const n = parseFloat(val) || 0;
+    return n.toLocaleString('en-IN');
+  }
+
+  // ---- watermark rasterization (for PDF only) ----
+  // The vine/leaf/mango/parakeet watermarks are <use>-referenced SVG defs
+  // living outside #receipt, styled with var(--ink) etc. html2canvas's own
+  // SVG support doesn't resolve cross-tree <use> refs or CSS custom
+  // properties, so it silently drops them from the captured canvas even
+  // though they render perfectly on-screen and in native print. Fix:
+  // pre-render each watermark with the browser's REAL SVG engine (a
+  // detached, self-contained SVG loaded into an <img>, drawn to a canvas)
+  // once on page load, then swap in that raster PNG only inside the PDF
+  // clone -- the live page and print output keep the crisp vector version.
+  const VAR_COLORS = { '--ink': '#303030', '--blush': '#F2ADB8', '--sage': '#71895B', '--bark': '#D8C3A8' };
+  const mmToPx = (mm) => Math.round(mm * 3.7795275591 * 2);
+  let wmTreeRaster = null, wmGroundRaster = null;
+
+  async function rasterizeSvg(svgEl, pxW, pxH) {
+    const defs = document.querySelector('body > svg defs').cloneNode(true);
+    const clone = svgEl.cloneNode(true);
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.setAttribute('width', pxW);
+    clone.setAttribute('height', pxH);
+    clone.insertBefore(defs, clone.firstChild);
+    let markup = new XMLSerializer().serializeToString(clone);
+    Object.entries(VAR_COLORS).forEach(([name, hex]) => {
+      markup = markup.split(`var(${name})`).join(hex);
+    });
+    const blob = new Blob([markup], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    try {
+      const img = new Image();
+      await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = url; });
+      const canvas = document.createElement('canvas');
+      canvas.width = pxW; canvas.height = pxH;
+      canvas.getContext('2d').drawImage(img, 0, 0, pxW, pxH);
+      return canvas.toDataURL('image/png');
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  async function ensureWatermarkRasters() {
+    if (wmTreeRaster && wmGroundRaster) return;
+    const [tree, ground] = await Promise.all([
+      rasterizeSvg(document.querySelector('.wm-tree'), mmToPx(46), mmToPx(280)),
+      rasterizeSvg(document.querySelector('.wm-ground'), mmToPx(210), mmToPx(12))
+    ]);
+    wmTreeRaster = tree;
+    wmGroundRaster = ground;
+  }
+  ensureWatermarkRasters().catch(() => {}); // warm the cache; re-attempted on demand if this fails
+
+  function buildStaticClone() {
+    const clone = document.getElementById('receipt').cloneNode(true);
+    clone.querySelectorAll('input, select, textarea').forEach((el) => {
+      const span = document.createElement('span');
+      const isAmount = el.closest('.amt-cell');
+      span.textContent = isAmount ? amountDisplay(el.value) : (el.value || '');
+      span.style.font = 'inherit';
+      span.style.color = 'inherit';
+      if (el.tagName === 'SELECT' || el.closest('.r-row')) span.style.fontWeight = '400';
+      el.replaceWith(span);
+    });
+    if (wmTreeRaster) {
+      const img = new Image();
+      img.src = wmTreeRaster;
+      img.className = 'wm-tree';
+      clone.querySelector('.wm-tree').replaceWith(img);
+    }
+    if (wmGroundRaster) {
+      const img = new Image();
+      img.src = wmGroundRaster;
+      img.className = 'wm-ground';
+      clone.querySelector('.wm-ground').replaceWith(img);
+    }
+    return clone;
+  }
+
+  function receiptFilename() {
+    const child = $('f-child').value.trim() || 'receipt';
+    return `Fee Receipt - ${child}.pdf`;
+  }
+
+  function pdfOptions(w, h) {
+    return {
+      margin: 0,
+      filename: receiptFilename(),
+      image: { type: 'jpeg', quality: 0.98 },
+      // width/height/windowWidth/windowHeight passed explicitly --
+      // html2canvas's own auto-measurement of the clone's height
+      // resolves to 0 without these (the element uses min-height, not
+      // a fixed height, and something about the clone/attach timing
+      // defeats its usual auto-detection), silently producing a
+      // correctly-SIZED but entirely BLANK canvas otherwise. Confirmed
+      // by sampling canvas pixel data directly while debugging this.
+      html2canvas: { scale: 2, useCORS: true, width: w, height: h, windowWidth: w, windowHeight: h },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all'] }
+    };
+  }
+
+  async function withOffscreenClone(fn) {
+    // NOTE: this deliberately does NOT position the clone off-screen
+    // (e.g. left:-9999px) -- html2canvas silently produces a blank
+    // capture for elements placed far outside the viewport in this
+    // environment. Instead the clone renders on-screen, covered by an
+    // opaque "generating" overlay so it isn't a jarring flash, and
+    // both are removed right after the capture.
+    await ensureWatermarkRasters().catch(() => {}); // near-instant if already warm from page load
+    const clone = buildStaticClone();
+    clone.style.position = 'fixed';
+    clone.style.top = '0';
+    clone.style.left = '0';
+    clone.style.zIndex = '99998';
+    clone.style.boxShadow = 'none';
+    // Genuinely visible (not visibility:hidden/display:none) so
+    // html2canvas actually has real pixels to capture -- it's covered
+    // from the user's view by the opaque overlay on top instead.
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#E9E2DC;display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:#303030;';
+    overlay.textContent = 'Generating PDF…';
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(clone);
+    // setTimeout, not requestAnimationFrame -- rAF pauses entirely while the
+    // tab/pane is backgrounded, which would hang PDF generation indefinitely
+    // if the user switches away mid-click.
+    return new Promise((resolve) => setTimeout(resolve, 50))
+      .then(() => {
+        const rect = clone.getBoundingClientRect();
+        // floor (not ceil) the height -- ceiling adds a fractional px that,
+        // once scaled up, is just enough to push jsPDF's mm math a hair past
+        // one A4 page and spill a near-empty second page. Floored height
+        // trims sub-pixel slack invisibly and keeps everything on page 1.
+        return fn(clone, Math.ceil(rect.width), Math.floor(rect.height));
+      })
+      .finally(() => { clone.remove(); overlay.remove(); });
+  }
+
+  $('btnDownload').addEventListener('click', () => {
+    withOffscreenClone((clone, w, h) => html2pdf().set(pdfOptions(w, h)).from(clone).save());
+  });
+
+  // ---- email send ----
+  const statusEl = $('sendStatus');
+  $('btnSend').addEventListener('click', async () => {
+    const email = $('parentEmail').value.trim();
+    if (!email) {
+      statusEl.textContent = 'Enter a parent email first.';
+      statusEl.className = 'status err';
+      return;
+    }
+    if (!$('f-child').value.trim()) {
+      statusEl.textContent = "Add the child's name first.";
+      statusEl.className = 'status err';
+      return;
+    }
+
+    const btn = $('btnSend');
+    btn.disabled = true;
+    statusEl.textContent = 'Generating PDF…';
+    statusEl.className = 'status';
+
+    try {
+      const pdfBlob = await withOffscreenClone((clone, w, h) =>
+        html2pdf().set(pdfOptions(w, h)).from(clone).outputPdf('blob')
+      );
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(pdfBlob);
+      });
+
+      statusEl.textContent = 'Sending…';
+
+      const fd = new FormData();
+      fd.append('form_id', 'fee_receipt');
+      fd.append('parent_email', email);
+      fd.append('receipt_no', $('f-receipt-no').value);
+      fd.append('date', $('f-date').value);
+      fd.append('child_name', $('f-child').value);
+      fd.append('parent_name', $('f-parent').value);
+      fd.append('programme', $('f-programme').value);
+      fd.append('hours', $('f-hours').value);
+      fd.append('academic_year', $('f-year').value);
+      fd.append('fee_due', $('f-fee-due').value);
+      fd.append('advance_received', $('f-advance').value);
+      fd.append('other_amount', $('f-other').value);
+      fd.append('total_amount', $('f-total').value);
+      fd.append('amount_words', $('f-words').value);
+      fd.append('payment_mode', $('f-mode').value);
+      fd.append('transaction_ref', $('f-ref').value);
+      fd.append('receipt_pdf_base64', base64);
+
+      const res = await fetch(FORM_ENDPOINT, { method: 'POST', body: fd });
+      const json = await res.json();
+      if (!json || json.ok !== true) throw new Error((json && json.error) || 'rejected');
+
+      statusEl.textContent = `Sent to ${email}.`;
+      statusEl.className = 'status ok';
+    } catch (err) {
+      statusEl.textContent = 'Could not send — please try again.';
+      statusEl.className = 'status err';
+    } finally {
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>
