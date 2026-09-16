@@ -18,51 +18,65 @@
     --line: #D7CCC0; --line-soft: #E7DFDA; --denim: #5377AB; --sage: #71895B; --blush: #F2ADB8;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
+  /* An element's own `display` rule (e.g. .retry-btn's display:block) has
+     equal-or-higher specificity than the browser's default [hidden] rule
+     and, being an author style, always wins over it regardless -- so
+     setting the hidden ATTRIBUTE silently failed to actually hide
+     anything with its own explicit display value. Confirmed visually:
+     "Try again" rendered on screen despite retryBtn.hidden === true in
+     the DOM. This makes [hidden] win unconditionally, page-wide. */
+  [hidden] { display: none !important; }
+  html, body { margin: 0; padding: 0; max-width: 100%; overflow-x: hidden; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: var(--ground); color: var(--ink); line-height: 1.5;
   }
-  .wrap { max-width: 1000px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
   .brand { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--denim); margin-bottom: 0.5rem; }
-  h1 { font-size: 1.5rem; margin: 0 0 1.25rem; line-height: 1.2; }
+  h1 { font-size: 1.4rem; margin: 0 0 1.25rem; line-height: 1.2; }
 
   .load-status { color: var(--ink-2); font-size: 0.9rem; }
   .load-status.err { color: #C4634A; }
+  .retry-btn {
+    display: block; margin-top: 0.75rem; font: inherit; font-size: 0.9rem; font-weight: 600; color: #fff;
+    background: var(--denim); border: none; border-radius: 0.5rem; padding: 0.6rem 1rem; cursor: pointer;
+  }
 
   /* ---------- directory ---------- */
   #directory[hidden] { display: none; }
   .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 1rem; }
   .toolbar input[type="search"] {
-    flex: 1 1 240px; font: inherit; font-size: 0.92rem; padding: 0.6rem 0.8rem;
+    flex: 1 1 200px; min-width: 0; font: inherit; font-size: 0.92rem; padding: 0.6rem 0.8rem;
     border: 1px solid var(--line); border-radius: 0.5rem; background: #fff;
   }
   .count { font-size: 0.85rem; color: var(--ink-2); white-space: nowrap; }
-
-  table { width: 100%; border-collapse: collapse; background: var(--ground-2); border: 1px solid var(--line-soft); border-radius: 0.75rem; overflow: hidden; }
-  thead th { text-align: left; font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2); padding: 0.75rem 1rem; border-bottom: 1px solid var(--line-soft); }
-  tbody td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--line-soft); font-size: 0.92rem; }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr { cursor: pointer; }
-  tbody tr:hover { background: var(--ground); }
-  .flag { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.78rem; font-weight: 600; color: #C4634A; }
-  .flag .dot { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: #C4634A; }
   .empty { padding: 2.5rem 1rem; text-align: center; color: var(--ink-2); }
 
-  /* ---------- detail modal ---------- */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(48,48,48,.55); z-index: 500; display: flex; align-items: flex-start; justify-content: center; padding: 3vh 16px; overflow-y: auto; }
-  .modal-overlay[hidden] { display: none; }
-  .modal { background: #fff; border-radius: 14px; padding: 1.75rem; max-width: 600px; width: 100%; margin-bottom: 3vh; }
-  .modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.25rem; }
-  .modal-head h2 { font-size: 1.25rem; margin: 0; }
-  .modal-head button { background: none; border: none; font-size: 1.4rem; line-height: 1; color: var(--ink-2); cursor: pointer; padding: 0.2rem; }
-  .modal-sub { color: var(--ink-2); font-size: 0.85rem; margin: 0 0 1.5rem; }
-  .section { margin-bottom: 1.4rem; }
-  .section h3 { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--denim); margin: 0 0 0.6rem; }
-  .field-row { display: flex; gap: 1rem; padding: 0.4rem 0; border-bottom: 1px solid var(--line-soft); font-size: 0.9rem; }
+  /* ---------- student cards (replaces a wide table -- nothing here has a
+     fixed or minimum width, so it reflows on any screen instead of
+     overflowing sideways the way a multi-column table did on mobile) ---- */
+  .card-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .card { background: var(--ground-2); border: 1px solid var(--line-soft); border-radius: 0.75rem; overflow: hidden; }
+  .card-head {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.9rem;
+    padding: 0.85rem 1rem; cursor: pointer; user-select: none;
+  }
+  .card-head:hover, .card-head:focus-visible { background: var(--ground); }
+  .card-name { font-weight: 600; flex: 1 1 auto; min-width: 0; }
+  .card-meta { font-size: 0.82rem; color: var(--ink-2); white-space: nowrap; }
+  .flag { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.78rem; font-weight: 600; color: #C4634A; white-space: nowrap; }
+  .flag .dot { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: #C4634A; flex: none; }
+  .chevron { color: var(--ink-2); flex: none; transition: transform 0.15s ease; font-size: 0.8rem; }
+  .card.open .chevron { transform: rotate(180deg); }
+
+  .card-body { display: none; padding: 0 1rem 1.1rem; border-top: 1px solid var(--line-soft); }
+  .card.open .card-body { display: block; }
+  .section { margin-top: 1.1rem; }
+  .section h3 { font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--denim); margin: 0 0 0.5rem; }
+  .field-row { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; padding: 0.35rem 0; border-bottom: 1px solid var(--line-soft); font-size: 0.88rem; }
   .field-row:last-child { border-bottom: none; }
-  .field-row .k { flex: 0 0 44%; color: var(--ink-2); }
-  .field-row .v { flex: 1; white-space: pre-wrap; }
+  .field-row .k { flex: 1 1 160px; color: var(--ink-2); }
+  .field-row .v { flex: 2 1 200px; white-space: pre-wrap; word-break: break-word; }
   .field-row.flagged .v { color: #C4634A; font-weight: 600; }
 </style>
 </head>
@@ -72,24 +86,16 @@
   <h1>Enrolled Students</h1>
 
   <p class="load-status" id="loadStatus">Loading…</p>
+  <button class="retry-btn" id="retryBtn" type="button" hidden>Try again</button>
 
   <div id="directory" hidden>
     <div class="toolbar">
       <input type="search" id="searchBox" placeholder="Search by child's name...">
       <span class="count" id="countLabel"></span>
     </div>
-    <table id="studentTable">
-      <thead>
-        <tr><th>Child's Name</th><th>Date of Birth</th><th>Submitted</th><th></th></tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
+    <div class="card-list" id="cardList"></div>
     <div class="empty" id="emptyState" hidden>No students found.</div>
   </div>
-</div>
-
-<div class="modal-overlay" id="detailModal" hidden>
-  <div class="modal" id="modalContent"></div>
 </div>
 
 <script>
@@ -102,7 +108,7 @@
   // Every field, in the order the sheet itself stores them (Timestamp and
   // Status are the sheet's own bookkeeping columns, not form answers).
   // Grouped to mirror the original form's own sections, purely for
-  // readability in the detail view -- the table/search doesn't depend on
+  // readability in the detail view -- the list/search doesn't depend on
   // this grouping at all.
   const SECTIONS = [
     { title: 'Basics', fields: ["Child's Full Name", 'Name Usually Called', 'Date of Birth', 'Languages At Home', 'Who Child Lives With'] },
@@ -126,8 +132,8 @@
   const NEGATIVE_ANSWERS = new Set(['no', 'none', 'n/a', 'na', 'nil', '-', 'nothing', 'not applicable']);
 
   // A plain truthiness check treats the literal string "No" as flag-worthy,
-  // since any non-empty string is truthy in JS -- that's exactly why Kabir
-  // (whose real answer to every one of these was "No") was showing a
+  // since any non-empty string is truthy in JS -- that's why Kabir (whose
+  // real answer to every one of these was "No") used to show a
   // health/allergy flag he doesn't have. Only a genuinely affirmative
   // answer should flag.
   function isMeaningfulAnswer(v) {
@@ -141,31 +147,12 @@
       s['Takes Regular Medication'] === 'Yes';
   }
 
-  function renderTable(list) {
-    const tbody = $('tableBody');
-    tbody.innerHTML = '';
-    $('emptyState').hidden = list.length > 0;
-    $('countLabel').textContent = `${list.length} student${list.length === 1 ? '' : 's'}`;
-    list.forEach((s, i) => {
-      const tr = document.createElement('tr');
-      const submitted = (s['Timestamp'] || '').split(' ')[0] || '-';
-      tr.innerHTML = `
-        <td>${escapeHtml(s["Child's Full Name"] || 'Unnamed')}</td>
-        <td>${escapeHtml(s['Date of Birth'] || '-')}</td>
-        <td>${escapeHtml(submitted)}</td>
-        <td>${hasSafetyFlag(s) ? '<span class="flag"><span class="dot"></span>Health/allergy note</span>' : ''}</td>
-      `;
-      tr.addEventListener('click', () => openDetail(s));
-      tbody.appendChild(tr);
-    });
-  }
-
   function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
-  function openDetail(s) {
-    const sectionsHtml = SECTIONS.map((section) => {
+  function sectionsHtml(s) {
+    return SECTIONS.map((section) => {
       const rows = section.fields
         .filter((f) => s[f] !== undefined && s[f] !== '')
         .map((f) => `<div class="field-row${FLAGGED_FIELDS.has(f) && isMeaningfulAnswer(s[f]) ? ' flagged' : ''}"><span class="k">${escapeHtml(f)}</span><span class="v">${escapeHtml(s[f])}</span></div>`)
@@ -173,75 +160,109 @@
       if (!rows) return '';
       return `<div class="section"><h3>${escapeHtml(section.title)}</h3>${rows}</div>`;
     }).join('');
-
-    $('modalContent').innerHTML = `
-      <div class="modal-head">
-        <h2>${escapeHtml(s["Child's Full Name"] || 'Unnamed')}</h2>
-        <button id="btnCloseModal" type="button" aria-label="Close">&times;</button>
-      </div>
-      <p class="modal-sub">Submitted ${escapeHtml((s['Timestamp'] || '-').split(' ')[0] || '-')}</p>
-      ${sectionsHtml}
-    `;
-    $('btnCloseModal').addEventListener('click', closeDetail);
-    $('detailModal').hidden = false;
   }
 
-  function closeDetail() { $('detailModal').hidden = true; }
-  $('detailModal').addEventListener('click', (e) => { if (e.target === $('detailModal')) closeDetail(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('detailModal').hidden) closeDetail(); });
+  // Inline collapsible per card instead of a popup modal -- easier to open
+  // several at once and compare, and there's nothing to accidentally
+  // dismiss by tapping outside it on a small screen.
+  function renderCards(list) {
+    const container = $('cardList');
+    container.innerHTML = '';
+    $('emptyState').hidden = list.length > 0;
+    $('countLabel').textContent = `${list.length} student${list.length === 1 ? '' : 's'}`;
+    list.forEach((s) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const submitted = (s['Timestamp'] || '').split(' ')[0] || '-';
+      card.innerHTML = `
+        <div class="card-head" tabindex="0" role="button" aria-expanded="false">
+          <span class="card-name">${escapeHtml(s["Child's Full Name"] || 'Unnamed')}</span>
+          <span class="card-meta">${escapeHtml(s['Date of Birth'] || '-')} &middot; submitted ${escapeHtml(submitted)}</span>
+          ${hasSafetyFlag(s) ? '<span class="flag"><span class="dot"></span>Health/allergy note</span>' : ''}
+          <span class="chevron">&#9662;</span>
+        </div>
+        <div class="card-body"><div class="section-wrap">${sectionsHtml(s)}</div></div>
+      `;
+      const head = card.querySelector('.card-head');
+      const toggle = () => {
+        const nowOpen = !card.classList.contains('open');
+        card.classList.toggle('open', nowOpen);
+        head.setAttribute('aria-expanded', String(nowOpen));
+      };
+      head.addEventListener('click', toggle);
+      head.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+      });
+      container.appendChild(card);
+    });
+  }
 
   $('searchBox').addEventListener('input', () => {
     const q = $('searchBox').value.trim().toLowerCase();
     const filtered = !q ? students : students.filter((s) =>
       String(s["Child's Full Name"] || '').toLowerCase().includes(q)
     );
-    renderTable(filtered);
+    renderCards(filtered);
   });
 
-  // Google Apps Script Web Apps have real cold-start latency (several
-  // seconds when the underlying execution container has been idle) and
-  // occasionally return a non-JSON error page for a transient platform
-  // hiccup rather than our own doPost's JSON -- that threw inside
-  // res.json() and got reported as "could not reach the server" even
-  // though a retry would very likely succeed. This retries automatically
-  // before ever showing an error.
-  async function fetchStudents() {
-    const fd = new FormData();
-    fd.append('action', 'list_students');
-    const res = await fetch(FORM_ENDPOINT, { method: 'POST', body: fd });
-    const json = await res.json(); // throws if the platform returned an HTML error page instead of JSON
-    return json;
+  // Google Apps Script Web Apps genuinely hang or fail intermittently under
+  // load, sometimes for 20+ seconds, sometimes outright (a non-JSON error
+  // page, or no response at all until the connection is aborted) -- this
+  // was confirmed directly by timing repeated requests against the live
+  // endpoint. A per-attempt timeout stops any single attempt from hanging
+  // the whole page indefinitely with no feedback, several attempts are
+  // made automatically, and a manual "Try again" button appears if all of
+  // them fail, so the visitor is never just stuck looking at "Loading…".
+  async function fetchStudentsOnce(timeoutMs) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const fd = new FormData();
+      fd.append('action', 'list_students');
+      const res = await fetch(FORM_ENDPOINT, { method: 'POST', body: fd, signal: controller.signal });
+      return await res.json(); // throws if the platform returned an HTML error page instead of JSON
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function showLoadError(msg) {
+    $('loadStatus').textContent = msg;
+    $('loadStatus').classList.add('err');
+    $('retryBtn').hidden = false;
   }
 
   async function loadDirectory() {
-    const maxAttempts = 3;
+    $('loadStatus').hidden = false;
+    $('loadStatus').classList.remove('err');
+    $('retryBtn').hidden = true;
+
+    const maxAttempts = 4;
+    const perAttemptTimeoutMs = 12000;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      if (attempt > 1) {
-        $('loadStatus').textContent = 'Still connecting…';
-        await new Promise((resolve) => setTimeout(resolve, 1200));
-      }
+      $('loadStatus').textContent = attempt === 1
+        ? 'Loading… this can take up to 15 seconds the first time.'
+        : `Still trying (attempt ${attempt} of ${maxAttempts})…`;
       try {
-        const json = await fetchStudents();
+        const json = await fetchStudentsOnce(perAttemptTimeoutMs);
         if (!json || json.ok !== true) {
-          $('loadStatus').textContent = (json && json.error) || 'Could not load the directory.';
-          $('loadStatus').classList.add('err');
+          showLoadError((json && json.error) || 'Could not load the directory.');
           return;
         }
         students = json.students || [];
         students.sort((a, b) => String(a["Child's Full Name"] || '').localeCompare(String(b["Child's Full Name"] || '')));
-        $('loadStatus').remove();
+        $('loadStatus').hidden = true;
         $('directory').hidden = false;
-        renderTable(students);
+        renderCards(students);
         return;
       } catch (err) {
-        if (attempt === maxAttempts) {
-          $('loadStatus').textContent = 'Could not reach the server after a few tries. Please refresh to try again.';
-          $('loadStatus').classList.add('err');
-        }
+        // fall through to the next attempt
       }
     }
+    showLoadError('The server is taking too long to respond -- it may be temporarily overloaded. Please try again in a minute.');
   }
 
+  $('retryBtn').addEventListener('click', loadDirectory);
   loadDirectory();
 })();
 </script>
