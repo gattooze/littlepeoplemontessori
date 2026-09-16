@@ -120,7 +120,7 @@
   // readability in the detail view -- the table/search doesn't depend on
   // this grouping at all.
   const SECTIONS = [
-    { title: 'Basics', fields: ["Child's Full Name", 'Date of Birth', 'Languages At Home', 'Who Child Lives With'] },
+    { title: 'Basics', fields: ["Child's Full Name", 'Name Usually Called', 'Date of Birth', 'Languages At Home', 'Who Child Lives With'] },
     { title: 'Siblings', fields: ['Has Siblings', 'Number Of Siblings',
       'Sibling 1 Name', 'Sibling 1 Age', 'Sibling 2 Name', 'Sibling 2 Age',
       'Sibling 3 Name', 'Sibling 3 Age', 'Sibling 4 Name', 'Sibling 4 Age',
@@ -128,7 +128,8 @@
     { title: 'Daily life and personality', fields: ['Adults Child Spends Most Time With',
       'How They Would Describe Their Child', 'What Child Enjoys', 'Dislikes / Avoids',
       'What Brings Comfort When Upset', 'Response To New People/Places/Experiences'] },
-    { title: 'Sleep', fields: ['Wake Up Time', 'Nap Time', 'Bedtime', 'Sleep Routine Notes'] },
+    { title: 'Development', fields: ['Development/Movement/Speech/Sensory/Emotional Notes'] },
+    { title: 'Sleep', fields: ['Wake Up Time', 'Nap Time', 'Bedtime', 'Sleeps Independently', 'Sleep Routine Notes'] },
     { title: 'Food', fields: ['Eating Habits', 'Eating Habits (Other)', 'Eats Independently',
       'Food Allergies/Dietary Restrictions', 'Other Food/Mealtime Notes'] },
     { title: 'Toileting and health', fields: ['Toileting Status', 'Toileting Status (Other)',
@@ -137,9 +138,22 @@
       'What Family Is Thinking About / Wants Support With', 'Anything Else'] }
   ];
   const FLAGGED_FIELDS = new Set(['Health Considerations', 'Food Allergies/Dietary Restrictions', 'Medication Details']);
+  const NEGATIVE_ANSWERS = new Set(['no', 'none', 'n/a', 'na', 'nil', '-', 'nothing', 'not applicable']);
+
+  // A plain truthiness check treats the literal string "No" as flag-worthy,
+  // since any non-empty string is truthy in JS -- that's exactly why Kabir
+  // (whose real answer to every one of these was "No") was showing a
+  // health/allergy flag he doesn't have. Only a genuinely affirmative
+  // answer should flag.
+  function isMeaningfulAnswer(v) {
+    if (!v) return false;
+    return !NEGATIVE_ANSWERS.has(String(v).trim().toLowerCase());
+  }
 
   function hasSafetyFlag(s) {
-    return !!(s['Health Considerations'] || s['Food Allergies/Dietary Restrictions'] || s['Takes Regular Medication'] === 'Yes');
+    return isMeaningfulAnswer(s['Health Considerations']) ||
+      isMeaningfulAnswer(s['Food Allergies/Dietary Restrictions']) ||
+      s['Takes Regular Medication'] === 'Yes';
   }
 
   function renderTable(list) {
@@ -169,7 +183,7 @@
     const sectionsHtml = SECTIONS.map((section) => {
       const rows = section.fields
         .filter((f) => s[f] !== undefined && s[f] !== '')
-        .map((f) => `<div class="field-row${FLAGGED_FIELDS.has(f) ? ' flagged' : ''}"><span class="k">${escapeHtml(f)}</span><span class="v">${escapeHtml(s[f])}</span></div>`)
+        .map((f) => `<div class="field-row${FLAGGED_FIELDS.has(f) && isMeaningfulAnswer(s[f]) ? ' flagged' : ''}"><span class="k">${escapeHtml(f)}</span><span class="v">${escapeHtml(s[f])}</span></div>`)
         .join('');
       if (!rows) return '';
       return `<div class="section"><h3>${escapeHtml(section.title)}</h3>${rows}</div>`;
@@ -199,32 +213,57 @@
     renderTable(filtered);
   });
 
+  // Google Apps Script Web Apps have real cold-start latency (several
+  // seconds when the underlying execution container has been idle) and
+  // occasionally return a non-JSON error page for a transient platform
+  // hiccup rather than our own doPost's JSON -- that threw inside
+  // res.json() and got reported as "could not reach the server" even
+  // though a retry would very likely succeed. This retries automatically
+  // before ever showing the user an error, and only a wrong PASSWORD
+  // (a real, non-retryable answer from the server) stops immediately.
+  async function fetchStudents(password) {
+    const fd = new FormData();
+    fd.append('action', 'list_students');
+    fd.append('password', password);
+    const res = await fetch(FORM_ENDPOINT, { method: 'POST', body: fd });
+    const json = await res.json(); // throws if the platform returned an HTML error page instead of JSON
+    return json;
+  }
+
   async function unlock() {
     const password = $('gatePassword').value;
     $('gateError').textContent = '';
     $('btnUnlock').disabled = true;
     $('btnUnlock').textContent = 'Checking…';
-    try {
-      const fd = new FormData();
-      fd.append('action', 'list_students');
-      fd.append('password', password);
-      const res = await fetch(FORM_ENDPOINT, { method: 'POST', body: fd });
-      const json = await res.json();
-      if (!json || json.ok !== true) {
-        $('gateError').textContent = (json && json.error) || 'Incorrect password.';
-        return;
+
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      if (attempt > 1) {
+        $('btnUnlock').textContent = 'Still connecting…';
+        await new Promise((resolve) => setTimeout(resolve, 1200));
       }
-      students = json.students || [];
-      students.sort((a, b) => String(a["Child's Full Name"] || '').localeCompare(String(b["Child's Full Name"] || '')));
-      $('gate').remove();
-      $('directory').hidden = false;
-      renderTable(students);
-    } catch (err) {
-      $('gateError').textContent = 'Could not reach the server. Please try again.';
-    } finally {
-      $('btnUnlock').disabled = false;
-      $('btnUnlock').textContent = 'View Directory';
+      try {
+        const json = await fetchStudents(password);
+        if (!json || json.ok !== true) {
+          // A real answer from the server (wrong password) -- stop, don't retry.
+          $('gateError').textContent = (json && json.error) || 'Incorrect password.';
+          break;
+        }
+        students = json.students || [];
+        students.sort((a, b) => String(a["Child's Full Name"] || '').localeCompare(String(b["Child's Full Name"] || '')));
+        $('gate').remove();
+        $('directory').hidden = false;
+        renderTable(students);
+        break;
+      } catch (err) {
+        if (attempt === maxAttempts) {
+          $('gateError').textContent = 'Could not reach the server after a few tries. Please try again in a moment.';
+        }
+        // otherwise loop and retry
+      }
     }
+    $('btnUnlock').disabled = false;
+    $('btnUnlock').textContent = 'View Directory';
   }
 
   $('btnUnlock').addEventListener('click', unlock);
