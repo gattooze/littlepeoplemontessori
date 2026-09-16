@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light only">
+<!-- Internal/admin tool, not a parent-facing page -- unlisted, noindex,
+     not linked from nav. IMPORTANT: this is obscurity, not real access
+     control on its own -- the password gate below is what actually
+     protects it. Health/medical and family details on enrolled children
+     live here, so treat the password with real care (don't paste it into
+     a shared doc, a group chat, etc.). -->
+<meta name="robots" content="noindex, nofollow">
+<title>Enrolled Students - Little People Montessori (admin)</title>
+<style>
+  :root {
+    --ground: #FDF9F7; --ground-2: #FFFFFF; --ink: #303030; --ink-2: #6B6663;
+    --line: #D7CCC0; --line-soft: #E7DFDA; --denim: #5377AB; --sage: #71895B; --blush: #F2ADB8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--ground); color: var(--ink); line-height: 1.5;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  .brand { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--denim); margin-bottom: 0.5rem; }
+  h1 { font-size: 1.5rem; margin: 0 0 1.25rem; line-height: 1.2; }
+
+  /* ---------- password gate ---------- */
+  .gate { max-width: 360px; margin: 3rem auto 0; }
+  .gate p { color: var(--ink-2); font-size: 0.92rem; margin: 0 0 1.2rem; }
+  .gate input {
+    width: 100%; font: inherit; font-size: 0.95rem; padding: 0.7rem 0.8rem;
+    border: 1px solid var(--line); border-radius: 0.5rem; margin-bottom: 0.6rem; background: #fff;
+  }
+  .gate button {
+    width: 100%; font: inherit; font-size: 0.95rem; font-weight: 600; color: #fff;
+    background: var(--denim); border: none; border-radius: 0.6rem; padding: 0.75rem; cursor: pointer;
+  }
+  .gate-error { color: #C4634A; font-size: 0.85rem; min-height: 1.2em; margin-bottom: 0.5rem; }
+
+  /* ---------- directory (hidden until unlocked) ---------- */
+  #directory[hidden] { display: none; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 1rem; }
+  .toolbar input[type="search"] {
+    flex: 1 1 240px; font: inherit; font-size: 0.92rem; padding: 0.6rem 0.8rem;
+    border: 1px solid var(--line); border-radius: 0.5rem; background: #fff;
+  }
+  .count { font-size: 0.85rem; color: var(--ink-2); white-space: nowrap; }
+
+  table { width: 100%; border-collapse: collapse; background: var(--ground-2); border: 1px solid var(--line-soft); border-radius: 0.75rem; overflow: hidden; }
+  thead th { text-align: left; font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2); padding: 0.75rem 1rem; border-bottom: 1px solid var(--line-soft); }
+  tbody td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--line-soft); font-size: 0.92rem; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr { cursor: pointer; }
+  tbody tr:hover { background: var(--ground); }
+  .flag { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.78rem; font-weight: 600; color: #C4634A; }
+  .flag .dot { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: #C4634A; }
+  .empty { padding: 2.5rem 1rem; text-align: center; color: var(--ink-2); }
+
+  /* ---------- detail modal ---------- */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(48,48,48,.55); z-index: 500; display: flex; align-items: flex-start; justify-content: center; padding: 3vh 16px; overflow-y: auto; }
+  .modal-overlay[hidden] { display: none; }
+  .modal { background: #fff; border-radius: 14px; padding: 1.75rem; max-width: 600px; width: 100%; margin-bottom: 3vh; }
+  .modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.25rem; }
+  .modal-head h2 { font-size: 1.25rem; margin: 0; }
+  .modal-head button { background: none; border: none; font-size: 1.4rem; line-height: 1; color: var(--ink-2); cursor: pointer; padding: 0.2rem; }
+  .modal-sub { color: var(--ink-2); font-size: 0.85rem; margin: 0 0 1.5rem; }
+  .section { margin-bottom: 1.4rem; }
+  .section h3 { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--denim); margin: 0 0 0.6rem; }
+  .field-row { display: flex; gap: 1rem; padding: 0.4rem 0; border-bottom: 1px solid var(--line-soft); font-size: 0.9rem; }
+  .field-row:last-child { border-bottom: none; }
+  .field-row .k { flex: 0 0 44%; color: var(--ink-2); }
+  .field-row .v { flex: 1; white-space: pre-wrap; }
+  .field-row.flagged .v { color: #C4634A; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Little People Montessori</div>
+  <h1>Enrolled Students</h1>
+
+  <div class="gate" id="gate">
+    <p>This page has family and health details on enrolled children. Enter the password to continue.</p>
+    <input type="password" id="gatePassword" placeholder="Password" autocomplete="off">
+    <div class="gate-error" id="gateError"></div>
+    <button id="btnUnlock" type="button">View Directory</button>
+  </div>
+
+  <div id="directory" hidden>
+    <div class="toolbar">
+      <input type="search" id="searchBox" placeholder="Search by child's name...">
+      <span class="count" id="countLabel"></span>
+    </div>
+    <table id="studentTable">
+      <thead>
+        <tr><th>Child's Name</th><th>Date of Birth</th><th>Submitted</th><th></th></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="empty" id="emptyState" hidden>No students found.</div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="detailModal" hidden>
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+(() => {
+  const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzUkmj133aJEQD5728vo_HXosOT_a54CwY33VM9n2rc3o4GQacg1hDTlqKTjDmsizsb/exec';
+  const $ = (id) => document.getElementById(id);
+
+  let students = [];
+
+  // Every field, in the order the sheet itself stores them (Timestamp and
+  // Status are the sheet's own bookkeeping columns, not form answers).
+  // Grouped to mirror the original form's own sections, purely for
+  // readability in the detail view -- the table/search doesn't depend on
+  // this grouping at all.
+  const SECTIONS = [
+    { title: 'Basics', fields: ["Child's Full Name", 'Date of Birth', 'Languages At Home', 'Who Child Lives With'] },
+    { title: 'Siblings', fields: ['Has Siblings', 'Number Of Siblings',
+      'Sibling 1 Name', 'Sibling 1 Age', 'Sibling 2 Name', 'Sibling 2 Age',
+      'Sibling 3 Name', 'Sibling 3 Age', 'Sibling 4 Name', 'Sibling 4 Age',
+      'Sibling 5 Name', 'Sibling 5 Age'] },
+    { title: 'Daily life and personality', fields: ['Adults Child Spends Most Time With',
+      'How They Would Describe Their Child', 'What Child Enjoys', 'Dislikes / Avoids',
+      'What Brings Comfort When Upset', 'Response To New People/Places/Experiences'] },
+    { title: 'Sleep', fields: ['Wake Up Time', 'Nap Time', 'Bedtime', 'Sleep Routine Notes'] },
+    { title: 'Food', fields: ['Eating Habits', 'Eating Habits (Other)', 'Eats Independently',
+      'Food Allergies/Dietary Restrictions', 'Other Food/Mealtime Notes'] },
+    { title: 'Toileting and health', fields: ['Toileting Status', 'Toileting Status (Other)',
+      'Health Considerations', 'Takes Regular Medication', 'Medication Details'] },
+    { title: 'Family context', fields: ['Family Routines/Traditions/Practices',
+      'What Family Is Thinking About / Wants Support With', 'Anything Else'] }
+  ];
+  const FLAGGED_FIELDS = new Set(['Health Considerations', 'Food Allergies/Dietary Restrictions', 'Medication Details']);
+
+  function hasSafetyFlag(s) {
+    return !!(s['Health Considerations'] || s['Food Allergies/Dietary Restrictions'] || s['Takes Regular Medication'] === 'Yes');
+  }
+
+  function renderTable(list) {
+    const tbody = $('tableBody');
+    tbody.innerHTML = '';
+    $('emptyState').hidden = list.length > 0;
+    $('countLabel').textContent = `${list.length} student${list.length === 1 ? '' : 's'}`;
+    list.forEach((s, i) => {
+      const tr = document.createElement('tr');
+      const submitted = (s['Timestamp'] || '').split(' ')[0] || '-';
+      tr.innerHTML = `
+        <td>${escapeHtml(s["Child's Full Name"] || 'Unnamed')}</td>
+        <td>${escapeHtml(s['Date of Birth'] || '-')}</td>
+        <td>${escapeHtml(submitted)}</td>
+        <td>${hasSafetyFlag(s) ? '<span class="flag"><span class="dot"></span>Health/allergy note</span>' : ''}</td>
+      `;
+      tr.addEventListener('click', () => openDetail(s));
+      tbody.appendChild(tr);
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function openDetail(s) {
+    const sectionsHtml = SECTIONS.map((section) => {
+      const rows = section.fields
+        .filter((f) => s[f] !== undefined && s[f] !== '')
+        .map((f) => `<div class="field-row${FLAGGED_FIELDS.has(f) ? ' flagged' : ''}"><span class="k">${escapeHtml(f)}</span><span class="v">${escapeHtml(s[f])}</span></div>`)
+        .join('');
+      if (!rows) return '';
+      return `<div class="section"><h3>${escapeHtml(section.title)}</h3>${rows}</div>`;
+    }).join('');
+
+    $('modalContent').innerHTML = `
+      <div class="modal-head">
+        <h2>${escapeHtml(s["Child's Full Name"] || 'Unnamed')}</h2>
+        <button id="btnCloseModal" type="button" aria-label="Close">&times;</button>
+      </div>
+      <p class="modal-sub">Submitted ${escapeHtml((s['Timestamp'] || '-').split(' ')[0] || '-')}</p>
+      ${sectionsHtml}
+    `;
+    $('btnCloseModal').addEventListener('click', closeDetail);
+    $('detailModal').hidden = false;
+  }
+
+  function closeDetail() { $('detailModal').hidden = true; }
+  $('detailModal').addEventListener('click', (e) => { if (e.target === $('detailModal')) closeDetail(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('detailModal').hidden) closeDetail(); });
+
+  $('searchBox').addEventListener('input', () => {
+    const q = $('searchBox').value.trim().toLowerCase();
+    const filtered = !q ? students : students.filter((s) =>
+      String(s["Child's Full Name"] || '').toLowerCase().includes(q)
+    );
+    renderTable(filtered);
+  });
+
+  async function unlock() {
+    const password = $('gatePassword').value;
+    $('gateError').textContent = '';
+    $('btnUnlock').disabled = true;
+    $('btnUnlock').textContent = 'Checking…';
+    try {
+      const fd = new FormData();
+      fd.append('action', 'list_students');
+      fd.append('password', password);
+      const res = await fetch(FORM_ENDPOINT, { method: 'POST', body: fd });
+      const json = await res.json();
+      if (!json || json.ok !== true) {
+        $('gateError').textContent = (json && json.error) || 'Incorrect password.';
+        return;
+      }
+      students = json.students || [];
+      students.sort((a, b) => String(a["Child's Full Name"] || '').localeCompare(String(b["Child's Full Name"] || '')));
+      $('gate').remove();
+      $('directory').hidden = false;
+      renderTable(students);
+    } catch (err) {
+      $('gateError').textContent = 'Could not reach the server. Please try again.';
+    } finally {
+      $('btnUnlock').disabled = false;
+      $('btnUnlock').textContent = 'View Directory';
+    }
+  }
+
+  $('btnUnlock').addEventListener('click', unlock);
+  $('gatePassword').addEventListener('keydown', (e) => { if (e.key === 'Enter') unlock(); });
+})();
+</script>
+</body>
+</html>
