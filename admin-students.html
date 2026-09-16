@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light only">
 <!-- Internal/admin tool, not a parent-facing page -- unlisted, noindex,
-     not linked from nav. IMPORTANT: this is obscurity, not real access
-     control on its own -- the password gate below is what actually
-     protects it. Health/medical and family details on enrolled children
-     live here, so treat the password with real care (don't paste it into
-     a shared doc, a group chat, etc.). -->
+     not linked from nav. IMPORTANT: obscurity is the ONLY protection here
+     (no password gate, by explicit choice) -- anyone with this exact URL
+     can see health/medical and family details on enrolled children. Don't
+     link to it from anywhere public, and treat the URL itself with the
+     same care as the data it shows. -->
 <meta name="robots" content="noindex, nofollow">
 <title>Enrolled Students - Little People Montessori (admin)</title>
 <style>
@@ -27,20 +27,10 @@
   .brand { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--denim); margin-bottom: 0.5rem; }
   h1 { font-size: 1.5rem; margin: 0 0 1.25rem; line-height: 1.2; }
 
-  /* ---------- password gate ---------- */
-  .gate { max-width: 360px; margin: 3rem auto 0; }
-  .gate p { color: var(--ink-2); font-size: 0.92rem; margin: 0 0 1.2rem; }
-  .gate input {
-    width: 100%; font: inherit; font-size: 0.95rem; padding: 0.7rem 0.8rem;
-    border: 1px solid var(--line); border-radius: 0.5rem; margin-bottom: 0.6rem; background: #fff;
-  }
-  .gate button {
-    width: 100%; font: inherit; font-size: 0.95rem; font-weight: 600; color: #fff;
-    background: var(--denim); border: none; border-radius: 0.6rem; padding: 0.75rem; cursor: pointer;
-  }
-  .gate-error { color: #C4634A; font-size: 0.85rem; min-height: 1.2em; margin-bottom: 0.5rem; }
+  .load-status { color: var(--ink-2); font-size: 0.9rem; }
+  .load-status.err { color: #C4634A; }
 
-  /* ---------- directory (hidden until unlocked) ---------- */
+  /* ---------- directory ---------- */
   #directory[hidden] { display: none; }
   .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 1rem; }
   .toolbar input[type="search"] {
@@ -81,12 +71,7 @@
   <div class="brand">Little People Montessori</div>
   <h1>Enrolled Students</h1>
 
-  <div class="gate" id="gate">
-    <p>This page has family and health details on enrolled children. Enter the password to continue.</p>
-    <input type="password" id="gatePassword" placeholder="Password" autocomplete="off">
-    <div class="gate-error" id="gateError"></div>
-    <button id="btnUnlock" type="button">View Directory</button>
-  </div>
+  <p class="load-status" id="loadStatus">Loading…</p>
 
   <div id="directory" hidden>
     <div class="toolbar">
@@ -219,55 +204,45 @@
   // hiccup rather than our own doPost's JSON -- that threw inside
   // res.json() and got reported as "could not reach the server" even
   // though a retry would very likely succeed. This retries automatically
-  // before ever showing the user an error, and only a wrong PASSWORD
-  // (a real, non-retryable answer from the server) stops immediately.
-  async function fetchStudents(password) {
+  // before ever showing an error.
+  async function fetchStudents() {
     const fd = new FormData();
     fd.append('action', 'list_students');
-    fd.append('password', password);
     const res = await fetch(FORM_ENDPOINT, { method: 'POST', body: fd });
     const json = await res.json(); // throws if the platform returned an HTML error page instead of JSON
     return json;
   }
 
-  async function unlock() {
-    const password = $('gatePassword').value;
-    $('gateError').textContent = '';
-    $('btnUnlock').disabled = true;
-    $('btnUnlock').textContent = 'Checking…';
-
+  async function loadDirectory() {
     const maxAttempts = 3;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       if (attempt > 1) {
-        $('btnUnlock').textContent = 'Still connecting…';
+        $('loadStatus').textContent = 'Still connecting…';
         await new Promise((resolve) => setTimeout(resolve, 1200));
       }
       try {
-        const json = await fetchStudents(password);
+        const json = await fetchStudents();
         if (!json || json.ok !== true) {
-          // A real answer from the server (wrong password) -- stop, don't retry.
-          $('gateError').textContent = (json && json.error) || 'Incorrect password.';
-          break;
+          $('loadStatus').textContent = (json && json.error) || 'Could not load the directory.';
+          $('loadStatus').classList.add('err');
+          return;
         }
         students = json.students || [];
         students.sort((a, b) => String(a["Child's Full Name"] || '').localeCompare(String(b["Child's Full Name"] || '')));
-        $('gate').remove();
+        $('loadStatus').remove();
         $('directory').hidden = false;
         renderTable(students);
-        break;
+        return;
       } catch (err) {
         if (attempt === maxAttempts) {
-          $('gateError').textContent = 'Could not reach the server after a few tries. Please try again in a moment.';
+          $('loadStatus').textContent = 'Could not reach the server after a few tries. Please refresh to try again.';
+          $('loadStatus').classList.add('err');
         }
-        // otherwise loop and retry
       }
     }
-    $('btnUnlock').disabled = false;
-    $('btnUnlock').textContent = 'View Directory';
   }
 
-  $('btnUnlock').addEventListener('click', unlock);
-  $('gatePassword').addEventListener('keydown', (e) => { if (e.key === 'Enter') unlock(); });
+  loadDirectory();
 })();
 </script>
 </body>
