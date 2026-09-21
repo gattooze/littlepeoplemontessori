@@ -107,12 +107,20 @@
     background: var(--ground-2); border: 1px solid var(--line-solid); border-radius: 20px;
     padding: clamp(1.4rem, 5vw, 2rem);
   }
-  .f-section-label {
-    font-family: var(--display); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.14em;
-    text-transform: uppercase; color: var(--ink-2); margin: 1.6rem 0 0.9rem;
+  .f-section-card {
+    background: var(--ground); border: 1px solid var(--line-solid); border-radius: 14px;
+    padding: 1.3rem 1.3rem 1.4rem; margin-bottom: 1rem;
   }
-  .f-section-label:first-child { margin-top: 0; }
+  .f-section-card:last-child { margin-bottom: 0; }
+  .f-section-label {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-family: var(--display); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-2); margin: 0 0 1.1rem;
+  }
+  .f-section-label .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--denim); flex: none; }
+  .f-section-card .f-field:last-child, .f-section-card .f-row:last-child, .f-section-card .f-detail:last-child { margin-bottom: 0; }
   .f-section-note { font-size: 0.85rem; color: var(--ink-2); margin: -0.5rem 0 1rem; }
+  .f-section-note:not(:first-of-type) { margin-top: 1.3rem; }
   .f-field { display: grid; gap: 0.4rem; margin-bottom: 1.1rem; position: relative; }
   .f-field label { font-family: var(--display); font-weight: 600; font-size: 0.8rem; color: var(--ink); }
   .f-field .f-sub { font-family: var(--body); font-weight: 400; font-size: 0.82rem; color: var(--ink-2); margin-top: -0.15rem; }
@@ -272,7 +280,8 @@
     <div class="f-body">
       <form id="gtkForm" novalidate>
 
-        <span class="f-section-label">About your child</span>
+        <div class="f-section-card">
+        <span class="f-section-label"><span class="dot"></span>About your child</span>
         <div class="f-field">
           <label for="gk-child-name">Child's full name</label>
           <input id="gk-child-name" name="child_full_name" type="text" autocomplete="off" required>
@@ -315,8 +324,10 @@
           <label for="gk-adults">Who are the adults your child spends most of their time with?</label>
           <textarea id="gk-adults" name="adults_time" rows="2"></textarea>
         </div>
+        </div>
 
-        <span class="f-section-label">A little about them</span>
+        <div class="f-section-card">
+        <span class="f-section-label"><span class="dot"></span>A little about them</span>
         <div class="f-field">
           <label for="gk-describe">How would you describe your child in a few words?</label>
           <textarea id="gk-describe" name="describe_child" rows="2"></textarea>
@@ -338,8 +349,10 @@
           <label for="gk-new-things">How does your child usually respond to new people, places or experiences?</label>
           <textarea id="gk-new-things" name="new_experiences" rows="2"></textarea>
         </div>
+        </div>
 
-        <span class="f-section-label">Their day</span>
+        <div class="f-section-card">
+        <span class="f-section-label"><span class="dot"></span>Their day</span>
         <p class="f-section-note">What does a typical day at home look like for your child?</p>
         <div class="f-row f-split-3">
           <div class="f-field">
@@ -359,8 +372,10 @@
           <label for="gk-sleep-notes">Anything about their sleep routine that would be helpful for us to know?</label>
           <textarea id="gk-sleep-notes" name="sleep_notes" rows="2"></textarea>
         </div>
+        </div>
 
-        <span class="f-section-label">Food &amp; mealtimes</span>
+        <div class="f-section-card">
+        <span class="f-section-label"><span class="dot"></span>Food &amp; mealtimes</span>
         <div class="f-field">
           <label>How would you describe your child's eating habits?</label>
           <div class="f-radio-group">
@@ -389,8 +404,10 @@
           <label for="gk-food-notes">Anything else you'd like us to know about food or mealtimes?</label>
           <textarea id="gk-food-notes" name="food_notes" rows="2"></textarea>
         </div>
+        </div>
 
-        <span class="f-section-label">Toileting &amp; self care</span>
+        <div class="f-section-card">
+        <span class="f-section-label"><span class="dot"></span>Toileting &amp; self care</span>
         <div class="f-field">
           <label>Where is your child currently with toileting?</label>
           <div class="f-radio-group">
@@ -404,8 +421,10 @@
             <input id="gk-toileting-other" name="toileting_status_other" type="text" autocomplete="off" placeholder="Please specify">
           </div>
         </div>
+        </div>
 
-        <span class="f-section-label">Health &amp; wellbeing</span>
+        <div class="f-section-card">
+        <span class="f-section-label"><span class="dot"></span>Health &amp; wellbeing</span>
         <div class="f-field">
           <label for="gk-blood-group">Child's blood group, if known</label>
           <select id="gk-blood-group" name="blood_group">
@@ -435,7 +454,10 @@
             <textarea id="gk-med-details" name="medication_details" rows="2" placeholder="Please provide details"></textarea>
           </div>
         </div>
-        <span class="f-section-label">Your family</span>
+        </div>
+
+        <div class="f-section-card">
+        <span class="f-section-label"><span class="dot"></span>Your family</span>
         <div class="f-field">
           <label for="gk-family-practices">Are there any routines, traditions, cultural practices or family circumstances that are important for us to know or respect?</label>
           <textarea id="gk-family-practices" name="family_practices" rows="2"></textarea>
@@ -444,67 +466,45 @@
           <label for="gk-family-support">Is there anything you're particularly thinking about, wondering about, or would like our support with at this stage?</label>
           <textarea id="gk-family-support" name="family_support" rows="2"></textarea>
         </div>
-
-        <span class="f-section-label">Parent / guardian &amp; contacts</span>
-        <p class="f-section-note">Parent 1</p>
-        <div class="f-field">
-          <label for="gk-p1-name">Name</label>
-          <input id="gk-p1-name" name="parent1_name" type="text" autocomplete="off">
-        </div>
-        <div class="f-row f-split-2">
-          <div class="f-field">
-            <label for="gk-p1-phone">Phone number</label>
-            <input id="gk-p1-phone" name="parent1_phone" type="tel" autocomplete="off">
-          </div>
-          <div class="f-field">
-            <label for="gk-p1-email">Email</label>
-            <input id="gk-p1-email" name="parent1_email" type="email" autocomplete="off">
-          </div>
-        </div>
-        <div class="f-field">
-          <label for="gk-p1-profession">Profession</label>
-          <input id="gk-p1-profession" name="parent1_profession" type="text" autocomplete="off">
         </div>
 
-        <p class="f-section-note">Parent 2</p>
-        <div class="f-field">
-          <label for="gk-p2-name">Name</label>
-          <input id="gk-p2-name" name="parent2_name" type="text" autocomplete="off">
-        </div>
-        <div class="f-row f-split-2">
-          <div class="f-field">
-            <label for="gk-p2-phone">Phone number</label>
-            <input id="gk-p2-phone" name="parent2_phone" type="tel" autocomplete="off">
-          </div>
-          <div class="f-field">
-            <label for="gk-p2-email">Email</label>
-            <input id="gk-p2-email" name="parent2_email" type="email" autocomplete="off">
-          </div>
-        </div>
-        <div class="f-field">
-          <label for="gk-p2-profession">Profession</label>
-          <input id="gk-p2-profession" name="parent2_profession" type="text" autocomplete="off">
-        </div>
-
+        <div class="f-section-card">
+        <span class="f-section-label"><span class="dot"></span>Contacts</span>
         <div class="f-field">
           <label for="gk-home-address">Home address</label>
           <textarea id="gk-home-address" name="home_address" rows="2"></textarea>
         </div>
 
-        <p class="f-section-note">Emergency contact, if different from the above</p>
+        <p class="f-section-note">Emergency contact 1</p>
         <div class="f-row f-split-2">
           <div class="f-field">
-            <label for="gk-emergency-name">Name</label>
-            <input id="gk-emergency-name" name="emergency_contact_name" type="text" autocomplete="off">
+            <label for="gk-emergency1-name">Name</label>
+            <input id="gk-emergency1-name" name="emergency_contact1_name" type="text" autocomplete="off">
           </div>
           <div class="f-field">
-            <label for="gk-emergency-relation">Relation to child</label>
-            <input id="gk-emergency-relation" name="emergency_contact_relation" type="text" autocomplete="off">
+            <label for="gk-emergency1-relation">Relation to child</label>
+            <input id="gk-emergency1-relation" name="emergency_contact1_relation" type="text" autocomplete="off">
           </div>
         </div>
         <div class="f-field">
-          <label for="gk-emergency-phone">Phone number</label>
-          <input id="gk-emergency-phone" name="emergency_contact_phone" type="tel" autocomplete="off">
+          <label for="gk-emergency1-phone">Phone number</label>
+          <input id="gk-emergency1-phone" name="emergency_contact1_phone" type="tel" autocomplete="off">
+        </div>
+
+        <p class="f-section-note">Emergency contact 2</p>
+        <div class="f-row f-split-2">
+          <div class="f-field">
+            <label for="gk-emergency2-name">Name</label>
+            <input id="gk-emergency2-name" name="emergency_contact2_name" type="text" autocomplete="off">
+          </div>
+          <div class="f-field">
+            <label for="gk-emergency2-relation">Relation to child</label>
+            <input id="gk-emergency2-relation" name="emergency_contact2_relation" type="text" autocomplete="off">
+          </div>
+        </div>
+        <div class="f-field">
+          <label for="gk-emergency2-phone">Phone number</label>
+          <input id="gk-emergency2-phone" name="emergency_contact2_phone" type="tel" autocomplete="off">
         </div>
 
         <p class="f-section-note">Pediatrician, if you have one you'd like on file</p>
@@ -543,8 +543,10 @@
             <input id="gk-pickup2-relation" name="pickup2_relation" type="text" autocomplete="off">
           </div>
         </div>
+        </div>
 
-        <span class="f-section-label">And finally</span>
+        <div class="f-section-card">
+        <span class="f-section-label"><span class="dot"></span>And finally</span>
         <div class="f-field">
           <label for="gk-anything-else">Is there anything else you'd like us to know about your child?</label>
           <textarea id="gk-anything-else" name="anything_else" rows="2"></textarea>
@@ -556,6 +558,7 @@
             <input type="checkbox" id="gk-agree-terms" name="agreed_to_terms" value="Yes" required>
             <label for="gk-agree-terms">I have read and agree to the above.</label>
           </div>
+        </div>
         </div>
 
         <div class="f-field f-hp" aria-hidden="true">
