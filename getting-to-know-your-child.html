@@ -121,7 +121,19 @@
   .f-section-card .f-field:last-child, .f-section-card .f-row:last-child, .f-section-card .f-detail:last-child { margin-bottom: 0; }
   .f-section-note { font-size: 0.85rem; color: var(--ink-2); margin: -0.5rem 0 1rem; }
   .f-section-note:not(:first-of-type) { margin-top: 1.3rem; }
-  .f-field { display: grid; gap: 0.4rem; margin-bottom: 1.1rem; position: relative; }
+  .f-field {
+    display: grid; gap: 0.4rem; margin-bottom: 1.1rem; position: relative;
+    /* A grid item's default min-width is auto, meaning it won't shrink
+       below its content's intrinsic min-width -- a native <input
+       type="time"> has a real internal minimum (its hour/minute/AM-PM
+       shadow-DOM segments), and in a 3-up row that minimum can exceed
+       the 1fr share this field is actually given. Confirmed directly:
+       the bedtime field (third column, tightest fit) measured its own
+       right edge ~36px past its row's right edge -- a real overflow,
+       not a hover/rendering artifact. min-width: 0 lets the grid item
+       actually shrink to its assigned track instead of forcing overflow. */
+    min-width: 0;
+  }
   .f-field label { font-family: var(--display); font-weight: 600; font-size: 0.8rem; color: var(--ink); }
   .f-field .f-sub { font-family: var(--body); font-weight: 400; font-size: 0.82rem; color: var(--ink-2); margin-top: -0.15rem; }
   .f-row { display: grid; grid-template-columns: 1fr; gap: 1.1rem; }
@@ -133,6 +145,22 @@
     font-family: var(--body); font-size: 1rem; color: var(--ink);
     background: var(--ground-2); border: 1px solid var(--line-solid); border-radius: 10px;
     padding: 0.75rem 0.85rem; width: 100%;
+    /* min-width:0 on the .f-field grid item alone wasn't enough -- the
+       <input> itself, as a replaced form control, keeps its own
+       intrinsic minimum width (an <input type="time">'s internal
+       hour/minute/AM-PM segments) unless told otherwise directly. */
+    min-width: 0;
+  }
+  .f-field input, .f-field select {
+    /* Native <input type="time"> was measured rendering ~9px taller
+       than an identical text input/select right next to it (confirmed:
+       all three padding/border/font-size values were byte-identical,
+       yet bedtime's own box was consistently taller than wake/nap's) --
+       a browser-internal sizing quirk in how the time control's
+       shadow-DOM segments get laid out, not anything under CSS control
+       via padding alone. An explicit height sidesteps it entirely so
+       every field in a row lines up regardless of control type. */
+    height: 3.1rem;
   }
   .f-field textarea { resize: vertical; min-height: 4.6rem; font-family: var(--body); }
   .f-field input:focus, .f-field select:focus, .f-field textarea:focus {
@@ -507,42 +535,6 @@
           <input id="gk-emergency2-phone" name="emergency_contact2_phone" type="tel" autocomplete="off">
         </div>
 
-        <p class="f-section-note">Pediatrician, if you have one you'd like on file</p>
-        <div class="f-row f-split-2">
-          <div class="f-field">
-            <label for="gk-pediatrician-name">Name</label>
-            <input id="gk-pediatrician-name" name="pediatrician_name" type="text" autocomplete="off">
-          </div>
-          <div class="f-field">
-            <label for="gk-pediatrician-phone">Phone number</label>
-            <input id="gk-pediatrician-phone" name="pediatrician_phone" type="tel" autocomplete="off">
-          </div>
-        </div>
-
-        <div class="f-field">
-          <label>Anyone besides the two of you who may pick your child up?</label>
-          <span class="f-hint">Leave blank if not applicable.</span>
-        </div>
-        <div class="f-row f-split-2">
-          <div class="f-field">
-            <label for="gk-pickup1-name">Name</label>
-            <input id="gk-pickup1-name" name="pickup1_name" type="text" autocomplete="off">
-          </div>
-          <div class="f-field">
-            <label for="gk-pickup1-relation">Relation to child</label>
-            <input id="gk-pickup1-relation" name="pickup1_relation" type="text" autocomplete="off">
-          </div>
-        </div>
-        <div class="f-row f-split-2">
-          <div class="f-field">
-            <label for="gk-pickup2-name">Name</label>
-            <input id="gk-pickup2-name" name="pickup2_name" type="text" autocomplete="off">
-          </div>
-          <div class="f-field">
-            <label for="gk-pickup2-relation">Relation to child</label>
-            <input id="gk-pickup2-relation" name="pickup2_relation" type="text" autocomplete="off">
-          </div>
-        </div>
         </div>
 
         <div class="f-section-card">
