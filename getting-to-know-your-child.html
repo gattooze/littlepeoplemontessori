@@ -310,6 +310,105 @@
           <textarea id="gk-adults" name="adults_time" rows="2"></textarea>
         </div>
 
+        <span class="f-section-label">Parent / guardian &amp; contacts</span>
+        <p class="f-section-note">Parent 1</p>
+        <div class="f-field">
+          <label for="gk-p1-name">Name</label>
+          <input id="gk-p1-name" name="parent1_name" type="text" autocomplete="off">
+        </div>
+        <div class="f-row f-split-2">
+          <div class="f-field">
+            <label for="gk-p1-phone">Phone number</label>
+            <input id="gk-p1-phone" name="parent1_phone" type="tel" autocomplete="off">
+          </div>
+          <div class="f-field">
+            <label for="gk-p1-email">Email</label>
+            <input id="gk-p1-email" name="parent1_email" type="email" autocomplete="off">
+          </div>
+        </div>
+        <div class="f-field">
+          <label for="gk-p1-profession">Profession</label>
+          <input id="gk-p1-profession" name="parent1_profession" type="text" autocomplete="off">
+        </div>
+
+        <p class="f-section-note">Parent 2</p>
+        <div class="f-field">
+          <label for="gk-p2-name">Name</label>
+          <input id="gk-p2-name" name="parent2_name" type="text" autocomplete="off">
+        </div>
+        <div class="f-row f-split-2">
+          <div class="f-field">
+            <label for="gk-p2-phone">Phone number</label>
+            <input id="gk-p2-phone" name="parent2_phone" type="tel" autocomplete="off">
+          </div>
+          <div class="f-field">
+            <label for="gk-p2-email">Email</label>
+            <input id="gk-p2-email" name="parent2_email" type="email" autocomplete="off">
+          </div>
+        </div>
+        <div class="f-field">
+          <label for="gk-p2-profession">Profession</label>
+          <input id="gk-p2-profession" name="parent2_profession" type="text" autocomplete="off">
+        </div>
+
+        <div class="f-field">
+          <label for="gk-home-address">Home address</label>
+          <textarea id="gk-home-address" name="home_address" rows="2"></textarea>
+        </div>
+
+        <p class="f-section-note">Emergency contact, if different from the above</p>
+        <div class="f-row f-split-2">
+          <div class="f-field">
+            <label for="gk-emergency-name">Name</label>
+            <input id="gk-emergency-name" name="emergency_contact_name" type="text" autocomplete="off">
+          </div>
+          <div class="f-field">
+            <label for="gk-emergency-relation">Relation to child</label>
+            <input id="gk-emergency-relation" name="emergency_contact_relation" type="text" autocomplete="off">
+          </div>
+        </div>
+        <div class="f-field">
+          <label for="gk-emergency-phone">Phone number</label>
+          <input id="gk-emergency-phone" name="emergency_contact_phone" type="tel" autocomplete="off">
+        </div>
+
+        <p class="f-section-note">Pediatrician, if you have one you'd like on file</p>
+        <div class="f-row f-split-2">
+          <div class="f-field">
+            <label for="gk-pediatrician-name">Name</label>
+            <input id="gk-pediatrician-name" name="pediatrician_name" type="text" autocomplete="off">
+          </div>
+          <div class="f-field">
+            <label for="gk-pediatrician-phone">Phone number</label>
+            <input id="gk-pediatrician-phone" name="pediatrician_phone" type="tel" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="f-field">
+          <label>Anyone besides the two of you who may pick your child up?</label>
+          <span class="f-hint">Leave blank if not applicable.</span>
+        </div>
+        <div class="f-row f-split-2">
+          <div class="f-field">
+            <label for="gk-pickup1-name">Name</label>
+            <input id="gk-pickup1-name" name="pickup1_name" type="text" autocomplete="off">
+          </div>
+          <div class="f-field">
+            <label for="gk-pickup1-relation">Relation to child</label>
+            <input id="gk-pickup1-relation" name="pickup1_relation" type="text" autocomplete="off">
+          </div>
+        </div>
+        <div class="f-row f-split-2">
+          <div class="f-field">
+            <label for="gk-pickup2-name">Name</label>
+            <input id="gk-pickup2-name" name="pickup2_name" type="text" autocomplete="off">
+          </div>
+          <div class="f-field">
+            <label for="gk-pickup2-relation">Relation to child</label>
+            <input id="gk-pickup2-relation" name="pickup2_relation" type="text" autocomplete="off">
+          </div>
+        </div>
+
         <span class="f-section-label">A little about them</span>
         <div class="f-field">
           <label for="gk-describe">How would you describe your child in a few words?</label>
@@ -401,6 +500,21 @@
 
         <span class="f-section-label">Health &amp; wellbeing</span>
         <div class="f-field">
+          <label for="gk-blood-group">Child's blood group, if known</label>
+          <select id="gk-blood-group" name="blood_group">
+            <option value=""></option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+            <option value="Don't know">Don't know</option>
+          </select>
+        </div>
+        <div class="f-field">
           <label for="gk-health">Does your child have any allergies, medical needs or health considerations we should be aware of?</label>
           <textarea id="gk-health" name="health_considerations" rows="2"></textarea>
         </div>
@@ -437,6 +551,7 @@
 
         <button class="btn" type="submit"><span class="pebble"></span><span class="f-submit-label">Submit</span></button>
         <p class="f-note">No spam, ever &mdash; this goes straight to us.</p>
+        <p class="f-note">By submitting, you're okay with your child occasionally appearing in photos or videos we share on our website and social media.</p>
         <p class="f-error" id="gk-error">Something went wrong sending that &mdash; please try again, or WhatsApp us directly on <a href="tel:+919137880091" style="color:inherit">+91 91378 80091</a>.</p>
       </form>
     </div>
