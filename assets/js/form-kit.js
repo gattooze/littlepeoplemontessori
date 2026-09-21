@@ -42,6 +42,11 @@
 
   const QUEUE_PREFIX = 'lpm_form_queue_';
   const RETRY_DELAYS_MS = [600, 1500]; // 2 retries after the first attempt, exponential-ish
+  const ATTEMPT_TIMEOUT_MS = 10000; // each attempt gives up after this long, so a hung backend
+    // (confirmed to happen -- Apps Script has been observed hanging 20s+ with no response at
+    // all) can't block the whole retry sequence indefinitely. Worst case across all 3 attempts:
+    // ~32s (3 x 10s + the two RETRY_DELAYS_MS gaps) before the visitor is told it failed --
+    // bounded and honest, instead of an unbounded wait with no feedback.
   const REDIRECT_HOLD_MS = 1500; // window given to the background attempt before navigating away
   const QUEUE_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 3; // stop retrying a queued item after 3 days
 
@@ -254,7 +259,14 @@
   function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
   async function attemptFetch(endpoint, formData) {
-    const res = await fetch(endpoint, { method: 'POST', body: formData });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ATTEMPT_TIMEOUT_MS);
+    let res;
+    try {
+      res = await fetch(endpoint, { method: 'POST', body: formData, signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+    }
     let body = null;
     try { body = await res.json(); } catch (_) { /* opaque response still counts as success */ }
     if (body && body.ok === false) {

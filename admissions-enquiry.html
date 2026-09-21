@@ -561,11 +561,17 @@
       card.classList.add('sent');
     },
     onQueued() {
-      // Same reasoning as the RSVP form: form-kit has queued this for
-      // retry (with a same-tab beacon attempt already fired), so show
-      // success rather than alarming a parent over a transient blip.
-      personalizeThanks();
-      card.classList.add('sent');
+      // A submission is never shown as successful until the server has
+      // actually confirmed it -- a real enquiry silently failing to
+      // arrive (while the family sees "thank you") is a direct loss of
+      // business, confirmed to have happened at least once. form-kit
+      // has saved a copy for a best-effort background retry, but that's
+      // a bonus, not something to promise the visitor right now.
+      const errorEl = document.getElementById('af-error');
+      if (errorEl) {
+        errorEl.textContent = "We couldn't confirm this reached us. Please try again in a moment, or WhatsApp us directly on +91 91378 80091 so we don't miss you.";
+        errorEl.classList.add('show');
+      }
     },
     onRejected(rejection) {
       const errorEl = document.getElementById('af-error');

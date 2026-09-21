@@ -795,13 +795,19 @@
       goToInstagram();
     },
     onQueued() {
-      // Delivery didn't confirm in time, but form-kit has queued it
-      // for retry (including a same-tab beacon attempt already fired)
-      // -- show success anyway rather than alarming a parent over a
-      // transient network blip; the data is not lost.
-      personalizeThanks();
-      card.classList.add('sent');
-      goToInstagram();
+      // A submission is never shown as successful until the server has
+      // actually confirmed it -- a real RSVP silently failing to arrive
+      // (while the family sees "you're in" and gets redirected away) is
+      // a direct loss of business, confirmed to have happened at least
+      // once elsewhere on the site. form-kit has saved a copy for a
+      // best-effort background retry, but that's a bonus, not something
+      // to promise the visitor right now -- and definitely not a reason
+      // to send them off to Instagram before they've even seen that.
+      const errorEl = document.getElementById('rf-error');
+      if (errorEl) {
+        errorEl.textContent = "We couldn't confirm this reached us. Please try again in a moment, or WhatsApp us directly on +91 91378 80091 so we don't miss you.";
+        errorEl.classList.add('show');
+      }
     },
     onRejected(rejection) {
       // The slot they picked filled up between page load and submit
