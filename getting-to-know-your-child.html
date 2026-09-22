@@ -118,7 +118,18 @@
     text-transform: uppercase; color: var(--ink-2); margin: 0 0 1.1rem;
   }
   .f-section-label .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--denim); flex: none; }
-  .f-section-card .f-field:last-child, .f-section-card .f-row:last-child, .f-section-card .f-detail:last-child { margin-bottom: 0; }
+  .f-section-card > .f-field:last-child, .f-section-card > .f-row:last-child, .f-section-card > .f-detail:last-child { margin-bottom: 0; }
+  /* Deliberately a CHILD combinator (>), not a descendant combinator --
+     the old descendant version also matched the last COLUMN of any
+     f-split-2/f-split-3 row (e.g. bedtime, or "relation to child"),
+     since :last-child just checks an element's own parent, regardless
+     of nesting depth. That field lost its margin-bottom while its row
+     siblings kept theirs, so the row's shared height (set by the tallest
+     margin-inclusive sibling) forced that one margin-less field to
+     stretch taller under CSS Grid's default align-items: stretch --
+     visible as a real ~9px misalignment on bedtime and both "relation
+     to child" fields. Scoping to direct children only strips the
+     margin from the actual trailing field/row/detail of a section. */
   .f-section-note { font-size: 0.85rem; color: var(--ink-2); margin: -0.5rem 0 1rem; }
   .f-section-note:not(:first-of-type) { margin-top: 1.3rem; }
   .f-field {
