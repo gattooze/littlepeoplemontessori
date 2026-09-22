@@ -41,12 +41,36 @@
   'use strict';
 
   const QUEUE_PREFIX = 'lpm_form_queue_';
-  const RETRY_DELAYS_MS = [600, 1500]; // 2 retries after the first attempt, exponential-ish
-  const ATTEMPT_TIMEOUT_MS = 10000; // each attempt gives up after this long, so a hung backend
-    // (confirmed to happen -- Apps Script has been observed hanging 20s+ with no response at
-    // all) can't block the whole retry sequence indefinitely. Worst case across all 3 attempts:
-    // ~32s (3 x 10s + the two RETRY_DELAYS_MS gaps) before the visitor is told it failed --
-    // bounded and honest, instead of an unbounded wait with no feedback.
+
+  /* Delivery timing. The backend is an Apps Script Web App: a normal
+     round trip is 1.5-3s, but it goes through a 3-hop 302 redirect
+     chain and can cold-start, and during a redeployment the /exec URL
+     briefly serves a Google error page instead of the script. Those
+     windows are exactly when a real family's enquiry gets lost, so the
+     numbers below are tuned to ride them out rather than to fail fast:
+
+       - ATTEMPT_TIMEOUT_MS is per attempt. The old 10s was shorter than
+         a cold Apps Script + Sheets write, so it aborted requests that
+         would have succeeded -- and an aborted fetch does NOT stop the
+         server, so those submissions were written but reported failed.
+       - FOREGROUND_DEADLINE_MS bounds how long the visitor waits before
+         being told the truth, regardless of how the attempts fall.
+       - After that, delivery does NOT stop: BACKGROUND_DELAYS_MS keeps
+         retrying while they're still on the page, and anything still
+         undelivered is queued for the next page load / reconnect. A
+         late success flips the UI from error to confirmed. */
+  // 30s per attempt: measured, not guessed. A cold Apps Script request
+  // from a real browser on the live site was timed at 19.3s (the same
+  // request warm takes ~1.5s), so the old 10s ceiling was aborting
+  // requests that were still on their way to succeeding -- and since an
+  // aborted fetch does not stop the server, those were being written
+  // and reported failed at the same time.
+  const ATTEMPT_TIMEOUT_MS = 30000;
+  const RETRY_DELAYS_MS = [800, 2500, 5000];
+  const FOREGROUND_DEADLINE_MS = 50000;
+  const BACKGROUND_DELAYS_MS = [10000, 30000, 90000, 180000];
+  const SLOW_NOTICE_MS = 6000; // swap the button label once it's clearly taking a while
+
   const REDIRECT_HOLD_MS = 1500; // window given to the background attempt before navigating away
   const QUEUE_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 3; // stop retrying a queued item after 3 days
 
@@ -258,18 +282,59 @@
      --------------------------------------------------------- */
   function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
-  async function attemptFetch(endpoint, formData) {
+  /**
+   * One delivery attempt. Returns true ONLY on an explicit, parsed
+   * {ok:true} from our own backend.
+   *
+   * The previous version checked neither res.ok nor whether the body
+   * was actually ours: any unparseable response was swallowed as
+   * success. That is precisely what an Apps Script Web App serves while
+   * it is being redeployed, and what a captive-portal/proxy serves on a
+   * hotel or airport network -- an HTTP 200 carrying an HTML page. Both
+   * were being reported to the visitor as "thank you", with the
+   * submission gone. Requiring a real confirmation means the only way
+   * to see the success screen is for the row to actually exist.
+   *
+   * Failing closed like this can, in principle, under-report a success
+   * (backend writes the row but the ack is lost in transit). That is
+   * the safe direction to be wrong in: the idempotency key makes the
+   * retry a no-op server-side, so the cost is a duplicate-free retry,
+   * not a duplicate row -- whereas being wrong the other way loses a
+   * family's enquiry silently.
+   */
+  async function attemptFetch(endpoint, formData, timeoutMs) {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), ATTEMPT_TIMEOUT_MS);
+    const timer = setTimeout(() => controller.abort(), timeoutMs || ATTEMPT_TIMEOUT_MS);
     let res;
     try {
       res = await fetch(endpoint, { method: 'POST', body: formData, signal: controller.signal });
     } finally {
       clearTimeout(timer);
     }
+
+    if (!res.ok) throw new Error('http_' + res.status);
+
+    let text = '';
+    try { text = await res.text(); } catch (_) { throw new Error('unreadable_response'); }
+
     let body = null;
-    try { body = await res.json(); } catch (_) { /* opaque response still counts as success */ }
-    if (body && body.ok === false) {
+    try { body = JSON.parse(text); } catch (_) { /* not our JSON -- handled below */ }
+
+    if (!body || typeof body.ok === 'undefined') {
+      // A 200 that isn't our backend speaking: mid-redeploy error page,
+      // proxy interception, or a sign-in wall. Never a success.
+      throw new Error('unconfirmed_response');
+    }
+
+    if (body.ok === false) {
+      if (body.retry) {
+        // The server is explicitly saying "this failed but ask again"
+        // -- an infrastructure hiccup (Sheets unavailable) or a timing
+        // collision with our own in-flight duplicate. Treated as a
+        // transient failure so the retry/queue machinery keeps working
+        // on it, NOT as a refusal to show the visitor.
+        throw new Error(body.error || 'retryable');
+      }
       // A definitive rejection from the server (e.g. a full RSVP slot)
       // -- not a transient failure. Retrying won't help (the same
       // business rule will reject it again) and queuing it would leave
@@ -282,22 +347,35 @@
     return true;
   }
 
-  async function sendWithRetry(endpoint, formData) {
-    try {
-      return await attemptFetch(endpoint, formData);
-    } catch (err) {
-      if (err && err.rejection) return { rejected: err.rejection };
-      for (const delay of RETRY_DELAYS_MS) {
-        await sleep(delay);
-        try {
-          return await attemptFetch(endpoint, formData);
-        } catch (err2) {
-          if (err2 && err2.rejection) return { rejected: err2.rejection };
-          /* transient -- keep going */
-        }
+  /**
+   * Retries until either a definitive answer or the deadline, whichever
+   * comes first -- a deadline rather than a fixed attempt count, so a
+   * fast-failing network (offline: each attempt rejects in milliseconds)
+   * gets many attempts inside the same window that a slow backend
+   * spends on two, instead of both being cut off after three.
+   */
+  async function sendWithRetry(endpoint, formData, opts) {
+    const deadline = Date.now() + (((opts || {}).budgetMs) || FOREGROUND_DEADLINE_MS);
+    const delays = ((opts || {}).delays) || RETRY_DELAYS_MS;
+    let attempt = 0;
+
+    for (;;) {
+      // Cap each attempt by whatever is left of the budget, so the
+      // deadline is a real bound on how long the visitor waits rather
+      // than merely the point at which no NEW attempt is started (a
+      // 30s attempt begun at 29s would otherwise run to ~59s).
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) return false;
+      try {
+        return await attemptFetch(endpoint, formData, Math.min(ATTEMPT_TIMEOUT_MS, remaining));
+      } catch (err) {
+        if (err && err.rejection) return { rejected: err.rejection };
       }
+      const delay = delays[Math.min(attempt, delays.length - 1)];
+      attempt += 1;
+      if (Date.now() + delay >= deadline) return false;
+      await sleep(delay);
     }
-    return false;
   }
 
   function formDataToObject(formData) {
@@ -327,29 +405,59 @@
     try { localStorage.removeItem(QUEUE_PREFIX + idempotencyKey); } catch (_) {}
   }
 
-  /** Call once per page load, before wiring any form: attempts to
-   *  deliver anything left over from a previous visit/tab that never
-   *  confirmed success -- from THIS form or any other on the same
-   *  kit, so a queued item survives even if the visitor lands on a
-   *  different page next time. */
-  async function flushQueue(resolveEndpoint) {
-    let keys;
+  /** Attempts to deliver anything left over from a previous visit/tab
+   *  that never confirmed success.
+   *
+   *  Every queued payload already carries its own form_id, and the
+   *  backend routes on that field alone, so an item can be flushed from
+   *  ANY page running this kit -- it does not have to be the page it was
+   *  submitted from. The old version resolved the endpoint only when the
+   *  queued key matched the current page's formId, which meant a failed
+   *  admissions enquiry would sit in localStorage until (and unless)
+   *  that exact family reopened that exact form. In practice that is
+   *  never: a parent who was told it failed goes to WhatsApp, not back
+   *  to the form. Flushing across forms is what makes the queue a real
+   *  safety net rather than a theoretical one. */
+  let flushing = false;
+  async function flushQueue(endpoint) {
+    if (!endpoint || flushing) return;
+    flushing = true;
     try {
-      keys = Object.keys(localStorage).filter((k) => k.indexOf(QUEUE_PREFIX) === 0);
-    } catch (_) { return; }
+      let keys;
+      try {
+        keys = Object.keys(localStorage).filter((k) => k.indexOf(QUEUE_PREFIX) === 0);
+      } catch (_) { return; }
 
-    for (const key of keys) {
-      let item;
-      try { item = JSON.parse(localStorage.getItem(key)); } catch (_) { localStorage.removeItem(key); continue; }
-      if (!item) { localStorage.removeItem(key); continue; }
-      if (Date.now() - item.queuedAt > QUEUE_MAX_AGE_MS) { localStorage.removeItem(key); continue; }
+      for (const key of keys) {
+        let item;
+        try { item = JSON.parse(localStorage.getItem(key)); } catch (_) { localStorage.removeItem(key); continue; }
+        if (!item) { localStorage.removeItem(key); continue; }
+        if (Date.now() - item.queuedAt > QUEUE_MAX_AGE_MS) { localStorage.removeItem(key); continue; }
+        if (!item.payload || !item.payload.form_id) { localStorage.removeItem(key); continue; }
 
-      const endpoint = resolveEndpoint(item.endpointKey);
-      if (!endpoint) continue;
-
-      const ok = await sendWithRetry(endpoint, objectToFormData(item.payload));
-      if (ok) localStorage.removeItem(key);
+        const ok = await sendWithRetry(endpoint, objectToFormData(item.payload), { budgetMs: 25000 });
+        if (ok === true) {
+          localStorage.removeItem(key);
+          gtagEvent('form_submit_recovered', { form_id: item.payload.form_id });
+        } else if (ok && ok.rejected) {
+          // The server has a definitive reason to refuse this one; no
+          // amount of retrying changes that, so stop carrying it.
+          localStorage.removeItem(key);
+        }
+      }
+    } finally {
+      flushing = false;
     }
+  }
+
+  /** Retry triggers beyond page load: the two moments when a previously
+   *  failing submission is most likely to suddenly succeed -- the device
+   *  regaining connectivity, and the visitor returning to the tab. */
+  function wireQueueFlushTriggers(endpoint) {
+    global.addEventListener('online', () => flushQueue(endpoint));
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') flushQueue(endpoint);
+    });
   }
 
   /* ---------------------------------------------------------
@@ -638,8 +746,12 @@
       });
 
       // Flush anything orphaned from a previous visit as soon as we
-      // know where to send it.
-      flushQueue((key) => (key === formId ? endpoint : null));
+      // know where to send it, and keep watching for the two moments
+      // most likely to turn a failure into a success (reconnect, and
+      // the visitor coming back to the tab).
+      const liveEndpoint = (typeof endpoint === 'string' && endpoint.indexOf('PASTE_') !== 0) ? endpoint : null;
+      flushQueue(liveEndpoint);
+      if (liveEndpoint) wireQueueFlushTriggers(liveEndpoint);
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -688,6 +800,13 @@
 
         if (submitBtn) submitBtn.disabled = true;
         if (submitLabel) submitLabel.textContent = 'Sending…';
+        // A submission that is genuinely still in flight after several
+        // seconds should say so. Silence on a dead-looking button is
+        // what makes people close the tab (or submit again) at exactly
+        // the wrong moment -- mid-retry, when it is about to land.
+        const slowNotice = setTimeout(() => {
+          if (submitLabel) submitLabel.textContent = 'Still sending — hang on…';
+        }, SLOW_NOTICE_MS);
 
         // Unload-safe last attempt: if the tab dies while sendWithRetry
         // is still working, this is the only mechanism the browser
@@ -700,6 +819,7 @@
 
         const result = await sendWithRetry(endpoint, formData);
 
+        clearTimeout(slowNotice);
         document.removeEventListener('pagehide', beaconOnExit);
 
         if (result === true) {
@@ -732,6 +852,33 @@
             errorEl.innerHTML = defaultErrorHTML;
             errorEl.classList.add('show');
           }
+
+          // Telling the visitor the truth is not the same as giving up.
+          // Keep trying quietly for the next few minutes while they are
+          // still on the page: transient causes (a redeploy window, a
+          // tunnel, a carrier handoff) usually clear well inside that,
+          // and when one does, the page upgrades itself from "we
+          // couldn't confirm this" to a real confirmation rather than
+          // leaving a family who actually did reach us believing they
+          // didn't.
+          (async () => {
+            for (const delay of BACKGROUND_DELAYS_MS) {
+              if (form.dataset.lpmSubmitted === 'true') return;
+              await sleep(delay);
+              if (form.dataset.lpmSubmitted === 'true') return;
+              const late = await sendWithRetry(endpoint, objectToFormData(payloadObj), { budgetMs: 25000 });
+              if (late === true) {
+                form.dataset.lpmSubmitted = 'true';
+                unqueueSubmission(idempotencyKey);
+                gtagEvent('form_submit_recovered', { form_id: formId });
+                if (errorEl) errorEl.classList.remove('show');
+                if (opts.onLateSuccess) opts.onLateSuccess();
+                else if (opts.onSuccess) opts.onSuccess();
+                return;
+              }
+              if (late && late.rejected) return; // definitive refusal -- stop
+            }
+          })();
         }
 
         if (submitBtn) submitBtn.disabled = false;
@@ -751,7 +898,12 @@
      *  see wireCountryPhone above. */
     wireCountryPhone,
 
-    _internal: { classifyDevice, captureUTM, uuid } // exposed for local testing only
+    // Exposed for local testing only. attemptFetch/sendWithRetry are
+    // included deliberately: the single most important guarantee in
+    // this file -- that nothing but an explicit {ok:true} from our own
+    // backend is ever reported as a success -- is only verifiable by
+    // driving them directly against stubbed responses.
+    _internal: { classifyDevice, captureUTM, uuid, attemptFetch, sendWithRetry }
   };
 
   global.FormKit = FormKit;
