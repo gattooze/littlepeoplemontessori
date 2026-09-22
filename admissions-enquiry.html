@@ -387,6 +387,12 @@
           </select>
         </div>
         <div class="f-field">
+          <label for="af-admit-month">Which month are you hoping to join?</label>
+          <select id="af-admit-month" name="admit_month" required>
+            <option value="" selected disabled>Select…</option>
+          </select>
+        </div>
+        <div class="f-field">
           <label for="af-has-sibling">Do they have a sibling?</label>
           <select id="af-has-sibling" name="has_sibling" required>
             <option value="" selected disabled>Select…</option>
@@ -509,6 +515,28 @@
     locInput.value = item.textContent;
     locList.classList.remove('open');
   });
+
+  // -----------------------------------------------------------
+  // Admission month -- generated from today's date, so the list always
+  // spans "the rest of this year" through "all of next year" without
+  // needing a manual update every January.
+  // -----------------------------------------------------------
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  (function populateAdmitMonths() {
+    const admitMonthSelect = document.getElementById('af-admit-month');
+    const now = new Date();
+    const startYear = now.getFullYear();
+    const endYear = startYear + 1;
+    for (let year = startYear; year <= endYear; year++) {
+      const fromMonth = (year === startYear) ? now.getMonth() : 0;
+      for (let m = fromMonth; m <= 11; m++) {
+        const opt = document.createElement('option');
+        opt.value = `${MONTH_NAMES[m]} ${year}`;
+        opt.textContent = `${MONTH_NAMES[m]} ${year}`;
+        admitMonthSelect.appendChild(opt);
+      }
+    }
+  })();
 
   // -----------------------------------------------------------
   // Sibling toggle -- age/school fields only exist (and are only
